@@ -24,13 +24,13 @@ async function loadTagConnections() {
     .sort((a, b) => b[1].size - a[1].size);
 
   if (!connections.length) {
-    wrap.innerHTML = emptyStateHTML({ icon: '🔗', title: 'ยังไม่มีหนังสือที่เชื่อมโยงกัน', sub: 'ลองใส่แท็กเดียวกันให้หนังสือหลายเล่มดูสิ' });
+    wrap.innerHTML = emptyStateHTML({ icon: iconSVG('link', 36), title: 'ยังไม่มีหนังสือที่เชื่อมโยงกัน', sub: 'ลองใส่แท็กเดียวกันให้หนังสือหลายเล่มดูสิ' });
     return;
   }
 
   wrap.innerHTML = connections.map(([tag, books]) => `
     <div class="connection-card">
-      <div class="connection-tag-label">🏷️ ${escapeHTML(tag)}</div>
+      <div class="connection-tag-label">${iconSVG('tag', 13)} ${escapeHTML(tag)}</div>
       <div class="text-sub" style="margin-bottom:10px">หนังสือ ${books.size} เล่มมีแนวคิดเชื่อมโยงกันผ่านแท็กนี้</div>
       <div class="connection-books">
         ${[...books].map(b => `<div class="connection-book"><span class="book-dot"></span>${escapeHTML(b)}</div>`).join('')}
@@ -48,12 +48,12 @@ async function runAIConnections() {
     setLoading(false);
     const items = result.connections || [];
     if (!items.length) {
-      wrap.innerHTML = emptyStateHTML({ icon: '🤖', title: 'AI ไม่พบความเชื่อมโยงเพิ่มเติม' });
+      wrap.innerHTML = emptyStateHTML({ icon: iconSVG('sparkle', 36), title: 'AI ไม่พบความเชื่อมโยงเพิ่มเติม' });
       return;
     }
     wrap.innerHTML = items.map(c => `
       <div class="connection-card">
-        <div class="connection-tag-label">✨ ${escapeHTML(c.concept || 'แนวคิดร่วม')}</div>
+        <div class="connection-tag-label">${iconSVG('sparkle', 13)} ${escapeHTML(c.concept || 'แนวคิดร่วม')}</div>
         <div class="text-sub" style="margin-bottom:10px">${escapeHTML(c.explanation || '')}</div>
         <div class="connection-books">
           ${(c.books || []).map(b => `<div class="connection-book"><span class="book-dot"></span>${escapeHTML(b)}</div>`).join('')}

@@ -28,7 +28,7 @@ async function loadReviewContent(days) {
   const header = `<div class="section-sub" style="margin:0 0 14px">วันนี้เมื่อ ${days} วันที่แล้ว (${formatDateTH(targetDate)}) คุณอ่านอะไรไว้?</div>`;
 
   if (!data.length) {
-    wrap.innerHTML = header + emptyStateHTML({ icon: '🗓️', title: 'ไม่มีบันทึกในวันนั้น', sub: 'ลองดูช่วงเวลาอื่นจากแท็บด้านบน' });
+    wrap.innerHTML = header + emptyStateHTML({ icon: iconSVG('calendar', 36), title: 'ไม่มีบันทึกในวันนั้น', sub: 'ลองดูช่วงเวลาอื่นจากแท็บด้านบน' });
     return;
   }
   wrap.innerHTML = header + data.map(renderNoteCard).join('');

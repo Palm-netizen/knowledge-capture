@@ -39,7 +39,7 @@ async function runKnowledgeSearch() {
     const reasonById = Object.fromEntries((result.results || []).map(r => [r.id, r.reason]));
     const ordered = ids.map(id => byId[id]).filter(Boolean);
     wrap.innerHTML = badgeHTML('ai') + ordered.map(n => renderNoteCard(n) +
-      (reasonById[n.id] ? `<div class="text-sub" style="margin:-8px 0 12px 4px">🤖 ${escapeHTML(reasonById[n.id])}</div>` : '')
+      (reasonById[n.id] ? `<div class="text-sub" style="margin:-8px 0 12px 4px">${iconSVG('sparkle', 12)} ${escapeHTML(reasonById[n.id])}</div>` : '')
     ).join('');
   } catch (err) {
     console.warn('AI search unavailable, falling back to keyword search:', err.message);
@@ -74,10 +74,10 @@ async function runKeywordSearchFallback(query) {
 
 function badgeHTML(mode) {
   return mode === 'ai'
-    ? '<div class="search-mode-badge search-mode-ai">🤖 ผลลัพธ์จาก AI</div>'
-    : '<div class="search-mode-badge search-mode-kw">🔤 ค้นหาด้วยคำสำคัญ (ยังไม่ได้ตั้งค่า AI Edge Function)</div>';
+    ? `<div class="search-mode-badge search-mode-ai">${iconSVG('sparkle', 12)} ผลลัพธ์จาก AI</div>`
+    : '<div class="search-mode-badge search-mode-kw">ค้นหาด้วยคำสำคัญ (ยังไม่ได้ตั้งค่า AI Edge Function)</div>';
 }
 
 function emptyResultsHTML() {
-  return emptyStateHTML({ icon: '🔎', title: 'ไม่พบผลลัพธ์ที่ตรงกับคำค้นหา', sub: 'ลองใช้คำอื่น หรือคำที่กว้างขึ้น' });
+  return emptyStateHTML({ icon: iconSVG('search', 36), title: 'ไม่พบผลลัพธ์ที่ตรงกับคำค้นหา', sub: 'ลองใช้คำอื่น หรือคำที่กว้างขึ้น' });
 }

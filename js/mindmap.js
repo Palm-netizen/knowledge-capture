@@ -50,7 +50,7 @@ async function renderMindmap() {
   const R1 = size * 0.30;
   const R2 = Math.max(40, size * 0.11);
 
-  mindmapNodes = [{ x: cx, y: cy, r: 26, type: 'center', label: '📚 ห้องสมุดของฉัน' }];
+  mindmapNodes = [{ x: cx, y: cy, r: 26, type: 'center', label: 'ห้องสมุดของฉัน' }];
 
   const lineColorOuter = cssVar('--primary-tint-strong');
   const lineColorInner = cssVar('--line');
@@ -118,17 +118,17 @@ function showMindmapDetail(node) {
   const panel = document.getElementById('mindmap-detail');
   if (node.type === 'center') {
     const bookCount = new Set(mindmapNotesCache.map(n => n.book_title)).size;
-    panel.innerHTML = `<strong>📚 ห้องสมุดความรู้ของฉัน</strong><div class="text-sub" style="margin-top:6px">รวม ${bookCount} เล่ม</div>`;
+    panel.innerHTML = `<strong>${iconSVG('book', 15)} ห้องสมุดความรู้ของฉัน</strong><div class="text-sub" style="margin-top:6px">รวม ${bookCount} เล่ม</div>`;
   } else if (node.type === 'tag') {
     panel.innerHTML = `
-      <strong>🏷️ ${escapeHTML(node.label)}</strong>
+      <strong>${iconSVG('tag', 14)} ${escapeHTML(node.label)}</strong>
       <div class="text-sub" style="margin-top:6px">เชื่อมโยงหนังสือ ${node.books.length} เล่ม: ${node.books.map(escapeHTML).join(', ')}</div>
     `;
   } else {
     const notes = mindmapNotesCache.filter(n => n.book_title === node.label);
     const totalHighlights = notes.reduce((s, n) => s + (n.highlights?.length || 0), 0);
     panel.innerHTML = `
-      <strong>📖 ${escapeHTML(node.label)}</strong>
+      <strong>${iconSVG('book', 14)} ${escapeHTML(node.label)}</strong>
       <div class="text-sub" style="margin-top:6px">${notes.length} บันทึก · ${totalHighlights} ไฮไลท์ · แท็ก: ${escapeHTML(node.tag)}</div>
     `;
   }

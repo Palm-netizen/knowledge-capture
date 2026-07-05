@@ -74,7 +74,7 @@ async function loadDayNotes(dateStr) {
   const { data, error } = await db.from('notes').select('*').eq('read_date', dateStr).order('created_at', { ascending: true });
   if (error) { wrap.innerHTML = '<div class="text-sub">โหลดข้อมูลไม่สำเร็จ</div>'; return; }
   if (!data.length) {
-    wrap.innerHTML = emptyStateHTML({ icon: '📖', title: 'ยังไม่มีบันทึกในวันนี้', sub: 'แตะปุ่มด้านล่างเพื่อบันทึกหนังสือที่อ่านในวันนี้' });
+    wrap.innerHTML = emptyStateHTML({ icon: iconSVG('book', 36), title: 'ยังไม่มีบันทึกในวันนี้', sub: 'แตะปุ่มด้านล่างเพื่อบันทึกหนังสือที่อ่านในวันนี้' });
     return;
   }
   wrap.innerHTML = data.map(renderNoteCard).join('');
@@ -90,8 +90,8 @@ function renderNoteCard(note) {
         </div>
       </div>
       ${(note.highlights || []).map(h => `<div class="note-highlight">${escapeHTML(h)}</div>`).join('')}
-      ${note.insight ? `<div class="note-insight">💡 ${escapeHTML(note.insight)}</div>` : ''}
-      ${note.action ? `<div class="note-action">🎯 ${escapeHTML(note.action)} ${note.action_done ? '<span class="note-done-badge">ทำแล้ว ✓</span>' : ''}</div>` : ''}
+      ${note.insight ? `<div class="note-insight">${iconSVG('lightbulb', 14)} ${escapeHTML(note.insight)}</div>` : ''}
+      ${note.action ? `<div class="note-action">${iconSVG('target', 14)} ${escapeHTML(note.action)} ${note.action_done ? '<span class="note-done-badge">ทำแล้ว ✓</span>' : ''}</div>` : ''}
       ${(note.tags || []).length ? `<div class="note-tags">${note.tags.map(t => `<span class="note-tag">${escapeHTML(t)}</span>`).join('')}</div>` : ''}
       ${(note.image_urls || []).length ? `<div class="note-photos">${note.image_urls.map(u => `<img src="${u}">`).join('')}</div>` : ''}
       <div class="note-actions-row">

@@ -56,7 +56,7 @@ function renderRecentNotes(notes) {
   const wrap = document.getElementById('dash-recent-notes');
   if (!notes.length) {
     wrap.innerHTML = emptyStateHTML({
-      icon: '📖',
+      icon: iconSVG('book', 36),
       title: 'ยังไม่มีบันทึก',
       sub: 'เริ่มบันทึกสิ่งที่ได้เรียนรู้จากหนังสือเล่มแรกของคุณ',
       ctaLabel: '+ บันทึกเล่มแรก',
