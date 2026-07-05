@@ -38,11 +38,44 @@ function showPage(pageId) {
   location.hash = pageId;
 }
 
+// ---- Theme (dark / light) -----------------------------------------
+
+const THEME_KEY = 'kc-theme';
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved === 'dark' || saved === 'light') {
+    document.documentElement.setAttribute('data-theme', saved);
+  }
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+}
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const current = root.getAttribute('data-theme') || (prefersDark ? 'dark' : 'light');
+  const next = current === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  localStorage.setItem(THEME_KEY, next);
+  refreshActivePageVisuals();
+}
+
+// Canvas-drawn content (Chart.js, Mind Map) doesn't repaint on CSS
+// changes by itself, so re-render it right after a theme switch.
+function refreshActivePageVisuals() {
+  const activeEl = document.querySelector('.page.active');
+  const pageId = activeEl?.id.replace('page-', '');
+  if (pageId === 'mindmap') renderMindmap();
+  else if (pageId === 'dashboard') loadDashboard();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const today = new Date();
   document.getElementById('nav-date').textContent = today.toLocaleDateString('th-TH', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
+
+  initTheme();
 
   document.querySelectorAll('.bottom-nav a').forEach(a => {
     a.addEventListener('click', (e) => {

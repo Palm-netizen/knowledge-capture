@@ -3,6 +3,7 @@
 let dashChartInstance = null;
 
 async function loadDashboard() {
+  document.getElementById('dash-recent-notes').innerHTML = skeletonNoteCardsHTML(3);
   setLoading(true);
   const { data, error } = await db.from('notes').select('*').order('created_at', { ascending: false });
   setLoading(false);
@@ -54,7 +55,13 @@ function renderDashStats(notes) {
 function renderRecentNotes(notes) {
   const wrap = document.getElementById('dash-recent-notes');
   if (!notes.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📖</div>ยังไม่มีบันทึก</div>';
+    wrap.innerHTML = emptyStateHTML({
+      icon: '📖',
+      title: 'ยังไม่มีบันทึก',
+      sub: 'เริ่มบันทึกสิ่งที่ได้เรียนรู้จากหนังสือเล่มแรกของคุณ',
+      ctaLabel: '+ บันทึกเล่มแรก',
+      ctaOnClick: `openEntryForm('${todayStr()}')`
+    });
     return;
   }
   wrap.innerHTML = notes.map(renderNoteCard).join('');
@@ -76,18 +83,24 @@ function renderWeeklyChart(notes) {
     counts.push(notes.filter(n => n.read_date >= startStr && n.read_date <= endStr).length);
   }
 
+  const inkSoft = cssVar('--ink-soft');
+  const line = cssVar('--line');
+
   const ctx = document.getElementById('dashChart');
   if (dashChartInstance) dashChartInstance.destroy();
   dashChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
       labels,
-      datasets: [{ label: 'บันทึก', data: counts, backgroundColor: '#4F46E5', borderRadius: 6 }]
+      datasets: [{ label: 'บันทึก', data: counts, backgroundColor: cssVar('--primary'), borderRadius: 6 }]
     },
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      scales: {
+        x: { ticks: { color: inkSoft }, grid: { color: line } },
+        y: { beginAtZero: true, ticks: { stepSize: 1, color: inkSoft }, grid: { color: line } }
+      }
     }
   });
 }

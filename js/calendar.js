@@ -70,11 +70,11 @@ function closeDayModal() {
 
 async function loadDayNotes(dateStr) {
   const wrap = document.getElementById('day-modal-notes');
-  wrap.innerHTML = '<div class="text-sub">กำลังโหลด...</div>';
+  wrap.innerHTML = skeletonNoteCardsHTML(1);
   const { data, error } = await db.from('notes').select('*').eq('read_date', dateStr).order('created_at', { ascending: true });
   if (error) { wrap.innerHTML = '<div class="text-sub">โหลดข้อมูลไม่สำเร็จ</div>'; return; }
   if (!data.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📖</div>ยังไม่มีบันทึกในวันนี้</div>';
+    wrap.innerHTML = emptyStateHTML({ icon: '📖', title: 'ยังไม่มีบันทึกในวันนี้', sub: 'แตะปุ่มด้านล่างเพื่อบันทึกหนังสือที่อ่านในวันนี้' });
     return;
   }
   wrap.innerHTML = data.map(renderNoteCard).join('');

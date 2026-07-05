@@ -30,7 +30,7 @@ async function renderMindmap() {
     canvas.width = wrap.clientWidth || 340;
     canvas.height = 200;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#A6A3B5';
+    ctx.fillStyle = cssVar('--ink-faint');
     ctx.font = '14px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('ยังไม่มีข้อมูลพอสร้าง Mind Map — เริ่มบันทึกก่อนนะ', canvas.width / 2, canvas.height / 2);
@@ -52,13 +52,16 @@ async function renderMindmap() {
 
   mindmapNodes = [{ x: cx, y: cy, r: 26, type: 'center', label: '📚 ห้องสมุดของฉัน' }];
 
+  const lineColorOuter = cssVar('--primary-tint-strong');
+  const lineColorInner = cssVar('--line');
+
   const groupAngleStep = (2 * Math.PI) / groups.length;
   groups.forEach((g, i) => {
     const angle = i * groupAngleStep - Math.PI / 2;
     const tx = cx + R1 * Math.cos(angle);
     const ty = cy + R1 * Math.sin(angle);
 
-    drawLine(ctx, cx, cy, tx, ty, '#C7C2E8');
+    drawLine(ctx, cx, cy, tx, ty, lineColorOuter);
     mindmapNodes.push({ x: tx, y: ty, r: 18, type: 'tag', label: g.label, books: g.books });
 
     const bookAngleStep = (2 * Math.PI) / g.books.length;
@@ -66,7 +69,7 @@ async function renderMindmap() {
       const bAngle = j * bookAngleStep;
       const bx = tx + R2 * Math.cos(bAngle);
       const by = ty + R2 * Math.sin(bAngle);
-      drawLine(ctx, tx, ty, bx, by, '#E7E5F1');
+      drawLine(ctx, tx, ty, bx, by, lineColorInner);
       mindmapNodes.push({ x: bx, y: by, r: 13, type: 'book', label: book, tag: g.label });
     });
   });
@@ -85,13 +88,13 @@ function drawLine(ctx, x1, y1, x2, y2, color) {
 }
 
 function drawNode(ctx, n) {
-  const colors = { center: '#4F46E5', tag: '#8B5CF6', book: '#F59E0B' };
+  const colors = { center: cssVar('--primary'), tag: cssVar('--violet'), book: cssVar('--accent') };
   ctx.beginPath();
   ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
   ctx.fillStyle = colors[n.type];
   ctx.fill();
 
-  ctx.fillStyle = '#14121F';
+  ctx.fillStyle = cssVar('--ink');
   ctx.font = n.type === 'center' ? 'bold 11px Outfit, sans-serif' : '10.5px Inter, sans-serif';
   ctx.textAlign = 'center';
   const label = n.label.length > 14 ? n.label.slice(0, 13) + '…' : n.label;

@@ -19,7 +19,7 @@ function switchReviewTab(days) {
 
 async function loadReviewContent(days) {
   const wrap = document.getElementById('review-content');
-  wrap.innerHTML = '<div class="text-sub">กำลังโหลด...</div>';
+  wrap.innerHTML = skeletonNoteCardsHTML(2);
   const targetDate = daysAgoStr(days);
 
   const { data, error } = await db.from('notes').select('*').eq('read_date', targetDate).order('created_at', { ascending: true });
@@ -28,7 +28,7 @@ async function loadReviewContent(days) {
   const header = `<div class="section-sub" style="margin:0 0 14px">วันนี้เมื่อ ${days} วันที่แล้ว (${formatDateTH(targetDate)}) คุณอ่านอะไรไว้?</div>`;
 
   if (!data.length) {
-    wrap.innerHTML = header + `<div class="empty-state"><div class="empty-icon">🗓️</div>ไม่มีบันทึกในวันนั้น</div>`;
+    wrap.innerHTML = header + emptyStateHTML({ icon: '🗓️', title: 'ไม่มีบันทึกในวันนั้น', sub: 'ลองดูช่วงเวลาอื่นจากแท็บด้านบน' });
     return;
   }
   wrap.innerHTML = header + data.map(renderNoteCard).join('');

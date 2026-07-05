@@ -6,7 +6,7 @@ async function initConnections() {
 
 async function loadTagConnections() {
   const wrap = document.getElementById('connections-list');
-  wrap.innerHTML = '<div class="text-sub">กำลังวิเคราะห์...</div>';
+  wrap.innerHTML = skeletonNoteCardsHTML(2);
 
   const { data, error } = await db.from('notes').select('book_title, tags');
   if (error) { wrap.innerHTML = '<div class="text-sub">โหลดข้อมูลไม่สำเร็จ</div>'; return; }
@@ -24,7 +24,7 @@ async function loadTagConnections() {
     .sort((a, b) => b[1].size - a[1].size);
 
   if (!connections.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🔗</div>ยังไม่มีหนังสือที่เชื่อมโยงกัน<br>ลองใส่แท็กเดียวกันให้หนังสือหลายเล่มดูสิ</div>';
+    wrap.innerHTML = emptyStateHTML({ icon: '🔗', title: 'ยังไม่มีหนังสือที่เชื่อมโยงกัน', sub: 'ลองใส่แท็กเดียวกันให้หนังสือหลายเล่มดูสิ' });
     return;
   }
 
@@ -41,13 +41,14 @@ async function loadTagConnections() {
 
 async function runAIConnections() {
   const wrap = document.getElementById('connections-list');
+  wrap.innerHTML = skeletonNoteCardsHTML(2);
   setLoading(true);
   try {
     const result = await callAIKnowledgeFunction('connections', {});
     setLoading(false);
     const items = result.connections || [];
     if (!items.length) {
-      wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🤖</div>AI ไม่พบความเชื่อมโยงเพิ่มเติม</div>';
+      wrap.innerHTML = emptyStateHTML({ icon: '🤖', title: 'AI ไม่พบความเชื่อมโยงเพิ่มเติม' });
       return;
     }
     wrap.innerHTML = items.map(c => `

@@ -72,6 +72,36 @@ function escapeHTML(str) {
   }[c]));
 }
 
+// Reads a CSS custom property from :root — used so canvas-drawn content
+// (Chart.js, Mind Map) follows the current light/dark theme.
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+// Richer empty-state block with optional title/sub/CTA button.
+function emptyStateHTML({ icon = '📖', title = '', sub = '', ctaLabel = '', ctaOnClick = '' } = {}) {
+  return `
+    <div class="empty-state">
+      <div class="empty-icon">${icon}</div>
+      ${title ? `<div class="empty-title">${escapeHTML(title)}</div>` : ''}
+      ${sub ? `<div class="empty-sub">${escapeHTML(sub)}</div>` : ''}
+      ${ctaLabel ? `<button type="button" class="btn btn-primary empty-cta" onclick="${ctaOnClick}">${escapeHTML(ctaLabel)}</button>` : ''}
+    </div>
+  `;
+}
+
+// Skeleton placeholder cards shown while a list of notes/results is loading.
+function skeletonNoteCardsHTML(n = 2) {
+  return Array.from({ length: n }).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton-block skeleton-line-title"></div>
+      <div class="skeleton-block skeleton-line"></div>
+      <div class="skeleton-block skeleton-line short"></div>
+      <div class="skeleton-block skeleton-line shorter"></div>
+    </div>
+  `).join('');
+}
+
 function starsHTML(level, max = 5) {
   let out = '';
   for (let i = 1; i <= max; i++) out += i <= level ? '★' : '☆';

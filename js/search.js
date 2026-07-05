@@ -23,7 +23,7 @@ async function runKnowledgeSearch() {
   if (!query) { showToast('กรุณาพิมพ์คำค้นหา', 'warn'); return; }
 
   const wrap = document.getElementById('search-results');
-  wrap.innerHTML = '<div class="text-sub">กำลังค้นหา...</div>';
+  wrap.innerHTML = skeletonNoteCardsHTML(3);
   setLoading(true);
 
   try {
@@ -79,5 +79,5 @@ function badgeHTML(mode) {
 }
 
 function emptyResultsHTML() {
-  return '<div class="empty-state"><div class="empty-icon">🔎</div>ไม่พบผลลัพธ์ที่ตรงกับคำค้นหา</div>';
+  return emptyStateHTML({ icon: '🔎', title: 'ไม่พบผลลัพธ์ที่ตรงกับคำค้นหา', sub: 'ลองใช้คำอื่น หรือคำที่กว้างขึ้น' });
 }
