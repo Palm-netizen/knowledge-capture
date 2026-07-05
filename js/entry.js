@@ -99,10 +99,9 @@ function renderStarPicker(level) {
 
 // ---- Action done toggle -------------------------------------------
 
-function toggleActionDone(e) {
-  if (e.target.tagName === 'INPUT') return;
+function syncActionDoneToggle() {
   const cb = document.getElementById('entry-action-done');
-  cb.checked = !cb.checked;
+  document.getElementById('entry-done-toggle').classList.toggle('checked', cb.checked);
 }
 
 // ---- Photos --------------------------------------------------------
@@ -126,6 +125,7 @@ async function openEntryForm(dateStr, noteId) {
   document.getElementById('entry-insight').value = '';
   document.getElementById('entry-action').value = '';
   document.getElementById('entry-action-done').checked = false;
+  syncActionDoneToggle();
   document.getElementById('entry-importance').value = 3;
   document.getElementById('entry-photo-1').value = '';
   document.getElementById('entry-photo-2').value = '';
@@ -149,6 +149,7 @@ async function openEntryForm(dateStr, noteId) {
     document.getElementById('entry-insight').value = data.insight || '';
     document.getElementById('entry-action').value = data.action || '';
     document.getElementById('entry-action-done').checked = !!data.action_done;
+    syncActionDoneToggle();
     document.getElementById('entry-importance').value = data.importance;
     renderHighlightFields(data.highlights?.length ? data.highlights : ['']);
     renderStarPicker(data.importance);

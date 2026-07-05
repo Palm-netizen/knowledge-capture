@@ -1,7 +1,9 @@
 // js/search.js — เมนู 4: ค้นหาด้วย AI (พร้อม fallback ค้นหาด้วยคำสำคัญ)
 
 function initSearch() {
-  // no-op: search runs on demand when the user submits a query
+  document.getElementById('search-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); runKnowledgeSearch(); }
+  });
 }
 
 async function callAIKnowledgeFunction(action, payload) {
