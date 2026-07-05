@@ -1,8 +1,8 @@
 /* =============================================================
    Knowledge Capture — Visual Design System
    "Gilt Page" — warm peach→periwinkle ambient wash, antique-gold
-   + sage accents, ink-espresso spotlight cards. Plus Jakarta Sans
-   (display) + Inter (body).
+   + sage accents, ink-espresso spotlight cards. Prompt throughout
+   (display + body) — a Thai-native geometric sans.
    แยกอิสระจาก VegFarm ทั้งหมด (ธีมคนละชุด, โปรเจกต์ Supabase คนละตัว)
    ============================================================= */
 
@@ -36,11 +36,12 @@
   --line:         #EDE2CF;
   --ink-card:     #1C1712;
 
-  --wash-top:     #F7DDAF;
-  --wash-mid:     #F0D9C8;
-  --wash-bottom:  #C9D2F5;
-  --page-wash:    radial-gradient(120% 60% at 85% 0%, #FCEAC0 0%, rgba(252,234,192,0) 60%),
-                   linear-gradient(180deg, var(--wash-top) 0%, var(--wash-mid) 45%, var(--wash-bottom) 100%);
+  --wash-top:     #F9DFA6;
+  --wash-mid:     #EDD3C4;
+  --wash-bottom:  #B9C4F2;
+  --page-wash:    radial-gradient(90% 55% at 88% -4%, #FFF0BE 0%, rgba(255,240,190,0) 62%),
+                   radial-gradient(75% 50% at 5% 100%, #A9B8ED 0%, rgba(169,184,237,0) 60%),
+                   linear-gradient(160deg, var(--wash-top) 0%, var(--wash-mid) 48%, var(--wash-bottom) 100%);
 
   --radius:    26px;
   --radius-sm: 18px;
@@ -49,8 +50,8 @@
   --shadow-lg: 0 10px 20px rgba(28,23,18,0.08), 0 28px 56px rgba(28,23,18,0.16);
   --shadow-primary: 0 10px 24px rgba(184,134,43,0.32);
 
-  --font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
-  --font-body:    'Inter', -apple-system, sans-serif;
+  --font-display: 'Prompt', -apple-system, sans-serif;
+  --font-body:    'Prompt', -apple-system, sans-serif;
 
   --nav-h: 64px;
   --bottom-nav-h: 78px;
@@ -86,8 +87,9 @@
 
     --wash-top:    #2B2013;
     --wash-bottom: #171A2B;
-    --page-wash:   radial-gradient(120% 60% at 85% 0%, #3D2B14 0%, rgba(61,43,20,0) 60%),
-                    linear-gradient(180deg, #2B2013 0%, #201A20 45%, #171A2B 100%);
+    --page-wash:   radial-gradient(90% 55% at 88% -4%, #4A3418 0%, rgba(74,52,24,0) 62%),
+                    radial-gradient(75% 50% at 5% 100%, #232A47 0%, rgba(35,42,71,0) 60%),
+                    linear-gradient(160deg, #2B2013 0%, #201A20 48%, #171A2B 100%);
 
     --shadow:    0 1px 2px rgba(0,0,0,0.3), 0 10px 28px rgba(0,0,0,0.4);
     --shadow-lg: 0 8px 16px rgba(0,0,0,0.35), 0 24px 48px rgba(0,0,0,0.5);
@@ -118,8 +120,9 @@
 
   --wash-top:    #2B2013;
   --wash-bottom: #171A2B;
-  --page-wash:   radial-gradient(120% 60% at 85% 0%, #3D2B14 0%, rgba(61,43,20,0) 60%),
-                  linear-gradient(180deg, #2B2013 0%, #201A20 45%, #171A2B 100%);
+  --page-wash:   radial-gradient(90% 55% at 88% -4%, #4A3418 0%, rgba(74,52,24,0) 62%),
+                  radial-gradient(75% 50% at 5% 100%, #232A47 0%, rgba(35,42,71,0) 60%),
+                  linear-gradient(160deg, #2B2013 0%, #201A20 48%, #171A2B 100%);
 
   --shadow:    0 1px 2px rgba(0,0,0,0.3), 0 10px 28px rgba(0,0,0,0.4);
   --shadow-lg: 0 8px 16px rgba(0,0,0,0.35), 0 24px 48px rgba(0,0,0,0.5);
@@ -322,19 +325,29 @@ select.form-control { cursor: pointer; }
 /* =============================================================
    CALENDAR
    ============================================================= */
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 14px; }
-.cal-day-name { text-align: center; font-size: 10.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-faint); padding: 4px 0 8px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 14px; }
+.cal-day-name { text-align: center; font-size: 10.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-faint); padding: 4px 0 10px; }
 .cal-day {
-  min-height: 46px; border-radius: 16px; background: var(--bg); padding: 6px 4px; font-size: 12px;
-  position: relative; cursor: pointer; transition: all 0.15s;
+  aspect-ratio: 1; border-radius: 50%; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  position: relative; cursor: pointer; transition: transform 0.15s, background 0.15s;
 }
-.cal-day:active { transform: scale(0.95); }
+.cal-day:active { transform: scale(0.92); }
 .cal-day.empty { background: transparent; cursor: default; }
-.cal-day .day-num { font-weight: 700; font-size: 13px; font-family: var(--font-display); }
-.cal-day.today { background: var(--gradient); }
+.cal-day .day-num { font-weight: 700; font-size: 14px; font-family: var(--font-display); }
+.cal-day.today { background: var(--gradient); box-shadow: var(--shadow-primary); }
 .cal-day.today .day-num { color: #fff; }
 .cal-day.has-note { background: var(--primary-tint-strong); }
-.cal-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin: 1px 1px 0 0; background: var(--primary); }
+.cal-day.today.has-note .cal-dot { background: #fff; }
+.cal-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--primary); }
+
+.cal-nav-btn {
+  width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--paper); box-shadow: var(--shadow);
+  color: var(--ink); font-size: 16px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+  flex-shrink: 0; transition: transform 0.15s;
+}
+.cal-nav-btn:active { transform: scale(0.9); }
+.cal-month-label { font-family: var(--font-display); color: var(--ink); font-size: 19px; font-weight: 800; letter-spacing: -0.5px; }
 
 /* =============================================================
    NOTE CARDS

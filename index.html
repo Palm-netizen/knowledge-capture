@@ -9,7 +9,7 @@
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <!-- Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -54,10 +54,10 @@
     <div class="section-sub">แตะวันที่เพื่อบันทึกหรือดูสิ่งที่อ่านในวันนั้น</div>
 
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <button class="btn btn-outline btn-sm" id="cal-prev">‹ ก่อนหน้า</button>
-        <strong id="cal-month-label" style="font-family:var(--font-display);color:var(--ink);font-size:16px;font-weight:800;letter-spacing:-0.5px">–</strong>
-        <button class="btn btn-outline btn-sm" id="cal-next">ถัดไป ›</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <button class="cal-nav-btn" id="cal-prev" aria-label="เดือนก่อนหน้า">‹</button>
+        <strong id="cal-month-label" class="cal-month-label">–</strong>
+        <button class="cal-nav-btn" id="cal-next" aria-label="เดือนถัดไป">›</button>
       </div>
       <div class="calendar-grid" id="cal-grid"></div>
       <div class="divider"></div>
