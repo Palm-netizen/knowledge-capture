@@ -1,8 +1,8 @@
 /* =============================================================
    Knowledge Capture — Visual Design System
    "Gilt Page" — warm peach→periwinkle ambient wash, antique-gold
-   + sage accents, ink-espresso spotlight cards. Outfit + Inter —
-   matching VegFarm's typography for brand consistency across apps.
+   + sage accents, ink-espresso spotlight cards. Prompt throughout
+   (display + body) — a Thai-native geometric sans by Cadson Demak.
    แยกอิสระจาก VegFarm ทั้งหมด (ธีมคนละชุด, โปรเจกต์ Supabase คนละตัว)
    ============================================================= */
 
@@ -50,8 +50,8 @@
   --shadow-lg: 0 10px 20px rgba(28,23,18,0.08), 0 28px 56px rgba(28,23,18,0.16);
   --shadow-primary: 0 10px 24px rgba(184,134,43,0.32);
 
-  --font-display: 'Outfit', 'Inter', -apple-system, sans-serif;
-  --font-body:    'Inter', -apple-system, sans-serif;
+  --font-display: 'Prompt', -apple-system, sans-serif;
+  --font-body:    'Prompt', -apple-system, sans-serif;
 
   --nav-h: 64px;
   --bottom-nav-h: 78px;
