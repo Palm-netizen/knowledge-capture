@@ -1,48 +1,59 @@
 /* =============================================================
    Knowledge Capture — Visual Design System
-   "Indigo Study" — indigo/violet + amber, Outfit + Inter
+   "Gilt Page" — warm peach→periwinkle ambient wash, antique-gold
+   + sage accents, ink-espresso spotlight cards. Plus Jakarta Sans
+   (display) + Inter (body).
    แยกอิสระจาก VegFarm ทั้งหมด (ธีมคนละชุด, โปรเจกต์ Supabase คนละตัว)
    ============================================================= */
 
 :root {
-  --primary:      #4F46E5;
-  --primary-dark: #4338CA;
-  --violet:       #8B5CF6;
-  --gradient:     linear-gradient(135deg, #4F46E5 0%, #8B5CF6 100%);
-  --gradient-soft:linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 100%);
+  --primary:      #B8862B;
+  --primary-dark: #8F6A1E;
+  --violet:       #6B8F71;
+  --gradient:     linear-gradient(135deg, #B8862B 0%, #D9A94A 100%);
+  --gradient-soft:linear-gradient(135deg, #F6E9CE 0%, #EAF1EA 100%);
 
-  --primary-tint: #EEF2FF;
-  --primary-tint-strong: #E0E7FF;
-  --violet-tint:  #F5F3FF;
+  --primary-tint: #F6E9CE;
+  --primary-tint-strong: #EEDBAF;
+  --violet-tint:  #EAF1EA;
 
-  --accent:       #F59E0B;
-  --accent-tint:  #FEF3E2;
+  --accent:       #D9922B;
+  --accent-tint:  #FBEAD2;
 
-  --danger:       #EF4444;
-  --danger-tint:  #FEECEC;
+  --danger:       #E0674A;
+  --danger-tint:  #FBE7E1;
 
-  --ink:          #14121F;
-  --ink-soft:     #6E6B7E;
-  --ink-faint:    #A6A3B5;
+  --good:         #3FA672;
+  --good-tint:    #E3F3EA;
+  --good-dark:    #1F6B45;
 
-  --bg:           #F4F3F9;
+  --ink:          #1C1712;
+  --ink-soft:     #6B6157;
+  --ink-faint:    #A79C8C;
+
+  --bg:           #F6EFE2;
   --paper:        #FFFFFF;
-  --line:         #E7E5F1;
+  --line:         #EDE2CF;
+  --ink-card:     #1C1712;
+
+  --wash-top:     #FBEAD2;
+  --wash-bottom:  #E7EAFB;
+  --page-wash:    linear-gradient(180deg, var(--wash-top) 0%, var(--wash-bottom) 100%);
 
   --radius:    22px;
   --radius-sm: 14px;
   --radius-lg: 28px;
-  --shadow:    0 1px 2px rgba(20,18,31,0.03), 0 10px 28px rgba(20,18,31,0.06);
-  --shadow-lg: 0 8px 16px rgba(20,18,31,0.05), 0 24px 48px rgba(20,18,31,0.12);
-  --shadow-primary: 0 8px 20px rgba(79,70,229,0.30);
+  --shadow:    0 1px 2px rgba(28,23,18,0.04), 0 10px 28px rgba(28,23,18,0.07);
+  --shadow-lg: 0 8px 16px rgba(28,23,18,0.06), 0 24px 48px rgba(28,23,18,0.14);
+  --shadow-primary: 0 8px 20px rgba(184,134,43,0.30);
 
-  --font-display: 'Outfit', 'Inter', -apple-system, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
   --font-body:    'Inter', -apple-system, sans-serif;
 
   --nav-h: 64px;
   --bottom-nav-h: 78px;
   --sidebar-w: 240px;
-  --overlay-bg: rgba(244,243,249,0.85);
+  --overlay-bg: rgba(246,239,226,0.85);
 
   color-scheme: light;
 }
@@ -53,49 +64,61 @@
    ============================================================= */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --primary-tint: #262244;
-    --primary-tint-strong: #322B5C;
-    --violet-tint:  #2A2140;
+    --primary-tint: #3A2E17;
+    --primary-tint-strong: #4A3A1E;
+    --violet-tint:  #1F2A22;
     --accent-tint:  #3A2C14;
-    --danger-tint:  #3A1618;
-    --primary-dark: #B4C0FA;
+    --danger-tint:  #3A1D16;
+    --good-tint:    #16281F;
+    --good-dark:    #7ED9A8;
+    --primary-dark: #E4C077;
 
-    --ink:      #F2F1F8;
-    --ink-soft: #B0ACC4;
-    --ink-faint:#7D7992;
+    --ink:      #F3ECE2;
+    --ink-soft: #C8BCA9;
+    --ink-faint:#8F8574;
 
-    --bg:    #100E1B;
-    --paper: #1C1A2C;
-    --line:  #322E48;
+    --bg:    #171310;
+    --paper: #241E17;
+    --line:  #3A3024;
+    --ink-card: #3A2A16;
 
-    --shadow:    0 1px 2px rgba(0,0,0,0.25), 0 10px 28px rgba(0,0,0,0.35);
-    --shadow-lg: 0 8px 16px rgba(0,0,0,0.3), 0 24px 48px rgba(0,0,0,0.45);
-    --shadow-primary: 0 8px 20px rgba(79,70,229,0.45);
-    --overlay-bg: rgba(16,14,27,0.85);
+    --wash-top:    #2B2013;
+    --wash-bottom: #171A2B;
+
+    --shadow:    0 1px 2px rgba(0,0,0,0.3), 0 10px 28px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 16px rgba(0,0,0,0.35), 0 24px 48px rgba(0,0,0,0.5);
+    --shadow-primary: 0 8px 20px rgba(184,134,43,0.4);
+    --overlay-bg: rgba(23,19,16,0.85);
 
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --primary-tint: #262244;
-  --primary-tint-strong: #322B5C;
-  --violet-tint:  #2A2140;
+  --primary-tint: #3A2E17;
+  --primary-tint-strong: #4A3A1E;
+  --violet-tint:  #1F2A22;
   --accent-tint:  #3A2C14;
-  --danger-tint:  #3A1618;
-  --primary-dark: #B4C0FA;
+  --danger-tint:  #3A1D16;
+  --good-tint:    #16281F;
+  --good-dark:    #7ED9A8;
+  --primary-dark: #E4C077;
 
-  --ink:      #F2F1F8;
-  --ink-soft: #B0ACC4;
-  --ink-faint:#7D7992;
+  --ink:      #F3ECE2;
+  --ink-soft: #C8BCA9;
+  --ink-faint:#8F8574;
 
-  --bg:    #100E1B;
-  --paper: #1C1A2C;
-  --line:  #322E48;
+  --bg:    #171310;
+  --paper: #241E17;
+  --line:  #3A3024;
+  --ink-card: #3A2A16;
 
-  --shadow:    0 1px 2px rgba(0,0,0,0.25), 0 10px 28px rgba(0,0,0,0.35);
-  --shadow-lg: 0 8px 16px rgba(0,0,0,0.3), 0 24px 48px rgba(0,0,0,0.45);
-  --shadow-primary: 0 8px 20px rgba(79,70,229,0.45);
-  --overlay-bg: rgba(16,14,27,0.85);
+  --wash-top:    #2B2013;
+  --wash-bottom: #171A2B;
+
+  --shadow:    0 1px 2px rgba(0,0,0,0.3), 0 10px 28px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 16px rgba(0,0,0,0.35), 0 24px 48px rgba(0,0,0,0.5);
+  --shadow-primary: 0 8px 20px rgba(184,134,43,0.4);
+  --overlay-bg: rgba(23,19,16,0.85);
 
   color-scheme: dark;
 }
@@ -105,7 +128,7 @@ html { -webkit-tap-highlight-color: transparent; }
 
 body {
   font-family: var(--font-body);
-  background: var(--bg);
+  background: var(--page-wash) fixed;
   color: var(--ink);
   font-size: 15px;
   line-height: 1.6;
@@ -117,54 +140,44 @@ body {
 }
 
 /* =============================================================
-   TOP NAV
+   TOP NAV — sits directly on the page's ambient wash (no banner)
    ============================================================= */
 .top-nav {
   position: sticky; top: 0; z-index: 100;
-  background: var(--gradient);
-  color: #fff;
-  min-height: 124px;
+  background: transparent;
+  color: var(--ink);
+  min-height: 108px;
   display: flex; flex-direction: column;
-  padding: 18px 20px 26px;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  padding: 22px 20px 14px;
   position: relative;
-  overflow: hidden;
-}
-.top-nav::before {
-  content: ''; position: absolute; top: -60px; right: -60px;
-  width: 180px; height: 180px; background: rgba(255,255,255,0.10); border-radius: 50%;
-}
-.top-nav::after {
-  content: ''; position: absolute; bottom: -80px; left: -40px;
-  width: 160px; height: 160px; background: rgba(255,255,255,0.07); border-radius: 50%;
 }
 .top-nav-row { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; }
 .top-nav .logo {
-  font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.7px;
-  display: flex; align-items: center; gap: 11px; color: #fff;
+  font-family: var(--font-display); font-size: 21px; font-weight: 800; letter-spacing: -0.6px;
+  display: flex; align-items: center; gap: 11px; color: var(--ink);
 }
 .top-nav .logo-mark {
   display: inline-flex; align-items: center; justify-content: center;
   width: 42px; height: 42px; border-radius: 14px;
-  background: rgba(255,255,255,0.18); flex-shrink: 0; backdrop-filter: blur(6px);
-  font-size: 21px;
+  background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow);
+  flex-shrink: 0; font-size: 20px;
 }
 .top-nav .logo-sub {
   display: block; font-family: var(--font-body); font-size: 10px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.75); margin-top: 2px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--ink-soft); margin-top: 2px;
 }
 .top-nav .nav-date {
   font-family: var(--font-body); font-size: 12px; font-weight: 600;
-  color: rgba(255,255,255,0.85); text-align: right; line-height: 1.4;
+  color: var(--ink-soft); text-align: right; line-height: 1.4;
 }
 .top-nav .nav-date .nav-date-label {
   font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
-  color: rgba(255,255,255,0.55); display: block;
+  color: var(--ink-faint); display: block;
 }
 .top-nav-actions { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
 .theme-toggle {
-  width: 38px; height: 38px; border-radius: 12px; border: none; cursor: pointer;
-  background: rgba(255,255,255,0.18); backdrop-filter: blur(6px); color: #fff;
+  width: 38px; height: 38px; border-radius: 12px; cursor: pointer;
+  background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow); color: var(--ink);
   display: flex; align-items: center; justify-content: center; font-size: 18px;
   flex-shrink: 0; transition: background 0.15s, transform 0.15s;
 }
@@ -237,9 +250,9 @@ body {
 .stat-card { background: var(--paper); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 1px solid var(--line); position: relative; overflow: hidden; }
 .stat-card .stat-icon { width: 38px; height: 38px; border-radius: 12px; background: var(--gradient); color: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: var(--shadow-primary); font-size: 18px; }
 .stat-card .stat-icon svg { width: 19px; height: 19px; }
-.stat-card.warn .stat-icon  { background: linear-gradient(135deg, #F59E0B, #FBBF24); box-shadow: 0 8px 20px rgba(245,158,11,0.30); }
-.stat-card.danger .stat-icon{ background: linear-gradient(135deg, #EF4444, #F87171); box-shadow: 0 8px 20px rgba(239,68,68,0.30); }
-.stat-card.accent .stat-icon{ background: linear-gradient(135deg, #8B5CF6, #A78BFA); box-shadow: 0 8px 20px rgba(139,92,246,0.30); }
+.stat-card.warn .stat-icon  { background: linear-gradient(135deg, #D9922B, #E8B25A); box-shadow: 0 8px 20px rgba(217,146,43,0.30); }
+.stat-card.danger .stat-icon{ background: linear-gradient(135deg, #3FA672, #5FC08E); box-shadow: 0 8px 20px rgba(63,166,114,0.30); }
+.stat-card.accent .stat-icon{ background: linear-gradient(135deg, #6B8F71, #8FAF8F); box-shadow: 0 8px 20px rgba(107,143,113,0.30); }
 
 /* =============================================================
    FORMS
@@ -330,18 +343,19 @@ select.form-control { cursor: pointer; }
 .note-photos { display: flex; gap: 8px; margin-top: 10px; }
 .note-photos img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
 .note-actions-row { display: flex; gap: 8px; margin-top: 10px; }
-.note-done-badge { background: var(--primary-tint); color: var(--primary-dark); border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 800; }
+.note-done-badge { background: var(--good-tint); color: var(--good-dark); border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 800; }
 
 /* =============================================================
-   QUOTE OF THE DAY
+   QUOTE OF THE DAY — solid "spotlight" card (ink-espresso), the
+   one saturated dark surface among the floating paper cards.
    ============================================================= */
 .quote-card {
-  background: var(--gradient); border-radius: var(--radius); padding: 24px 22px; color: #fff;
-  margin-bottom: 14px; position: relative; overflow: hidden;
+  background: var(--ink-card); border-radius: var(--radius); padding: 24px 22px; color: #FBEAD2;
+  margin-bottom: 14px; position: relative; overflow: hidden; box-shadow: var(--shadow-lg);
 }
-.quote-card::before { content: '“'; position: absolute; top: -18px; left: 8px; font-size: 100px; font-family: var(--font-display); color: rgba(255,255,255,0.15); }
-.quote-text { font-family: var(--font-display); font-size: 19px; font-weight: 700; line-height: 1.4; letter-spacing: -0.4px; position: relative; z-index: 1; }
-.quote-source { font-size: 12.5px; margin-top: 12px; opacity: 0.85; font-weight: 600; position: relative; z-index: 1; }
+.quote-card::before { content: '"'; position: absolute; top: -30px; left: 8px; font-size: 120px; font-family: var(--font-display); color: rgba(251,234,210,0.12); }
+.quote-text { font-family: var(--font-display); font-size: 19px; font-weight: 700; line-height: 1.4; letter-spacing: -0.4px; position: relative; z-index: 1; color: #FBEAD2; }
+.quote-source { font-size: 12.5px; margin-top: 12px; opacity: 0.75; font-weight: 600; position: relative; z-index: 1; color: #FBEAD2; }
 
 /* =============================================================
    TOAST / LOADER
