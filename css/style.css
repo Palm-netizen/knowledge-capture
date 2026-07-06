@@ -451,11 +451,11 @@ select.form-control { cursor: pointer; }
 .connection-book .book-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
 
 /* Mind map */
-.mindmap-wrap { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: auto; margin-bottom: 14px; }
-#mindmapCanvas { display: block; touch-action: pan-y; }
+.mindmap-wrap { background: var(--paper); border-radius: var(--radius); box-shadow: var(--shadow); overflow: auto; margin-bottom: 14px; padding: 4px; }
+#mindmapCanvas { display: block; touch-action: pan-y; cursor: pointer; }
 .mindmap-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-bottom: 10px; }
 .mindmap-legend .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; }
-.mindmap-detail { min-height: 40px; }
+.mindmap-detail { min-height: 40px; transition: box-shadow 0.2s; }
 
 @media (max-width: 380px) {
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
