@@ -36,7 +36,7 @@ async function runKnowledgeSearch() {
       wrap.innerHTML = badgeHTML('ai') + emptyResultsHTML();
       return;
     }
-    const { data } = await db.from('notes').select('*').in('id', ids);
+    const { data } = await db.from('notes').select('*').eq('media_type', getCurrentMode()).in('id', ids);
     const byId = Object.fromEntries((data || []).map(n => [n.id, n]));
     const reasonById = Object.fromEntries((result.results || []).map(r => [r.id, r.reason]));
     const ordered = ids.map(id => byId[id]).filter(Boolean);
@@ -53,7 +53,7 @@ async function runKnowledgeSearch() {
 
 async function runKeywordSearchFallback(query) {
   const wrap = document.getElementById('search-results');
-  const { data, error } = await db.from('notes').select('*');
+  const { data, error } = await db.from('notes').select('*').eq('media_type', getCurrentMode());
   if (error) { wrap.innerHTML = '<div class="text-sub">ค้นหาไม่สำเร็จ</div>'; return; }
 
   const keywords = query.split(/\s+/).map(k => k.toLowerCase()).filter(Boolean);

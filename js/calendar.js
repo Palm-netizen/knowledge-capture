@@ -33,7 +33,7 @@ async function renderCalendar() {
   const today = todayStr();
 
   let notedDates = new Set();
-  const { data, error } = await db.from('notes').select('read_date').gte('read_date', firstStr).lte('read_date', lastStr);
+  const { data, error } = await db.from('notes').select('read_date').eq('media_type', getCurrentMode()).gte('read_date', firstStr).lte('read_date', lastStr);
   if (!error && data) notedDates = new Set(data.map(r => r.read_date));
 
   const grid = document.getElementById('cal-grid');
@@ -71,10 +71,11 @@ function closeDayModal() {
 async function loadDayNotes(dateStr) {
   const wrap = document.getElementById('day-modal-notes');
   wrap.innerHTML = skeletonNoteCardsHTML(1);
-  const { data, error } = await db.from('notes').select('*').eq('read_date', dateStr).order('created_at', { ascending: true });
+  const { data, error } = await db.from('notes').select('*').eq('media_type', getCurrentMode()).eq('read_date', dateStr).order('created_at', { ascending: true });
   if (error) { wrap.innerHTML = '<div class="text-sub">โหลดข้อมูลไม่สำเร็จ</div>'; return; }
   if (!data.length) {
-    wrap.innerHTML = emptyStateHTML({ icon: iconSVG('book', 36), title: 'ยังไม่มีบันทึกในวันนี้', sub: 'แตะปุ่มด้านล่างเพื่อบันทึกหนังสือที่อ่านในวันนี้' });
+    const meta = modeMeta();
+    wrap.innerHTML = emptyStateHTML({ icon: iconSVG(meta.icon, 36), title: meta.dayModalEmptyTitle, sub: meta.dayModalEmptySub });
     return;
   }
   wrap.innerHTML = data.map(renderNoteCard).join('');

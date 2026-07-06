@@ -9,7 +9,7 @@ function renderHighlightFields(values) {
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center';
     row.innerHTML = `
-      <input type="text" class="form-control entry-highlight-input" data-idx="${i}" value="${escapeHTML(val)}" placeholder="ไฮไลท์ข้อที่ ${i + 1}">
+      <input type="text" class="form-control entry-highlight-input" data-idx="${i}" value="${escapeHTML(val)}" placeholder="${escapeHTML(modeMeta().highlightUnitWord)}ข้อที่ ${i + 1}">
       ${values.length > 1 ? `<span class="btn-icon" onclick="removeHighlightField(${i})">✕</span>` : ''}
     `;
     wrap.appendChild(row);
@@ -137,7 +137,7 @@ async function openEntryForm(dateStr, noteId) {
   renderCustomTags();
   renderPhotoPreview();
   document.getElementById('entry-delete-btn').classList.add('hidden');
-  document.getElementById('entry-modal-title').textContent = 'บันทึกการอ่านเล่มใหม่';
+  document.getElementById('entry-modal-title').textContent = modeMeta().entryNewTitle;
 
   if (noteId) {
     setLoading(true);
@@ -159,7 +159,7 @@ async function openEntryForm(dateStr, noteId) {
     entryPhotoExisting = [data.image_urls?.[0] || null, data.image_urls?.[1] || null];
     renderPhotoPreview();
     document.getElementById('entry-delete-btn').classList.remove('hidden');
-    document.getElementById('entry-modal-title').textContent = 'แก้ไขบันทึกการอ่าน';
+    document.getElementById('entry-modal-title').textContent = modeMeta().entryEditTitle;
   }
 
   document.getElementById('entry-modal').style.display = 'flex';
@@ -180,9 +180,10 @@ async function saveEntry() {
   const importance = parseInt(document.getElementById('entry-importance').value, 10);
   const tags = getTagsFromForm();
 
-  if (!book) { showToast('กรุณาใส่ชื่อหนังสือ', 'warn'); return; }
-  if (!date) { showToast('กรุณาเลือกวันที่อ่าน', 'warn'); return; }
-  if (!highlights.length) { showToast('กรุณาใส่ไฮไลท์อย่างน้อย 1 ข้อ', 'warn'); return; }
+  const meta = modeMeta();
+  if (!book) { showToast(meta.validateTitleMsg, 'warn'); return; }
+  if (!date) { showToast(meta.validateDateMsg, 'warn'); return; }
+  if (!highlights.length) { showToast(meta.validateHighlightsMsg, 'warn'); return; }
 
   setLoading(true);
   try {
@@ -194,6 +195,7 @@ async function saveEntry() {
     const finalImageUrls = imageUrls.filter(Boolean).slice(0, 2);
 
     const payload = {
+      media_type: getCurrentMode(),
       book_title: book,
       read_date: date,
       highlights,

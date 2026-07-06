@@ -5,7 +5,7 @@ let dashChartInstance = null;
 async function loadDashboard() {
   document.getElementById('dash-recent-notes').innerHTML = skeletonNoteCardsHTML(3);
   setLoading(true);
-  const { data, error } = await db.from('notes').select('*').order('created_at', { ascending: false });
+  const { data, error } = await db.from('notes').select('*').eq('media_type', getCurrentMode()).order('created_at', { ascending: false });
   setLoading(false);
   if (error) { showToast('โหลด Dashboard ไม่สำเร็จ', 'error'); return; }
 
@@ -16,17 +16,18 @@ async function loadDashboard() {
 }
 
 function renderQuoteOfDay(notes) {
+  const meta = modeMeta();
   const pool = [];
   notes.forEach(n => (n.highlights || []).forEach(h => pool.push({ text: h, book: n.book_title })));
   if (!pool.length) {
-    document.getElementById('qotd-text').textContent = 'ยังไม่มีไฮไลท์ในระบบ เริ่มบันทึกเล่มแรกกันเลย!';
+    document.getElementById('qotd-text').textContent = meta.noHighlightsYet;
     document.getElementById('qotd-source').textContent = '–';
     return;
   }
   const rand = seededRandom(todayStr());
   const pick = pool[Math.floor(rand() * pool.length)];
   document.getElementById('qotd-text').textContent = `“${pick.text}”`;
-  document.getElementById('qotd-source').textContent = `จากหนังสือ: ${pick.book}`;
+  document.getElementById('qotd-source').textContent = `${meta.quoteSourcePrefix}: ${pick.book}`;
 }
 
 function renderDashStats(notes) {
@@ -55,11 +56,12 @@ function renderDashStats(notes) {
 function renderRecentNotes(notes) {
   const wrap = document.getElementById('dash-recent-notes');
   if (!notes.length) {
+    const meta = modeMeta();
     wrap.innerHTML = emptyStateHTML({
-      icon: iconSVG('book', 36),
-      title: 'ยังไม่มีบันทึก',
-      sub: 'เริ่มบันทึกสิ่งที่ได้เรียนรู้จากหนังสือเล่มแรกของคุณ',
-      ctaLabel: '+ บันทึกเล่มแรก',
+      icon: iconSVG(meta.icon, 36),
+      title: meta.recentEmptyTitle,
+      sub: meta.recentEmptySub,
+      ctaLabel: meta.recentEmptyCta,
       ctaOnClick: `openEntryForm('${todayStr()}')`
     });
     return;

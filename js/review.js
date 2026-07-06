@@ -22,10 +22,10 @@ async function loadReviewContent(days) {
   wrap.innerHTML = skeletonNoteCardsHTML(2);
   const targetDate = daysAgoStr(days);
 
-  const { data, error } = await db.from('notes').select('*').eq('read_date', targetDate).order('created_at', { ascending: true });
+  const { data, error } = await db.from('notes').select('*').eq('media_type', getCurrentMode()).eq('read_date', targetDate).order('created_at', { ascending: true });
   if (error) { wrap.innerHTML = '<div class="text-sub">โหลดข้อมูลไม่สำเร็จ</div>'; return; }
 
-  const header = `<div class="section-sub" style="margin:0 0 14px">วันนี้เมื่อ ${days} วันที่แล้ว (${formatDateTH(targetDate)}) คุณอ่านอะไรไว้?</div>`;
+  const header = `<div class="section-sub" style="margin:0 0 14px">วันนี้เมื่อ ${days} วันที่แล้ว (${formatDateTH(targetDate)}) คุณ${modeMeta().reviewVerb}อะไรไว้?</div>`;
 
   if (!data.length) {
     wrap.innerHTML = header + emptyStateHTML({ icon: iconSVG('calendar', 36), title: 'ไม่มีบันทึกในวันนั้น', sub: 'ลองดูช่วงเวลาอื่นจากแท็บด้านบน' });

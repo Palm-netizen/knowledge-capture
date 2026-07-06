@@ -8,7 +8,7 @@ async function loadTagConnections() {
   const wrap = document.getElementById('connections-list');
   wrap.innerHTML = skeletonNoteCardsHTML(2);
 
-  const { data, error } = await db.from('notes').select('book_title, tags');
+  const { data, error } = await db.from('notes').select('book_title, tags').eq('media_type', getCurrentMode());
   if (error) { wrap.innerHTML = '<div class="text-sub">โหลดข้อมูลไม่สำเร็จ</div>'; return; }
 
   const tagMap = {}; // tag -> Set(book_title)
@@ -23,15 +23,16 @@ async function loadTagConnections() {
     .filter(([, books]) => books.size >= 2)
     .sort((a, b) => b[1].size - a[1].size);
 
+  const meta = modeMeta();
   if (!connections.length) {
-    wrap.innerHTML = emptyStateHTML({ icon: iconSVG('link', 36), title: 'ยังไม่มีหนังสือที่เชื่อมโยงกัน', sub: 'ลองใส่แท็กเดียวกันให้หนังสือหลายเล่มดูสิ' });
+    wrap.innerHTML = emptyStateHTML({ icon: iconSVG('link', 36), title: meta.connectionsEmptyTitle, sub: meta.connectionsEmptySub });
     return;
   }
 
   wrap.innerHTML = connections.map(([tag, books]) => `
     <div class="connection-card">
       <div class="connection-tag-label">${iconSVG('tag', 13)} ${escapeHTML(tag)}</div>
-      <div class="text-sub" style="margin-bottom:10px">หนังสือ ${books.size} เล่มมีแนวคิดเชื่อมโยงกันผ่านแท็กนี้</div>
+      <div class="text-sub" style="margin-bottom:10px">${escapeHTML(meta.connectionsUnitText(books.size))}</div>
       <div class="connection-books">
         ${[...books].map(b => `<div class="connection-book"><span class="book-dot"></span>${escapeHTML(b)}</div>`).join('')}
       </div>

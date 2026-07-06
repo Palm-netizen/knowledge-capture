@@ -11,7 +11,7 @@ function initMindmap() {
 
 // Fetches notes once, then hands off to the (synchronous, refetch-free) drawer.
 async function renderMindmap() {
-  const { data, error } = await db.from('notes').select('id, book_title, tags, insight, action, read_date, importance, highlights');
+  const { data, error } = await db.from('notes').select('id, book_title, tags, insight, action, read_date, importance, highlights').eq('media_type', getCurrentMode());
   if (error) return;
   mindmapNotesCache = data;
   drawMindmap();
@@ -40,7 +40,8 @@ function drawMindmap() {
       empty.className = 'mindmap-empty';
       wrap.appendChild(empty);
     }
-    empty.innerHTML = emptyStateHTML({ icon: iconSVG('network', 36), title: 'ยังไม่มีข้อมูลพอสร้าง Mind Map', sub: 'เริ่มบันทึกหนังสืออย่างน้อย 1 เล่มก่อนนะ' });
+    const meta = modeMeta();
+    empty.innerHTML = emptyStateHTML({ icon: iconSVG(meta.icon, 36), title: meta.mindmapEmptyTitle, sub: meta.mindmapEmptySub });
     mindmapNodes = [];
     return;
   }
@@ -69,7 +70,7 @@ function drawMindmap() {
   const R1 = size * 0.24;
   const R2 = Math.max(40, size * 0.12);
 
-  mindmapNodes = [{ x: cx, y: cy, r: 30, type: 'center', label: 'ห้องสมุดของฉัน' }];
+  mindmapNodes = [{ x: cx, y: cy, r: 30, type: 'center', label: modeMeta().mindmapCenterLabel }];
 
   const lineColorOuter = cssVar('--primary-tint-strong');
   const lineColorInner = cssVar('--line');
@@ -207,22 +208,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function showMindmapDetail(node) {
   const panel = document.getElementById('mindmap-detail');
+  const meta = modeMeta();
   const accent = { center: 'var(--primary)', tag: 'var(--violet)', book: 'var(--accent)' }[node.type];
   panel.style.boxShadow = `inset 3px 0 0 ${accent}, var(--shadow)`;
   if (node.type === 'center') {
     const bookCount = new Set(mindmapNotesCache.map(n => n.book_title)).size;
-    panel.innerHTML = `<strong>${iconSVG('book', 15)} ห้องสมุดความรู้ของฉัน</strong><div class="text-sub" style="margin-top:6px">รวม ${bookCount} เล่ม</div>`;
+    panel.innerHTML = `<strong>${iconSVG(meta.icon, 15)} ${escapeHTML(meta.mindmapCenterDetail)}</strong><div class="text-sub" style="margin-top:6px">รวม ${bookCount} ${escapeHTML(meta.mindmapLeafLegend)}</div>`;
   } else if (node.type === 'tag') {
     panel.innerHTML = `
       <strong>${iconSVG('tag', 14)} ${escapeHTML(node.label)}</strong>
-      <div class="text-sub" style="margin-top:6px">เชื่อมโยงหนังสือ ${node.books.length} เล่ม: ${node.books.map(escapeHTML).join(', ')}</div>
+      <div class="text-sub" style="margin-top:6px">${escapeHTML(meta.mindmapTagDetailText(node.books.length))}: ${node.books.map(escapeHTML).join(', ')}</div>
     `;
   } else {
     const notes = mindmapNotesCache.filter(n => n.book_title === node.label);
     const totalHighlights = notes.reduce((s, n) => s + (n.highlights?.length || 0), 0);
     panel.innerHTML = `
-      <strong>${iconSVG('book', 14)} ${escapeHTML(node.label)}</strong>
-      <div class="text-sub" style="margin-top:6px">${notes.length} บันทึก · ${totalHighlights} ไฮไลท์ · แท็ก: ${escapeHTML(node.tag)}</div>
+      <strong>${iconSVG(meta.icon, 14)} ${escapeHTML(node.label)}</strong>
+      <div class="text-sub" style="margin-top:6px">${notes.length} บันทึก · ${totalHighlights} ${escapeHTML(meta.highlightUnitWord)} · แท็ก: ${escapeHTML(node.tag)}</div>
     `;
   }
 }

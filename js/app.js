@@ -9,6 +9,22 @@ const PAGE_INIT = {
   mindmap: initMindmap
 };
 
+// Re-entrant refresh for a page that's already initialized (listeners
+// already attached) — used both when revisiting a tab and after an
+// อ่าน/ฟัง mode switch, so we never re-run PAGE_INIT and double up
+// event listeners.
+const PAGE_REFRESH = {
+  calendar: renderCalendar,
+  dashboard: loadDashboard,
+  review: () => loadReviewContent(reviewActiveDays),
+  connections: loadTagConnections,
+  mindmap: renderMindmap,
+  search: () => {
+    document.getElementById('search-input').value = '';
+    document.getElementById('search-results').innerHTML = '';
+  }
+};
+
 const initialized = new Set();
 
 function showPage(pageId) {
@@ -23,16 +39,8 @@ function showPage(pageId) {
   if (!initialized.has(pageId)) {
     PAGE_INIT[pageId]?.();
     initialized.add(pageId);
-  } else if (pageId === 'dashboard') {
-    loadDashboard();
-  } else if (pageId === 'calendar') {
-    renderCalendar();
-  } else if (pageId === 'review') {
-    loadReviewContent(reviewActiveDays);
-  } else if (pageId === 'connections') {
-    loadTagConnections();
-  } else if (pageId === 'mindmap') {
-    renderMindmap();
+  } else {
+    PAGE_REFRESH[pageId]?.();
   }
 
   location.hash = pageId;
@@ -69,6 +77,54 @@ function refreshActivePageVisuals() {
   else if (pageId === 'dashboard') loadDashboard();
 }
 
+// ---- Mode (อ่าน / ฟัง) ----------------------------------------------
+
+function applyModeLabels() {
+  const meta = modeMeta();
+  document.getElementById('app-subtitle').textContent = meta.appSubtitle;
+  document.getElementById('logo-mark-icon').innerHTML = iconSVG(meta.icon, 22);
+  document.getElementById('calendar-title-text').textContent = meta.calendarTitle;
+  document.getElementById('calendar-sub-text').textContent = meta.calendarSub;
+  document.getElementById('dashboard-sub-text').textContent = meta.dashboardSub;
+  document.getElementById('dash-books-icon').innerHTML = iconSVG(meta.icon, 20);
+  document.getElementById('dash-books-label').textContent = meta.dashboardCountLabel;
+  document.getElementById('dash-books-unit').textContent = meta.dashboardUnit;
+  document.getElementById('search-sub-text').textContent = meta.searchSub;
+  document.getElementById('connections-sub-text').textContent = meta.connectionsSub;
+  document.getElementById('mindmap-sub-text').textContent = meta.mindmapSub;
+  document.getElementById('mindmap-legend-leaf').textContent = meta.mindmapLeafLegend;
+  document.getElementById('day-modal-cta').textContent = meta.dayModalCta;
+  document.getElementById('title-field-icon').innerHTML = iconSVG(meta.icon, 14);
+  document.getElementById('title-field-label').textContent = meta.titleFieldLabel;
+  document.getElementById('date-field-label').textContent = meta.dateFieldLabel;
+  document.getElementById('highlights-field-label').textContent = meta.highlightsFieldLabel;
+  document.getElementById('entry-book').placeholder = meta.titlePlaceholder;
+
+  document.querySelectorAll('.mode-switch-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === getCurrentMode());
+  });
+}
+
+function initModeSwitch() {
+  applyModeLabels();
+  document.querySelectorAll('.mode-switch-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      if (mode === getCurrentMode()) return;
+      setCurrentMode(mode);
+      applyModeLabels();
+
+      // Refresh every tab that's already been visited — its data (and
+      // in the mindmap/calendar's case, canvas labels) depends on the
+      // mode. `initialized` is only read here, never touched: clearing
+      // it would make a later visit re-run PAGE_INIT, which for
+      // calendar/search/mindmap re-attaches listeners to DOM nodes
+      // that already have one, double-firing every click afterward.
+      initialized.forEach(pageId => PAGE_REFRESH[pageId]?.());
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const today = new Date();
   document.getElementById('nav-date').textContent = today.toLocaleDateString('th-TH', {
@@ -76,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   initTheme();
+  initModeSwitch();
 
   document.querySelectorAll('.bottom-nav a').forEach(a => {
     a.addEventListener('click', (e) => {
