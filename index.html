@@ -194,6 +194,50 @@
   </div>
 </div>
 
+<!-- ===========================================================
+     7. นัดหมายคุยงาน
+     =========================================================== -->
+<div class="page" id="page-appointments">
+  <div class="page-content">
+    <div class="section-eyebrow">เมนู 7</div>
+    <div class="section-title"><span class="title-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></span> นัดหมายคุยงาน</div>
+    <div class="section-sub">บันทึกนัดคุยงานรายคน ดูภาพรวมและจัดตารางไม่ให้ชนกัน</div>
+
+    <div class="card" id="appt-goal-card">
+      <div class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> เป้าหมายจำนวนการคุยเดือนนี้</div>
+      <div id="appt-goal-display" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div>
+          <span class="card-value" id="appt-goal-count">0</span>
+          <span class="text-sub"> / <span id="appt-goal-target">0</span> คน</span>
+        </div>
+        <button class="btn btn-outline btn-sm" id="appt-goal-edit-btn" type="button">แก้ไขเป้าหมาย</button>
+      </div>
+      <div class="appt-goal-bar-track" style="margin-top:12px">
+        <div class="appt-goal-bar-fill" id="appt-goal-bar-fill" style="width:0%"></div>
+      </div>
+      <div id="appt-goal-editor" class="hidden" style="display:flex;gap:8px;margin-top:12px">
+        <input type="number" id="appt-goal-input" class="form-control" min="0" placeholder="จำนวนเป้าหมาย (คน)">
+        <button class="btn btn-primary" style="width:auto" id="appt-goal-save-btn" type="button">บันทึก</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <button class="cal-nav-btn" id="appt-cal-prev" aria-label="เดือนก่อนหน้า">‹</button>
+        <strong id="appt-cal-month-label" class="cal-month-label">–</strong>
+        <button class="cal-nav-btn" id="appt-cal-next" aria-label="เดือนถัดไป">›</button>
+      </div>
+      <div class="calendar-grid" id="appt-cal-grid"></div>
+      <div class="divider"></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);font-weight:600">
+        <span><span class="appt-dot appt-dot-pending" style="display:inline-block;margin-right:4px"></span>รอคุย</span>
+        <span><span class="appt-dot appt-dot-confirmed" style="display:inline-block;margin-right:4px"></span>คุยแล้ว</span>
+        <span><span class="appt-dot appt-dot-cancelled" style="display:inline-block;margin-right:4px"></span>ยกเลิก</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== DAY MODAL: list notes of a clicked date ===== -->
 <div class="modal-overlay" id="day-modal" onclick="if(event.target===this)closeDayModal()">
   <div class="modal-sheet">
@@ -270,6 +314,67 @@
   </div>
 </div>
 
+<!-- ===== APPT DAY MODAL: list appointments of a clicked date ===== -->
+<div class="modal-overlay" id="appt-day-modal" onclick="if(event.target===this)closeApptDayModal()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="appt-day-modal-title">วันที่ –</div>
+    <div id="appt-day-modal-list"></div>
+    <button class="btn btn-primary" style="margin-top:10px" onclick="openApptForm(currentApptModalDate)">+ เพิ่มนัดหมายใหม่</button>
+  </div>
+</div>
+
+<!-- ===== APPT ENTRY MODAL: add / edit an appointment ===== -->
+<div class="modal-overlay" id="appt-modal" onclick="if(event.target===this)closeApptForm()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="appt-modal-title">เพิ่มนัดหมายใหม่</div>
+
+    <input type="hidden" id="appt-id">
+
+    <div class="form-group">
+      <label class="form-label">ชื่อคน</label>
+      <input type="text" id="appt-name" class="form-control" placeholder="เช่น สมชาย ใจดี">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ชื่อ Facebook</label>
+      <input type="text" id="appt-fb" class="form-control" placeholder="เช่น Somchai Jaidee">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label class="form-label">อายุ</label>
+        <input type="number" id="appt-age" class="form-control" min="0" max="120" placeholder="เช่น 28">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ทำงานอะไร</label>
+        <input type="text" id="appt-job" class="form-control" placeholder="เช่น พนักงานขาย">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">เรียนอยู่ที่ไหน</label>
+      <input type="text" id="appt-study" class="form-control" placeholder="เช่น ม.เกษตรศาสตร์ (ถ้ายังเรียนอยู่)">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label class="form-label">วันที่นัด</label>
+        <input type="date" id="appt-date" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label">เวลานัด</label>
+        <input type="time" id="appt-time" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">อยู่แถวไหน / นัดที่ไหน</label>
+      <input type="text" id="appt-location" class="form-control" placeholder="เช่น BTS อโศก">
+    </div>
+
+    <button class="btn btn-primary" onclick="saveAppt()">บันทึก</button>
+    <button class="btn btn-danger btn-block hidden" id="appt-delete-btn" style="margin-top:8px" onclick="deleteAppt(document.getElementById('appt-id').value, document.getElementById('appt-date').value)">ลบนัดหมายนี้</button>
+    <button class="btn btn-outline btn-block" style="margin-top:8px" onclick="closeApptForm()">ยกเลิก</button>
+  </div>
+</div>
+
 <!-- ===== BOTTOM NAV ===== -->
 <div class="bottom-nav">
   <a href="#calendar" id="nav-calendar" data-page="calendar">
@@ -290,6 +395,9 @@
   <a href="#mindmap" id="nav-mindmap" data-page="mindmap">
     <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/></svg></span> Mind Map
   </a>
+  <a href="#appointments" id="nav-appointments" data-page="appointments">
+    <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></span> นัดหมาย
+  </a>
 </div>
 
 <!-- ===== SCRIPTS ===== -->
@@ -301,6 +409,7 @@
 <script src="js/search.js"></script>
 <script src="js/connections.js"></script>
 <script src="js/mindmap.js"></script>
+<script src="js/appointments.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

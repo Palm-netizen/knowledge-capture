@@ -465,6 +465,25 @@ select.form-control { cursor: pointer; }
 .connection-book { display: flex; align-items: center; gap: 10px; background: var(--bg); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13.5px; font-weight: 700; }
 .connection-book .book-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
 
+/* Appointments (เมนู 7) */
+.appt-goal-bar-track { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.appt-goal-bar-fill { height: 100%; border-radius: 999px; background: var(--gradient); transition: width 0.3s ease; }
+.appt-goal-bar-fill.goal-reached { background: linear-gradient(135deg, #3FA672, #5FC08E); }
+
+.appt-day-dots { display: flex; gap: 2px; }
+.appt-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; }
+.appt-dot-pending { background: var(--accent); }
+.appt-dot-confirmed { background: var(--good); }
+.appt-dot-cancelled { background: var(--ink-faint); }
+
+.appt-status-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 800; vertical-align: 1px; }
+.appt-status-pending { background: var(--accent-tint); color: var(--accent); }
+.appt-status-confirmed { background: var(--good-tint); color: var(--good-dark); }
+.appt-status-cancelled { background: var(--line); color: var(--ink-faint); }
+
+.appt-detail-grid { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
+.appt-detail-grid svg { vertical-align: -2px; margin-right: 4px; }
+
 /* Mind map */
 .mindmap-wrap { background: var(--paper); border-radius: var(--radius); box-shadow: var(--shadow); overflow: auto; margin-bottom: 14px; padding: 4px; }
 #mindmapCanvas { display: block; touch-action: pan-y; cursor: pointer; }
