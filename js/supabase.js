@@ -1,8 +1,8 @@
 // js/supabase.js — Supabase client config (Knowledge Capture — แยกอิสระจาก VegFarm)
 // แก้ SUPABASE_URL และ SUPABASE_ANON_KEY ให้ตรงกับโปรเจกต์ Supabase ของแอปนี้ (คนละโปรเจกต์กับ VegFarm)
 
-const SUPABASE_URL = 'https://YOUR_KC_PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_KC_ANON_KEY_HERE';
+const SUPABASE_URL = 'https://ubtowmtqxakjfwllcali.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidG93bXRxeGFramZ3bGxjYWxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDIyODksImV4cCI6MjA5ODc3ODI4OX0.L73GYomVHytMZe9lquWhTgGFrurqmZWcXCCxt0utno4';
 
 const PHOTO_BUCKET = 'knowledge-photos';
 const PRESET_TAGS = ['ธุรกิจ', 'การเงิน', 'จิตวิทยา', 'สุขภาพ'];
