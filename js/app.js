@@ -6,8 +6,7 @@ const PAGE_INIT = {
   review: initReview,
   search: initSearch,
   connections: initConnections,
-  mindmap: initMindmap,
-  appointments: initAppointments
+  mindmap: initMindmap
 };
 
 // Re-entrant refresh for a page that's already initialized (listeners
@@ -20,7 +19,6 @@ const PAGE_REFRESH = {
   review: () => loadReviewContent(reviewActiveDays),
   connections: loadTagConnections,
   mindmap: renderMindmap,
-  appointments: renderApptCalendar,
   search: () => {
     document.getElementById('search-input').value = '';
     document.getElementById('search-results').innerHTML = '';
