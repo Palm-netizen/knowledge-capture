@@ -94,7 +94,7 @@ function renderNoteCard(note) {
       ${note.insight ? `<div class="note-insight">${iconSVG('lightbulb', 14)} ${escapeHTML(note.insight)}</div>` : ''}
       ${note.action ? `<div class="note-action">${iconSVG('target', 14)} ${escapeHTML(note.action)} ${note.action_done ? '<span class="note-done-badge">ทำแล้ว ✓</span>' : ''}</div>` : ''}
       ${(note.tags || []).length ? `<div class="note-tags">${note.tags.map(t => `<span class="note-tag">${escapeHTML(t)}</span>`).join('')}</div>` : ''}
-      ${(note.image_urls || []).length ? `<div class="note-photos">${note.image_urls.map(u => `<img src="${u}">`).join('')}</div>` : ''}
+      ${(note.image_urls || []).length ? `<div class="note-photos">${note.image_urls.map(u => `<img src="${u}" onclick="openLightbox(this.src)">`).join('')}</div>` : ''}
       <div class="note-actions-row">
         <button class="btn btn-outline btn-sm" onclick="openEntryForm('${note.read_date}', '${note.id}')">แก้ไข</button>
         <button class="btn btn-outline btn-sm" onclick="quickDeleteNote('${note.id}', '${note.read_date}')">ลบ</button>

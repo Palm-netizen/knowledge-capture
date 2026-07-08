@@ -202,6 +202,18 @@ function starsHTML(level, max = 5) {
   return out;
 }
 
+// ---- Lightbox: full-size photo viewer for note thumbnails --------
+
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-overlay').style.display = 'flex';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox-overlay').style.display = 'none';
+  document.getElementById('lightbox-img').src = '';
+}
+
 async function uploadNoteImage(file) {
   const ext = file.name.split('.').pop();
   const path = `${crypto.randomUUID()}.${ext}`;

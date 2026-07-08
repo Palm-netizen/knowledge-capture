@@ -379,7 +379,20 @@ select.form-control { cursor: pointer; }
 .note-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .note-tag { background: var(--violet-tint); color: var(--primary-dark); border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
 .note-photos { display: flex; gap: 8px; margin-top: 10px; }
-.note-photos img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
+.note-photos img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); cursor: pointer; transition: transform 0.15s; }
+.note-photos img:active { transform: scale(0.94); }
+
+/* Lightbox (full-size photo viewer) */
+.lightbox-overlay {
+  position: fixed; inset: 0; z-index: 400; background: rgba(10,8,6,0.88);
+  display: none; align-items: center; justify-content: center; padding: 24px;
+  cursor: zoom-out; backdrop-filter: blur(2px);
+}
+.lightbox-overlay img {
+  max-width: 100%; max-height: 100%; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: lightboxPop 0.2s ease; cursor: default;
+}
+@keyframes lightboxPop { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
 .note-actions-row { display: flex; gap: 8px; margin-top: 10px; }
 .note-done-badge { background: var(--good); color: #fff; border-radius: 999px; padding: 4px 12px; font-size: 11px; font-weight: 800; }
 
