@@ -7,7 +7,7 @@ create extension if not exists pgcrypto;
 
 create table if not exists notes (
   id             uuid primary key default gen_random_uuid(),
-  media_type     text not null default 'reading' check (media_type in ('reading', 'listening')),
+  media_type     text not null default 'reading' check (media_type in ('reading', 'listening', 'mind')),
   book_title     text not null,
   read_date      date not null default current_date,
   highlights     text[] not null default '{}',
@@ -24,11 +24,12 @@ create table if not exists notes (
 );
 
 -- Migration for projects that already ran an earlier version of this file
--- (before the "อ่าน / ฟัง" mode split) — safe to re-run, adds the column
--- only if it isn't there yet.
+-- (before the "อ่าน / ฟัง" mode split, or before the "Mind" mode was
+-- added) — safe to re-run, adds the column only if it isn't there yet
+-- and widens the check constraint to allow 'mind'.
 alter table notes add column if not exists media_type text not null default 'reading';
 alter table notes drop constraint if exists notes_media_type_check;
-alter table notes add constraint notes_media_type_check check (media_type in ('reading', 'listening'));
+alter table notes add constraint notes_media_type_check check (media_type in ('reading', 'listening', 'mind'));
 
 create index if not exists notes_read_date_idx on notes (read_date);
 create index if not exists notes_tags_idx on notes using gin (tags);
