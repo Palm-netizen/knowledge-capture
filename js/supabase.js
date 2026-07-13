@@ -214,7 +214,9 @@ const ICON_PATHS = {
   briefcase: '<rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
   pin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
   flower: '<path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5"/><path d="M12 7.5A4.5 4.5 0 1 0 7.5 12"/><path d="M12 16.5a4.5 4.5 0 1 1-4.5-4.5"/><path d="M12 16.5a4.5 4.5 0 1 0 4.5-4.5"/><circle cx="12" cy="12" r="2.5"/>',
-  user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'
+  user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  checkSquare: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/>',
+  list: '<path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/>'
 };
 
 function iconSVG(name, size = 18, strokeWidth = 2) {
