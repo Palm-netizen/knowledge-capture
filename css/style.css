@@ -376,9 +376,15 @@ select.form-control { cursor: pointer; }
   border-radius: 0 10px 10px 0; padding: 8px 12px; margin: 6px 0;
   font-size: 13.5px; font-weight: 700; color: var(--ink); line-height: 1.5;
 }
-.note-insight svg, .note-action svg { vertical-align: -2px; margin-right: 3px; }
-.note-insight { font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
-.note-action { font-size: 13px; color: var(--primary-dark); margin-top: 6px; font-weight: 600; }
+.note-insight, .note-action { font-size: 13px; color: var(--ink-soft); margin-top: 10px; line-height: 1.6; }
+.note-action { color: var(--primary-dark); }
+.note-body-head { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink-faint); margin-bottom: 4px; }
+.note-body-line { margin: 3px 0; }
+.note-body-line:last-child { margin-bottom: 0; }
+mark.note-callout {
+  background: #6EE787; color: #0B2B14; font-weight: 800; padding: 1px 5px; border-radius: 4px;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
 .note-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .note-tag { background: var(--violet-tint); color: var(--primary-dark); border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
 .note-photos { display: flex; gap: 8px; margin-top: 10px; }

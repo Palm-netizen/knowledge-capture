@@ -185,6 +185,26 @@ function escapeHTML(str) {
   }[c]));
 }
 
+// Long free-text fields (insight/action) sometimes arrive as one run-on
+// paragraph with "* " used as an informal bullet marker instead of real
+// line breaks — split those into separate lines so they don't read as
+// one wall of text, and mark up "quoted" phrases as bold/highlighted
+// callouts since those are usually the sentence worth remembering.
+function formatNoteBody(text) {
+  if (!text) return '';
+  const lines = String(text)
+    .split(/\r?\n+|\s*\*\s+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+  return lines.map(line => `<div class="note-body-line">${highlightQuotes(escapeHTML(line))}</div>`).join('');
+}
+
+function highlightQuotes(escapedText) {
+  return escapedText
+    .replace(/“([^”]{2,})”/g, '<mark class="note-callout">$1</mark>')
+    .replace(/&quot;([^&]{2,}?)&quot;/g, '<mark class="note-callout">$1</mark>');
+}
+
 // Reads a CSS custom property from :root — used so canvas-drawn content
 // (Chart.js, Mind Map) follows the current light/dark theme.
 function cssVar(name) {

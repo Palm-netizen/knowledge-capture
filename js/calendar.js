@@ -91,8 +91,8 @@ function renderNoteCard(note) {
         </div>
       </div>
       ${(note.highlights || []).map(h => `<div class="note-highlight">${escapeHTML(h)}</div>`).join('')}
-      ${note.insight ? `<div class="note-insight">${iconSVG('lightbulb', 14)} ${escapeHTML(note.insight)}</div>` : ''}
-      ${note.action ? `<div class="note-action">${iconSVG('target', 14)} ${escapeHTML(note.action)} ${note.action_done ? '<span class="note-done-badge">ทำแล้ว ✓</span>' : ''}</div>` : ''}
+      ${note.insight ? `<div class="note-insight"><div class="note-body-head">${iconSVG('lightbulb', 14)} สิ่งที่ได้เรียนรู้</div>${formatNoteBody(note.insight)}</div>` : ''}
+      ${note.action ? `<div class="note-action"><div class="note-body-head">${iconSVG('target', 14)} จะนำไปใช้ยังไง ${note.action_done ? '<span class="note-done-badge">ทำแล้ว ✓</span>' : ''}</div>${formatNoteBody(note.action)}</div>` : ''}
       ${(note.tags || []).length ? `<div class="note-tags">${note.tags.map(t => `<span class="note-tag">${escapeHTML(t)}</span>`).join('')}</div>` : ''}
       ${(note.image_urls || []).length ? `<div class="note-photos">${note.image_urls.map(u => `<img src="${u}" onclick="openLightbox(this.src)">`).join('')}</div>` : ''}
       <div class="note-actions-row">
