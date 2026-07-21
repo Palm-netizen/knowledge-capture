@@ -212,85 +212,82 @@
 </div>
 
 <!-- ===========================================================
-     7. กิจวัตร (checklist กิจวัตรประจำวัน + แผนรายสัปดาห์)
+     7. เพื่อน (Name List — จัดการรายชื่อคนที่เพิ่งรู้จัก)
      =========================================================== -->
-<div class="page" id="page-habits">
+<div class="page" id="page-friends">
   <div class="page-content">
     <div class="section-eyebrow">เมนู 7</div>
-    <div class="section-title"><span class="title-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg></span> กิจวัตร</div>
-    <div class="section-sub">เช็กกิจวัตรประจำวันและวางแผนรายสัปดาห์ ไม่พลาดวินัยที่ตั้งไว้</div>
+    <div class="section-title"><span class="title-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> เพื่อน</div>
+    <div class="section-sub">จัดการรายชื่อคนที่เพิ่งรู้จัก ติดตามเรื่องที่เชื่อมกันและข้อมูลเพิ่มเติม</div>
 
-    <div class="review-tabs">
-      <button type="button" class="review-tab active" id="habit-tab-daily">รายวัน</button>
-      <button type="button" class="review-tab" id="habit-tab-weekly">รายสัปดาห์</button>
+    <div class="card">
+      <div class="card-title">เพื่อนใหม่ทั้งหมด</div>
+      <div class="card-value" id="friends-total-count">0</div>
     </div>
 
-    <!-- รายวัน -->
-    <div id="habit-panel-daily">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-          <button class="cal-nav-btn" id="habit-cal-prev" aria-label="เดือนก่อนหน้า">‹</button>
-          <strong id="habit-cal-month-label" class="cal-month-label">–</strong>
-          <button class="cal-nav-btn" id="habit-cal-next" aria-label="เดือนถัดไป">›</button>
-        </div>
-        <div class="calendar-grid" id="habit-cal-grid"></div>
-        <div class="divider"></div>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);font-weight:600">
-          <span><span class="cal-dot" style="display:inline-block;margin-right:4px"></span>ทำแล้วบางข้อ</span>
-          <span><span class="cal-dot" style="display:inline-block;margin-right:4px;background:var(--good)"></span>ครบทุกข้อ</span>
-        </div>
-      </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <select id="friends-month-filter" class="form-control"></select>
+      <input type="text" id="friends-search-input" class="form-control" placeholder="ค้นหาชื่อ...">
     </div>
 
-    <!-- รายสัปดาห์ -->
-    <div id="habit-panel-weekly" class="hidden">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <button class="cal-nav-btn" id="wp-week-prev" aria-label="สัปดาห์ก่อนหน้า">‹</button>
-          <strong id="wp-week-label" class="cal-month-label">–</strong>
-          <button class="cal-nav-btn" id="wp-week-next" aria-label="สัปดาห์ถัดไป">›</button>
-        </div>
-      </div>
+    <button type="button" class="btn btn-primary" id="friends-add-btn" style="margin-bottom:14px">+ เพิ่มรายชื่อ</button>
 
-      <div class="card">
-        <div class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg> เป้าหมายสำคัญประจำสัปดาห์ (สูงสุด 10 ข้อ)</div>
-        <div id="wp-priorities"></div>
-        <button type="button" class="btn btn-outline btn-sm" id="wp-add-priority-btn">+ เพิ่มเป้าหมาย</button>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg> สิ่งที่ต้องทำ: นัดหมาย / STP</div>
-        <div id="wp-todo-list"></div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <input type="text" id="wp-todo-input" class="form-control" placeholder="เพิ่มรายการ แล้วกด Enter">
-          <button type="button" class="btn btn-primary" style="width:auto" id="wp-add-todo-btn">เพิ่ม</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg> สินค้าที่จะเรียนรู้สัปดาห์นี้</div>
-        <input type="text" id="wp-study-product" class="form-control" placeholder="เช่น ผลิตภัณฑ์บำรุงผิว X">
-        <label class="checkbox-item" id="wp-study-done-toggle" style="margin-top:10px">
-          <input type="checkbox" id="wp-study-done" onchange="this.closest('.checkbox-item').classList.toggle('checked', this.checked)"> เรียนแล้ว
-        </label>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> สิ่งที่เอาชนะประจำวัน</div>
-        <div id="wp-day-wins"></div>
-      </div>
-
-      <button type="button" class="btn btn-primary" id="wp-save-btn">บันทึกแผนสัปดาห์นี้</button>
-    </div>
+    <div id="friends-list"></div>
   </div>
 </div>
 
-<!-- ===== HABIT DAY MODAL: checklist ของวันที่คลิก ===== -->
-<div class="modal-overlay" id="habit-day-modal" onclick="if(event.target===this)closeHabitDayModal()">
+<!-- ===== FRIEND ENTRY MODAL: add / edit a friend ===== -->
+<div class="modal-overlay" id="friend-modal" onclick="if(event.target===this)closeFriendForm()">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="habit-day-modal-title">วันที่ –</div>
-    <div id="habit-day-modal-list"></div>
+    <div class="modal-title" id="friend-modal-title">เพื่อนใหม่</div>
+
+    <input type="hidden" id="friend-id">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label class="form-label">วันที่</label>
+        <input type="date" id="friend-met-date" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ชื่อ</label>
+        <input type="text" id="friend-name" class="form-control" placeholder="เช่น น้องแก้ม">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label class="form-label">อายุ</label>
+        <input type="number" id="friend-age" class="form-control" min="0" max="120" placeholder="เช่น 27">
+      </div>
+      <div class="form-group">
+        <label class="form-label">อาชีพ</label>
+        <input type="text" id="friend-occupation" class="form-control" placeholder="เช่น หลานเจ้าของร้านกาแฟ">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">เจอที่ไหน</label>
+      <input type="text" id="friend-met-where" class="form-control" placeholder="เช่น งานสัมมนา AI มากับไอซ์ครูสอนเทควันโด">
+    </div>
+
+    <button class="btn btn-primary" onclick="saveFriend()">บันทึกเพื่อนใหม่</button>
+    <button class="btn btn-danger btn-block hidden" id="friend-delete-btn" style="margin-top:8px" onclick="deleteFriend(document.getElementById('friend-id').value)">ลบรายชื่อนี้</button>
+    <button class="btn btn-outline btn-block" style="margin-top:8px" onclick="closeFriendForm()">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- ===== FRIEND LIST-FIELD MODAL: shared UI for "เรื่องที่เชื่อม" / "ข้อมูลเพิ่มเติม" ===== -->
+<div class="modal-overlay" id="friend-listfield-modal" onclick="if(event.target===this)closeFriendListField()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="friend-listfield-title">–</div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input type="text" id="friend-listfield-input" class="form-control" placeholder="พิมพ์รายละเอียด...">
+      <button type="button" class="btn btn-primary" style="width:auto" onclick="addFriendListFieldItem()">เพิ่ม</button>
+    </div>
+    <div id="friend-listfield-items"></div>
+
+    <button type="button" class="btn btn-primary" style="margin-top:14px" onclick="saveFriendListField()">บันทึกการเปลี่ยนแปลง</button>
   </div>
 </div>
 
@@ -390,8 +387,8 @@
   <a href="#mindmap" id="nav-mindmap" data-page="mindmap">
     <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/></svg></span> Mind Map
   </a>
-  <a href="#habits" id="nav-habits" data-page="habits">
-    <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg></span> กิจวัตร
+  <a href="#friends" id="nav-friends" data-page="friends">
+    <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> เพื่อน
   </a>
 </div>
 
@@ -404,7 +401,7 @@
 <script src="js/search.js"></script>
 <script src="js/connections.js"></script>
 <script src="js/mindmap.js"></script>
-<script src="js/habits.js"></script>
+<script src="js/friends.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

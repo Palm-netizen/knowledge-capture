@@ -66,57 +66,33 @@ drop policy if exists "allow all" on notes;
 create policy "allow all" on notes for all using (true) with check (true);
 
 -- ============================================================
--- เมนู 8: กิจวัตร — checklist กิจวัตรประจำวัน (9 ข้อคงที่) + แผนรายสัปดาห์
+-- เมนู 7: เพื่อน — Name List (รายชื่อคนที่เพิ่งรู้จัก + STP)
 -- ============================================================
 
-create table if not exists habit_checks (
+create table if not exists friends (
   id            uuid primary key default gen_random_uuid(),
-  check_date    date not null unique,
-  goal_write    boolean not null default false,  -- เขียนเป้าหมาย/ฝัน
-  audio_n21     boolean not null default false,  -- ฟังไฟล์เสียง N21
-  read_book     boolean not null default false,  -- อ่านหนังสือ
-  add_friend    boolean not null default false,  -- รู้จักคนเพิ่ม / Add เพื่อน
-  check_ford    boolean not null default false,  -- เช็ก FORD
-  appointment   boolean not null default false,  -- แชทหรือโทรนัดหมาย
-  stp           boolean not null default false,  -- STP / แนะนำสินค้า
-  follow_up     boolean not null default false,  -- ติดตามผล บันทึกผล
-  post_social   boolean not null default false,  -- โพส FB / Tiktok
+  met_date      date not null default current_date,
+  name          text not null,
+  age           smallint,
+  occupation    text default '',
+  met_where     text default '',
+  connections   jsonb not null default '[]',  -- เรื่องที่เชื่อมกัน — [ "ข้อความ", ... ]
+  extra_info    jsonb not null default '[]',  -- ข้อมูลเพิ่มเติม — [ "ข้อความ", ... ]
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
 
-create index if not exists habit_checks_date_idx on habit_checks (check_date);
+create index if not exists friends_met_date_idx on friends (met_date);
+create index if not exists friends_name_idx on friends (name);
 
-drop trigger if exists habit_checks_set_updated_at on habit_checks;
-create trigger habit_checks_set_updated_at
-  before update on habit_checks
+drop trigger if exists friends_set_updated_at on friends;
+create trigger friends_set_updated_at
+  before update on friends
   for each row execute function set_updated_at();
 
-alter table habit_checks enable row level security;
-drop policy if exists "allow all" on habit_checks;
-create policy "allow all" on habit_checks for all using (true) with check (true);
-
--- แผนรายสัปดาห์ — 1 แถวต่อสัปดาห์ อ้างอิงวันจันทร์ของสัปดาห์นั้น (week_start)
-create table if not exists weekly_plans (
-  id               uuid primary key default gen_random_uuid(),
-  week_start       date not null unique,
-  top_priorities   text[] not null default '{}',
-  todo_items       jsonb not null default '[]',
-  study_product    text default '',
-  study_done       boolean not null default false,
-  day_wins         jsonb not null default '{}',
-  created_at       timestamptz not null default now(),
-  updated_at       timestamptz not null default now()
-);
-
-drop trigger if exists weekly_plans_set_updated_at on weekly_plans;
-create trigger weekly_plans_set_updated_at
-  before update on weekly_plans
-  for each row execute function set_updated_at();
-
-alter table weekly_plans enable row level security;
-drop policy if exists "allow all" on weekly_plans;
-create policy "allow all" on weekly_plans for all using (true) with check (true);
+alter table friends enable row level security;
+drop policy if exists "allow all" on friends;
+create policy "allow all" on friends for all using (true) with check (true);
 
 -- ============================================================
 -- Storage: สร้าง bucket ชื่อ "knowledge-photos" (Public) ผ่าน Dashboard → Storage
