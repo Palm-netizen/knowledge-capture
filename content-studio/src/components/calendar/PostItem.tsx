@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Clock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { CalendarX2, Check, Clock, PenLine, Trash2 } from "lucide-react";
+import { Menu } from "@/components/ui/Menu";
+import { usePostActions } from "./usePostActions";
 import type { Publication } from "@/lib/types";
 import { useStore } from "@/lib/store/StoreProvider";
 import { PlatformMark, PublicationStatusBadge } from "@/components/ui/Badge";
@@ -13,6 +16,8 @@ import { studioHref } from "@/lib/routes";
 export function PostItem({ pub, showDate, dateLabel }: { pub: Publication; showDate?: boolean; dateLabel?: string }) {
   const { contents, updatePublication } = useStore();
   const { toast } = useFeedback();
+  const router = useRouter();
+  const actions = usePostActions();
   const content = contents.find((c) => c.id === pub.contentId);
   const posted = pub.status === "published";
 
@@ -32,7 +37,7 @@ export function PostItem({ pub, showDate, dateLabel }: { pub: Publication; showD
           {pub.scheduledTime ? `${pub.scheduledTime} น.` : "ยังไม่ระบุเวลา"}
         </p>
       </div>
-      <div className="relative z-10 flex items-center gap-2">
+      <div className="relative z-10 flex items-center gap-1">
         {posted ? (
           <PublicationStatusBadge status="published" />
         ) : (
@@ -48,6 +53,13 @@ export function PostItem({ pub, showDate, dateLabel }: { pub: Publication; showD
             <Check size={13} /> โพสต์แล้ว
           </button>
         )}
+        <Menu
+          items={[
+            { label: "เปิดเขียน", icon: PenLine, onSelect: () => router.push(studioHref(pub.contentId, pub.platform)) },
+            ...(!posted && pub.scheduledDate ? [{ label: "นำออกจากปฏิทิน", icon: CalendarX2, onSelect: () => actions.unschedule(pub) }] : []),
+            { label: "ลบเวอร์ชันนี้", icon: Trash2, danger: true, onSelect: () => void actions.remove(pub) },
+          ]}
+        />
       </div>
     </div>
   );
