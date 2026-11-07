@@ -6,6 +6,7 @@ export const TABLES = {
   ideas: "ideas",
   contents: "content_items",
   publications: "content_publications",
+  dailyLogs: "daily_logs",
 } as const satisfies Record<keyof AppData, string>;
 
 export type Collection = keyof typeof TABLES;
@@ -30,6 +31,6 @@ function isTextColumn(k: string) {
   return [
     "details", "source_note", "objective", "audience", "pain_point", "hook", "main_message",
     "story", "takeaway", "cta", "script", "on_image_text", "caption", "hashtags",
-    "learnings", "improvements",
+    "learnings", "improvements", "experience", "lesson",
   ].includes(k);
 }
