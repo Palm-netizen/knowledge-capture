@@ -4,6 +4,8 @@
 
 สร้างด้วย **Next.js (App Router) + TypeScript + Tailwind CSS**, export เป็นไฟล์ static แล้ว deploy ขึ้น GitHub Pages อัตโนมัติผ่าน GitHub Actions
 
+> 🌱 **ใหม่:** แอป **SUPPERPALM — Content Studio** (Next.js) อยู่ในโฟลเดอร์ [`content-studio/`](content-studio/README.md) แยกจากแอปนี้ — เปิดใช้ที่ https://palm-netizen.github.io/knowledge-capture/studio/
+
 ## โครงสร้างไฟล์
 
 ```

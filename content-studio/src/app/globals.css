@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #e9ebf0;
+  --color-panel: #f5f6f8;
+  --color-card: #ffffff;
+  --color-ink: #15171c;
+  --color-muted: #6f7582;
+  --color-faint: #a5abb7;
+  --color-line: #e7e9ee;
+  --color-line-strong: #d5d9e1;
+  --color-subtle: #f0f1f4;
+  --color-primary: #2f5bea;
+  --color-primary-hover: #2449c4;
+  --color-primary-soft: #ebf0ff;
+  --color-violet: #7b61ff;
+  --color-violet-soft: #efebff;
+  --color-orange: #ff8a1f;
+  --color-orange-soft: #fff1e2;
+  --color-success: #17915f;
+  --color-success-soft: #e6f6ee;
+  --color-danger: #d4380d;
+  --color-danger-soft: #fdeee8;
+
+  --font-sans: var(--font-thai), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-num), var(--font-thai), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-card: 0 1px 2px rgb(21 23 28 / 0.04);
+  --shadow-pop: 0 12px 32px rgb(21 23 28 / 0.14), 0 2px 6px rgb(21 23 28 / 0.06);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-panel);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thai text needs a bit more line-height than Latin defaults */
+h1, h2, h3 {
+  line-height: 1.35;
+}
+
+::selection {
+  background: #d6e0ff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@layer base {
+  input, textarea, select, button {
+    font: inherit;
+    color: inherit;
+  }
+}
+
+/* Inputs are at least 16px on mobile to prevent iOS zoom */
+@media (max-width: 767px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-pop { animation: pop-in 0.16s ease-out; }
+.animate-sheet { animation: sheet-up 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.animate-fade { animation: fade-in 0.15s ease-out; }
+
+@media (min-width: 768px) {
+  body {
+    background: var(--color-bg);
+  }
+}
+
+/* Planned (not yet posted) bar segments — diagonal stripes */
+.bar-hatched {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgb(123 97 255 / 0.55) 0 3px,
+    transparent 3px 8px
+  );
+}
