@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarPlus, ChartColumn, Inbox, Lightbulb, PenLine, Plus, Send, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarPlus, ChartColumn, Inbox, Lightbulb, PartyPopper, PenLine, Plus, Send, Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store/StoreProvider";
 import { useQuickActions } from "@/components/capture/QuickActions";
 import { PageContainer, PageHeader } from "@/components/layout/PageHeader";
@@ -20,7 +20,7 @@ import { PageSkeleton } from "@/components/ui/Skeleton";
 import { WeeklySummary } from "@/components/overview/WeeklySummary";
 import { NextPostCard } from "@/components/overview/NextPostCard";
 import type { Idea, Publication } from "@/lib/types";
-import { addDays, fmt, greeting, isoToDateStr, relativeDayLabel, toDateStr, todayStr } from "@/lib/date";
+import { addDays, daysUntilNewYear, fmt, greeting, isoToDateStr, relativeDayLabel, toDateStr, todayStr } from "@/lib/date";
 import { engagementRate, hasMetrics, sortBySchedule } from "@/lib/selectors";
 import { cn, formatNumber } from "@/lib/utils";
 
@@ -54,7 +54,7 @@ export default function OverviewPage() {
     <PageContainer wide>
       <PageHeader
         title={`${greeting()}!`}
-        description={`${fmt.long(new Date())} · วันนี้จะทำคอนเทนต์อะไรดี?`}
+        description={`${fmt.long(new Date())} · วันนี้คุณมีอะไรอยากที่จะให้คนอื่น?`}
         actions={
           <>
             <Button variant="secondary" onClick={() => openNewContent()}>
@@ -65,7 +65,9 @@ export default function OverviewPage() {
             </Button>
           </>
         }
-      />
+      >
+        <NewYearNote />
+      </PageHeader>
 
       {/* --- 4 key numbers: each one is a shortcut --- */}
       <div className="mb-4 grid grid-cols-2 gap-3 md:mb-5 md:gap-4 lg:grid-cols-4">
@@ -306,5 +308,30 @@ function StatTile({
       </p>
       <p className="mt-2 text-sm text-muted">{label}</p>
     </Link>
+  );
+}
+
+/** Countdown to the new year + a reflection question (Overview header). */
+function NewYearNote() {
+  const [days, setDays] = useState<number | null>(null);
+  useEffect(() => setDays(daysUntilNewYear()), []);
+  if (days === null) return null;
+  return (
+    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+      <span className="inline-flex w-fit items-center gap-2 rounded-full bg-ink px-3.5 py-1.5 text-[13px] text-white">
+        <PartyPopper size={14} className="text-orange" />
+        {days === 0 ? (
+          "สวัสดีปีใหม่ ปาล์ม! 🎉"
+        ) : (
+          <span>
+            นับถอยหลัง <span className="font-display font-semibold tabular-nums">{days}</span> วัน จะปีใหม่แล้ว ปาล์ม
+          </span>
+        )}
+      </span>
+      <span className="inline-flex w-fit items-center gap-2 rounded-full bg-violet-soft px-3.5 py-1.5 text-[13px] text-ink">
+        <span className="font-display font-semibold text-violet">Q.</span>
+        จริงๆ แล้วคนแบบไหน ที่คุณอยากเป็น?
+      </span>
+    </div>
   );
 }
