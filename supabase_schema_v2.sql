@@ -15,6 +15,18 @@ begin
 end;
 $$ language plpgsql;
 
+-- to_tsvector(regconfig, text) is only STABLE in Postgres (the config
+-- could theoretically change), so it can't be used directly inside a
+-- GIN index expression, which requires IMMUTABLE. This wrapper pins the
+-- 'simple' config and is safe to mark IMMUTABLE.
+create or replace function simple_tsvector(input text)
+returns tsvector
+language sql
+immutable
+as $$
+  select to_tsvector('simple', coalesce(input, ''));
+$$;
+
 -- ------------------------------------------------------------
 -- 1) learning_sources — หนังสือ / Podcast / Audiobook / วิดีโอ / บทความ / คอร์ส
 -- ------------------------------------------------------------
@@ -38,7 +50,7 @@ create index if not exists learning_sources_type_idx on learning_sources (source
 create index if not exists learning_sources_status_idx on learning_sources (status);
 create index if not exists learning_sources_title_idx on learning_sources (title);
 create index if not exists learning_sources_search_idx on learning_sources using gin (
-  to_tsvector('simple', coalesce(title, '') || ' ' || coalesce(creator, '') || ' ' || array_to_string(tags, ' '))
+  simple_tsvector(coalesce(title, '') || ' ' || coalesce(creator, '') || ' ' || array_to_string(tags, ' '))
 );
 
 drop trigger if exists learning_sources_set_updated_at on learning_sources;
@@ -75,7 +87,7 @@ create index if not exists learning_notes_source_idx on learning_notes (source_i
 create index if not exists learning_notes_captured_at_idx on learning_notes (captured_at);
 create index if not exists learning_notes_tags_idx on learning_notes using gin (tags);
 create index if not exists learning_notes_search_idx on learning_notes using gin (
-  to_tsvector('simple',
+  simple_tsvector(
     coalesce(highlight, '') || ' ' ||
     coalesce(learned, '') || ' ' ||
     coalesce(thought, '') || ' ' ||
