@@ -15,22 +15,6 @@ begin
 end;
 $$ language plpgsql;
 
--- to_tsvector(regconfig, text) is only STABLE in Postgres, so it can't
--- be used directly inside a GIN index expression, which requires
--- IMMUTABLE. A single-statement `language sql` wrapper gets inlined by
--- the planner (exposing the real to_tsvector call and the same error),
--- so this is `language plpgsql` instead — plpgsql functions are never
--- inlined, so Postgres just trusts the IMMUTABLE marking.
-create or replace function simple_tsvector(input text)
-returns tsvector
-language plpgsql
-immutable
-as $$
-begin
-  return to_tsvector('simple', coalesce(input, ''));
-end;
-$$;
-
 -- ------------------------------------------------------------
 -- 1) learning_sources — หนังสือ / Podcast / Audiobook / วิดีโอ / บทความ / คอร์ส
 -- ------------------------------------------------------------
@@ -53,9 +37,8 @@ create table if not exists learning_sources (
 create index if not exists learning_sources_type_idx on learning_sources (source_type);
 create index if not exists learning_sources_status_idx on learning_sources (status);
 create index if not exists learning_sources_title_idx on learning_sources (title);
-create index if not exists learning_sources_search_idx on learning_sources using gin (
-  simple_tsvector(coalesce(title, '') || ' ' || coalesce(creator, '') || ' ' || array_to_string(tags, ' '))
-);
+-- No full-text GIN index here: the app's search (Library page, source
+-- picker) filters client-side, so Postgres full-text search is unused.
 
 drop trigger if exists learning_sources_set_updated_at on learning_sources;
 create trigger learning_sources_set_updated_at
@@ -90,15 +73,7 @@ create table if not exists learning_notes (
 create index if not exists learning_notes_source_idx on learning_notes (source_id);
 create index if not exists learning_notes_captured_at_idx on learning_notes (captured_at);
 create index if not exists learning_notes_tags_idx on learning_notes using gin (tags);
-create index if not exists learning_notes_search_idx on learning_notes using gin (
-  simple_tsvector(
-    coalesce(highlight, '') || ' ' ||
-    coalesce(learned, '') || ' ' ||
-    coalesce(thought, '') || ' ' ||
-    coalesce(will_apply, '') || ' ' ||
-    array_to_string(tags, ' ')
-  )
-);
+-- No full-text GIN index here either — same reason as learning_sources.
 
 drop trigger if exists learning_notes_set_updated_at on learning_notes;
 create trigger learning_notes_set_updated_at
