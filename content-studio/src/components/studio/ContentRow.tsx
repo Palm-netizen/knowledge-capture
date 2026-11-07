@@ -55,7 +55,7 @@ export function ContentRow({ item, showStatusSelect = true }: { item: ContentIte
   const nextDate = pubs.map((p) => p.scheduledDate).filter(Boolean).sort()[0];
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-xl border border-line bg-card p-3.5 transition-colors hover:border-line-strong md:gap-4 md:p-4">
+    <div className="group relative flex items-center gap-3 rounded-2xl border border-transparent bg-card shadow-card p-3.5 transition-colors hover:border-line-strong md:gap-4 md:p-4">
       <div className="min-w-0 flex-1">
         <Link href={studioHref(item.id)} className="block after:absolute after:inset-0 after:content-['']">
           <p className="truncate text-[15px] font-medium text-ink">{item.title}</p>

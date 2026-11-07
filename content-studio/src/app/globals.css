@@ -1,25 +1,32 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #f8faf8;
+  --color-bg: #e9ebf0;
+  --color-panel: #f5f6f8;
   --color-card: #ffffff;
-  --color-ink: #202923;
-  --color-muted: #78847c;
-  --color-faint: #a7b0aa;
-  --color-line: #e8ece8;
-  --color-line-strong: #d7ddd8;
-  --color-subtle: #f1f4f1;
-  --color-primary: #26734d;
-  --color-primary-hover: #1e5e3f;
-  --color-primary-soft: #eaf3ee;
-  --color-danger: #c2410c;
-  --color-danger-soft: #fdf1ea;
+  --color-ink: #15171c;
+  --color-muted: #6f7582;
+  --color-faint: #a5abb7;
+  --color-line: #e7e9ee;
+  --color-line-strong: #d5d9e1;
+  --color-subtle: #f0f1f4;
+  --color-primary: #2f5bea;
+  --color-primary-hover: #2449c4;
+  --color-primary-soft: #ebf0ff;
+  --color-violet: #7b61ff;
+  --color-violet-soft: #efebff;
+  --color-orange: #ff8a1f;
+  --color-orange-soft: #fff1e2;
+  --color-success: #17915f;
+  --color-success-soft: #e6f6ee;
+  --color-danger: #d4380d;
+  --color-danger-soft: #fdeee8;
 
   --font-sans: var(--font-thai), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-num), var(--font-thai), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-card: 12px;
-  --shadow-card: 0 1px 2px rgb(32 41 35 / 0.04);
-  --shadow-pop: 0 8px 28px rgb(32 41 35 / 0.12), 0 1px 3px rgb(32 41 35 / 0.06);
+  --shadow-card: 0 1px 2px rgb(21 23 28 / 0.04);
+  --shadow-pop: 0 12px 32px rgb(21 23 28 / 0.14), 0 2px 6px rgb(21 23 28 / 0.06);
 }
 
 html {
@@ -27,7 +34,7 @@ html {
 }
 
 body {
-  background: var(--color-bg);
+  background: var(--color-panel);
   color: var(--color-ink);
   font-family: var(--font-sans);
   line-height: 1.6;
@@ -40,7 +47,7 @@ h1, h2, h3 {
 }
 
 ::selection {
-  background: #cfe5d8;
+  background: #d6e0ff;
 }
 
 :focus-visible {
@@ -48,9 +55,11 @@ h1, h2, h3 {
   outline-offset: 2px;
 }
 
-input, textarea, select, button {
-  font: inherit;
-  color: inherit;
+@layer base {
+  input, textarea, select, button {
+    font: inherit;
+    color: inherit;
+  }
 }
 
 /* Inputs are at least 16px on mobile to prevent iOS zoom */
@@ -86,3 +95,18 @@ input, textarea, select, button {
 .animate-pop { animation: pop-in 0.16s ease-out; }
 .animate-sheet { animation: sheet-up 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .animate-fade { animation: fade-in 0.15s ease-out; }
+
+@media (min-width: 768px) {
+  body {
+    background: var(--color-bg);
+  }
+}
+
+/* Planned (not yet posted) bar segments — diagonal stripes */
+.bar-hatched {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgb(123 97 255 / 0.55) 0 3px,
+    transparent 3px 8px
+  );
+}

@@ -129,7 +129,7 @@ function Workspace() {
       </div>
 
       {/* mobile / tablet tabs */}
-      <div className="sticky top-14 z-20 -mx-4 mb-2 border-b border-line bg-bg/95 px-4 backdrop-blur md:top-0 xl:hidden">
+      <div className="sticky top-14 z-20 -mx-4 mb-2 border-b border-line bg-panel/95 px-4 backdrop-blur md:top-0 xl:hidden">
         <div className="flex gap-4">
           {(
             [

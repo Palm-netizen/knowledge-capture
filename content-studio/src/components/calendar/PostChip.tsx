@@ -6,8 +6,9 @@ import { platformMeta } from "@/lib/constants";
 import { useStore } from "@/lib/store/StoreProvider";
 import { cn } from "@/lib/utils";
 import { studioHref } from "@/lib/routes";
+import { startPostDrag } from "./dnd";
 
-/** Compact post block for calendar cells. Opens the version in the studio. */
+/** Compact post block for calendar cells. Click opens the version; drag to move it to another day. */
 export function PostChip({ pub, compact }: { pub: Publication; compact?: boolean }) {
   const { contents } = useStore();
   const content = contents.find((c) => c.id === pub.contentId);
@@ -18,10 +19,12 @@ export function PostChip({ pub, compact }: { pub: Publication; compact?: boolean
     <Link
       href={studioHref(pub.contentId, pub.platform)}
       onClick={(e) => e.stopPropagation()}
+      draggable={!posted}
+      onDragStart={(e) => (posted ? e.preventDefault() : startPostDrag(e, pub.id))}
       title={`${meta.label} · ${content?.title ?? ""}${pub.scheduledTime ? ` · ${pub.scheduledTime}` : ""}`}
       className={cn(
-        "group flex items-center gap-1.5 rounded-md border px-1.5 py-1 text-left text-[11.5px] leading-tight transition-colors",
-        posted ? "border-transparent bg-subtle text-muted" : "border-line bg-card text-ink hover:border-line-strong",
+        "group flex items-center gap-1.5 rounded-lg border px-1.5 py-1 text-left text-[11.5px] leading-tight transition-colors",
+        posted ? "border-transparent bg-subtle text-muted" : "cursor-grab border-line bg-card text-ink hover:border-primary/40 active:cursor-grabbing",
       )}
     >
       <span className={cn("h-2 w-2 shrink-0 rounded-full", meta.dot)} />

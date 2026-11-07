@@ -61,12 +61,12 @@ export function Modal({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center md:p-6" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="animate-fade absolute inset-0 bg-[#202923]/30" onClick={onClose} />
+      <div className="animate-fade absolute inset-0 bg-[#15171c]/35" onClick={onClose} />
       <div
         ref={panelRef}
         className={cn(
           "relative flex max-h-[92dvh] w-full flex-col bg-card shadow-pop",
-          "animate-sheet rounded-t-2xl md:animate-pop md:rounded-xl",
+          "animate-sheet rounded-t-2xl md:animate-pop md:rounded-2xl",
           width,
         )}
       >

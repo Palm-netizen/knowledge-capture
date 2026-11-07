@@ -20,6 +20,8 @@ import { sortBySchedule } from "@/lib/selectors";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { studioHref } from "@/lib/routes";
+import { useFeedback } from "@/components/ui/Feedback";
+import { DRAG_TYPE, isPostDrag, startPostDrag } from "@/components/calendar/dnd";
 
 type View = "week" | "month";
 const WEEKDAYS = ["จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส.", "อา."];
@@ -33,6 +35,38 @@ export default function CalendarPage() {
   const [scheduleFor, setScheduleFor] = useState<string | null>(null);
 
   const today = todayStr();
+  const { toast } = useFeedback();
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
+
+  const movePost = (pubId: string, ds: string) => {
+    const pub = store.publications.find((p) => p.id === pubId);
+    if (!pub || pub.status === "published" || pub.scheduledDate === ds) return;
+    const prev = pub.scheduledDate;
+    store.updatePublication(pubId, { scheduledDate: ds });
+    toast(`ย้ายไป${relativeDayLabel(ds) === "วันนี้" ? "วันนี้" : ` ${fmt.short(parseDateStr(ds))}`} แล้ว`, {
+      action: { label: "เลิกทำ", onClick: () => store.updatePublication(pubId, { scheduledDate: prev }) },
+    });
+  };
+
+  /** Props that make a day cell accept dropped posts. */
+  const dropZone = (ds: string) => ({
+    "data-day": ds,
+    onDragOver: (e: React.DragEvent) => {
+      if (!isPostDrag(e)) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (dropTarget !== ds) setDropTarget(ds);
+    },
+    onDragLeave: (e: React.DragEvent) => {
+      if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) setDropTarget((t) => (t === ds ? null : t));
+    },
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      setDropTarget(null);
+      const id = e.dataTransfer.getData(DRAG_TYPE);
+      if (id) movePost(id, ds);
+    },
+  });
 
   const byDay = useMemo(() => {
     const map = new Map<string, Publication[]>();
@@ -132,12 +166,12 @@ export default function CalendarPage() {
           {view === "week" ? (
             <>
               {/* desktop: 7 columns */}
-              <div className="hidden grid-cols-7 overflow-hidden rounded-xl border border-line bg-line md:grid md:gap-px">
+              <div className="hidden grid-cols-7 overflow-hidden rounded-2xl border border-line bg-line md:grid md:gap-px">
                 {days.map((d) => {
                   const ds = toDateStr(d);
                   const posts = byDay.get(ds) ?? [];
                   return (
-                    <div key={ds} className={cn("group flex min-h-64 flex-col bg-card", ds === today && "bg-primary-soft/40")}>
+                    <div key={ds} {...dropZone(ds)} className={cn("group flex min-h-64 flex-col bg-card transition-colors", ds === today && "bg-primary-soft/40", dropTarget === ds && "bg-primary-soft ring-2 ring-primary ring-inset")}>
                       <button
                         onClick={() => setSelected(ds)}
                         title="เลือกวันนี้"
@@ -169,6 +203,7 @@ export default function CalendarPage() {
                   );
                 })}
               </div>
+              <p className="mt-2 hidden text-xs text-faint md:block">ลากโพสต์ไปวางวันอื่นเพื่อเปลี่ยนวัน · ลากจาก “ยังไม่กำหนดวัน” มาวางเพื่อตั้งวัน</p>
               {/* mobile: agenda */}
               <div className="space-y-3 md:hidden">
                 {days.map((d) => {
@@ -201,7 +236,7 @@ export default function CalendarPage() {
             </>
           ) : (
             <>
-              <div className="overflow-hidden rounded-xl border border-line bg-line">
+              <div className="overflow-hidden rounded-2xl border border-line bg-line">
                 <div className="grid grid-cols-7 gap-px">
                   {WEEKDAYS.map((w) => (
                     <div key={w} className="bg-subtle py-2 text-center text-xs text-muted">
@@ -215,6 +250,7 @@ export default function CalendarPage() {
                     return (
                       <div
                         key={ds}
+                        {...dropZone(ds)}
                         role="button"
                         tabIndex={0}
                         onClick={() => setSelected(ds)}
@@ -222,6 +258,7 @@ export default function CalendarPage() {
                         onKeyDown={(e) => e.key === "Enter" && setSelected(ds)}
                         className={cn(
                           "flex min-h-16 cursor-pointer flex-col gap-1 bg-card p-1 text-left transition-colors md:min-h-28 md:p-1.5",
+                          dropTarget === ds && "bg-primary-soft",
                           !inMonth && "bg-bg",
                           selected === ds && "ring-2 ring-primary ring-inset",
                         )}
@@ -252,7 +289,7 @@ export default function CalendarPage() {
                   })}
                 </div>
               </div>
-              <p className="mt-2 hidden text-xs text-faint md:block">คลิกวันเพื่อดูรายละเอียด · ดับเบิลคลิกเพื่อวางโพสต์</p>
+              <p className="mt-2 hidden text-xs text-faint md:block">คลิกวันเพื่อดูรายละเอียด · ดับเบิลคลิกเพื่อวางโพสต์ · ลากโพสต์ไปวางวันอื่นเพื่อเปลี่ยนวัน</p>
 
               <Card className="mt-4 p-3 md:p-4">
                 <SectionTitle
@@ -289,7 +326,7 @@ export default function CalendarPage() {
                 {unscheduled.map((p) => {
                   const c = store.contents.find((x) => x.id === p.contentId);
                   return (
-                    <div key={p.id} className="flex items-center gap-2 rounded-lg px-1 py-1.5 hover:bg-subtle/70">
+                    <div key={p.id} draggable onDragStart={(e) => startPostDrag(e, p.id)} className="flex cursor-grab items-center gap-2 rounded-lg px-1 py-1.5 hover:bg-subtle/70 active:cursor-grabbing" title="ลากไปวางในปฏิทินเพื่อกำหนดวัน">
                       <PlatformMark platform={p.platform} size="xs" />
                       <Link href={studioHref(p.contentId, p.platform)} className="min-w-0 flex-1 truncate text-[13px] hover:text-primary">
                         {c?.title}

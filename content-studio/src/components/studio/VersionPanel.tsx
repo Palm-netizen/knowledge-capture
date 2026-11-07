@@ -40,7 +40,7 @@ export function VersionPanel({
   const add = (platform: Platform) => onActiveChange(store.addPublication(item.id, platform).id);
 
   return (
-    <div className="rounded-xl border border-line bg-card">
+    <div className="rounded-2xl border border-line bg-card">
       <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
           <Layers size={16} className="text-primary" /> เวอร์ชันแพลตฟอร์ม

@@ -27,7 +27,7 @@ export function IdeaCard({ idea, onEdit, compact }: { idea: Idea; onEdit: (i: Id
   const toggleSelect = () => updateIdea(idea.id, { status: idea.status === "new" ? "selected" : "new" });
 
   return (
-    <div className={cn("group flex gap-3 rounded-xl border border-line bg-card transition-colors hover:border-line-strong", compact ? "p-3" : "p-4")}>
+    <div className={cn("group flex gap-3 rounded-2xl border border-transparent bg-card shadow-card transition-colors hover:border-line-strong", compact ? "p-3" : "p-4")}>
       <button
         onClick={toggleSelect}
         disabled={idea.status === "used"}

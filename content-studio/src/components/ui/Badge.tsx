@@ -6,18 +6,18 @@ export type Tone = "neutral" | "green" | "amber" | "blue" | "violet";
 
 const tones: Record<Tone, string> = {
   neutral: "bg-subtle text-muted",
-  green: "bg-primary-soft text-primary",
-  amber: "bg-[#FBF3E4] text-[#94631A]",
-  blue: "bg-[#EAF1FB] text-[#2F5E9E]",
-  violet: "bg-[#F1EDFA] text-[#6046A8]",
+  green: "bg-success-soft text-success",
+  amber: "bg-orange-soft text-[#B65A00]",
+  blue: "bg-primary-soft text-primary",
+  violet: "bg-violet-soft text-violet",
 };
 
 const dots: Record<Tone, string> = {
   neutral: "bg-faint",
-  green: "bg-primary",
-  amber: "bg-[#D39A3A]",
-  blue: "bg-[#4E82C9]",
-  violet: "bg-[#7E63C4]",
+  green: "bg-success",
+  amber: "bg-orange",
+  blue: "bg-primary",
+  violet: "bg-violet",
 };
 
 export function Badge({ tone = "neutral", dot, className, children }: { tone?: Tone; dot?: boolean; className?: string; children: React.ReactNode }) {

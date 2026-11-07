@@ -238,7 +238,7 @@ export default function PerformancePage() {
           <section>
             <SectionTitle title="บทเรียนล่าสุด" />
             {lessons.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-line-strong px-4 py-5 text-center text-[13px] text-muted">
+              <p className="rounded-2xl border border-dashed border-line-strong px-4 py-5 text-center text-[13px] text-muted">
                 ตอนบันทึกผล ลองเขียน “สิ่งที่ได้เรียนรู้” และ “สิ่งที่จะปรับปรุง” สั้น ๆ — จะสรุปไว้ตรงนี้
               </p>
             ) : (
