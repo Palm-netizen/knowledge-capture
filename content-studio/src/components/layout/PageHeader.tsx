@@ -18,8 +18,9 @@ export function PageHeader({
   );
 }
 
-export function PageContainer({ children, wide }: { children: React.ReactNode; wide?: boolean }) {
+export function PageContainer({ children, wide, full }: { children: React.ReactNode; wide?: boolean; full?: boolean }) {
+  const width = full ? "max-w-[1800px]" : wide ? "max-w-7xl" : "max-w-5xl";
   return (
-    <div className={`mx-auto w-full px-4 pt-4 pb-36 md:px-8 md:pt-9 md:pb-12 ${wide ? "max-w-7xl" : "max-w-5xl"}`}>{children}</div>
+    <div className={`mx-auto w-full px-4 pt-4 pb-36 md:px-8 md:pt-9 md:pb-12 ${width}`}>{children}</div>
   );
 }

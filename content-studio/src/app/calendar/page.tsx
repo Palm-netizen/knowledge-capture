@@ -13,6 +13,7 @@ import { PageSkeleton } from "@/components/ui/Skeleton";
 import { PostChip } from "@/components/calendar/PostChip";
 import { PostItem } from "@/components/calendar/PostItem";
 import { ScheduleDialog } from "@/components/calendar/ScheduleDialog";
+import { PostDialog } from "@/components/calendar/PostDialog";
 import { PLATFORMS, platformMeta } from "@/lib/constants";
 import type { Platform, Publication } from "@/lib/types";
 import { addDays, fmt, parseDateStr, relativeDayLabel, startOfWeek, toDateStr, todayStr } from "@/lib/date";
@@ -33,6 +34,7 @@ export default function CalendarPage() {
   const [selected, setSelected] = useState(todayStr());
   const [platform, setPlatform] = useState<Platform | null>(null);
   const [scheduleFor, setScheduleFor] = useState<string | null>(null);
+  const [openPost, setOpenPost] = useState<string | null>(null);
 
   const today = todayStr();
   const { toast } = useFeedback();
@@ -109,13 +111,13 @@ export default function CalendarPage() {
   const periodPosts = days.reduce((n, d) => n + (byDay.get(toDateStr(d))?.length ?? 0), 0);
 
   return (
-    <PageContainer wide>
+    <PageContainer full>
       <PageHeader
         title="Content Calendar"
         description="แต่ละวันจะลงอะไร ลงช่องทางไหน"
         actions={
           <Button variant="primary" onClick={() => setScheduleFor(selected)}>
-            <Plus size={16} /> วางโพสต์
+            <Plus size={16} /> วางแผนคอนเทนต์
           </Button>
         }
       />
@@ -161,7 +163,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <div>
           {view === "week" ? (
             <>
@@ -171,7 +173,7 @@ export default function CalendarPage() {
                   const ds = toDateStr(d);
                   const posts = byDay.get(ds) ?? [];
                   return (
-                    <div key={ds} {...dropZone(ds)} className={cn("group flex min-h-64 flex-col bg-card transition-colors", ds === today && "bg-primary-soft/40", dropTarget === ds && "bg-primary-soft ring-2 ring-primary ring-inset")}>
+                    <div key={ds} {...dropZone(ds)} className={cn("group flex min-h-[26rem] flex-col bg-card transition-colors", ds === today && "bg-primary-soft/40", dropTarget === ds && "bg-primary-soft ring-2 ring-primary ring-inset")}>
                       <button
                         onClick={() => setSelected(ds)}
                         title="เลือกวันนี้"
@@ -187,23 +189,34 @@ export default function CalendarPage() {
                           {d.getDate()}
                         </span>
                       </button>
-                      <div className="flex flex-1 flex-col gap-1 px-1.5 pb-1.5">
+                      <div
+                        className="flex flex-1 cursor-pointer flex-col gap-1 px-2 pb-2"
+                        onClick={() => {
+                          setSelected(ds);
+                          setScheduleFor(ds);
+                        }}
+                        title="คลิกเพื่อวางแผนคอนเทนต์วันนี้"
+                      >
                         {posts.map((p) => (
-                          <PostChip key={p.id} pub={p} />
+                          <PostChip key={p.id} pub={p} onOpen={setOpenPost} />
                         ))}
                         <button
-                          onClick={() => setScheduleFor(ds)}
-                          className="mt-auto flex h-7 items-center justify-center rounded-md text-faint opacity-0 transition-opacity group-hover:opacity-100 hover:bg-subtle hover:text-primary focus:opacity-100"
-                          aria-label={`วางโพสต์วันที่ ${d.getDate()}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelected(ds);
+                            setScheduleFor(ds);
+                          }}
+                          className="mt-auto flex h-8 items-center justify-center gap-1 rounded-lg text-xs text-faint opacity-60 transition-opacity group-hover:bg-subtle group-hover:text-primary group-hover:opacity-100 focus:opacity-100"
+                          aria-label={`วางแผนวันที่ ${d.getDate()}`}
                         >
-                          <Plus size={14} />
+                          <Plus size={14} /> วางแผน
                         </button>
                       </div>
                     </div>
                   );
                 })}
               </div>
-              <p className="mt-2 hidden text-xs text-faint md:block">ลากโพสต์ไปวางวันอื่นเพื่อเปลี่ยนวัน · ลากจาก “ยังไม่กำหนดวัน” มาวางเพื่อตั้งวัน</p>
+              <p className="mt-2 hidden text-xs text-faint md:block">คลิกช่องว่างของวันเพื่อวางแผนคอนเทนต์ · คลิกโพสต์เพื่อแก้ไข/ลบ · ลากโพสต์ไปวันอื่นเพื่อเปลี่ยนวัน</p>
               {/* mobile: agenda */}
               <div className="space-y-3 md:hidden">
                 {days.map((d) => {
@@ -239,7 +252,7 @@ export default function CalendarPage() {
               <div className="overflow-hidden rounded-2xl border border-line bg-line">
                 <div className="grid grid-cols-7 gap-px">
                   {WEEKDAYS.map((w) => (
-                    <div key={w} className="bg-subtle py-2 text-center text-xs text-muted">
+                    <div key={w} className="bg-subtle py-2.5 text-center text-xs font-medium text-muted">
                       {w}
                     </div>
                   ))}
@@ -253,11 +266,20 @@ export default function CalendarPage() {
                         {...dropZone(ds)}
                         role="button"
                         tabIndex={0}
-                        onClick={() => setSelected(ds)}
-                        onDoubleClick={() => setScheduleFor(ds)}
-                        onKeyDown={(e) => e.key === "Enter" && setSelected(ds)}
+                        onClick={() => {
+                          setSelected(ds);
+                          // desktop: plan right away; mobile: select and show the day below
+                          if (window.matchMedia("(min-width: 768px)").matches) setScheduleFor(ds);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            setSelected(ds);
+                            setScheduleFor(ds);
+                          }
+                        }}
+                        title="คลิกเพื่อวางแผนคอนเทนต์วันนี้"
                         className={cn(
-                          "flex min-h-16 cursor-pointer flex-col gap-1 bg-card p-1 text-left transition-colors md:min-h-28 md:p-1.5",
+                          "group flex min-h-16 cursor-pointer flex-col gap-1 bg-card p-1 text-left transition-colors hover:bg-subtle/60 md:min-h-32 md:p-1.5 xl:min-h-36",
                           dropTarget === ds && "bg-primary-soft",
                           !inMonth && "bg-bg",
                           selected === ds && "ring-2 ring-primary ring-inset",
@@ -279,17 +301,20 @@ export default function CalendarPage() {
                         </div>
                         {/* desktop: chips */}
                         <div className="hidden flex-col gap-1 md:flex">
-                          {posts.slice(0, 3).map((p) => (
-                            <PostChip key={p.id} pub={p} compact />
+                          {posts.slice(0, 4).map((p) => (
+                            <PostChip key={p.id} pub={p} compact onOpen={setOpenPost} />
                           ))}
-                          {posts.length > 3 && <span className="px-1 text-[11px] text-muted">+{posts.length - 3} โพสต์</span>}
+                          {posts.length > 4 && <span className="px-1 text-[11px] text-muted">+{posts.length - 4} โพสต์</span>}
+                          <span className="mt-0.5 hidden items-center gap-1 px-1 text-[11px] text-primary group-hover:flex">
+                            <Plus size={12} /> วางแผน
+                          </span>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-              <p className="mt-2 hidden text-xs text-faint md:block">คลิกวันเพื่อดูรายละเอียด · ดับเบิลคลิกเพื่อวางโพสต์ · ลากโพสต์ไปวางวันอื่นเพื่อเปลี่ยนวัน</p>
+              <p className="mt-2 hidden text-xs text-faint md:block">คลิกวันเพื่อวางแผนคอนเทนต์ · คลิกโพสต์เพื่อแก้ไข/ลบ · ลากโพสต์ไปวันอื่นเพื่อเปลี่ยนวัน</p>
 
               <Card className="mt-4 p-3 md:p-4">
                 <SectionTitle
@@ -298,7 +323,7 @@ export default function CalendarPage() {
                   className="px-2"
                   action={
                     <Button size="sm" onClick={() => setScheduleFor(selected)}>
-                      <Plus size={14} /> วางโพสต์
+                      <Plus size={14} /> วางแผน
                     </Button>
                   }
                 />
@@ -355,6 +380,7 @@ export default function CalendarPage() {
       </div>
 
       <ScheduleDialog date={scheduleFor} onClose={() => setScheduleFor(null)} />
+      <PostDialog pubId={openPost} onClose={() => setOpenPost(null)} />
     </PageContainer>
   );
 }
