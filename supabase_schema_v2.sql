@@ -165,79 +165,90 @@ create policy "allow all" on learning_goals for all using (true) with check (tru
 -- Migration — ย้ายข้อมูลเดิมจากตาราง notes เข้าโครงสร้างใหม่
 -- ไม่แก้ไข/ลบตาราง notes หรือ friends เดิม
 -- รันซ้ำได้อย่างปลอดภัย (ข้าม record ที่ย้ายไปแล้ว โดยเช็คจาก tag "orig_note:<id>")
+-- ทั้งบล็อกอยู่ใน IF ที่เช็คว่าตาราง notes มีอยู่จริงก่อน — ถ้าไม่มี (เช่น
+-- รันผิดโปรเจกต์) จะข้ามส่วนนี้ไปเฉย ๆ แทนที่จะ error จนตารางใหม่ด้านบน
+-- ถูก rollback ไปด้วย (ทั้งสคริปต์รันเป็น transaction เดียว)
 -- ============================================================
 
--- 5a) สร้าง learning_sources จากหนังสือ/สิ่งที่ฟัง (media_type: reading, listening)
-insert into learning_sources (source_type, title, status, tags, created_at, updated_at)
-select
-  grp.source_type,
-  grp.title,
-  'in_progress',
-  '{}'::text[],
-  grp.created_at,
-  grp.updated_at
-from (
+do $$
+begin
+  if to_regclass('public.notes') is null then
+    raise notice 'Skipping migration: table "notes" does not exist in this project.';
+    return;
+  end if;
+
+  -- 5a) สร้าง learning_sources จากหนังสือ/สิ่งที่ฟัง (media_type: reading, listening)
+  insert into learning_sources (source_type, title, status, tags, created_at, updated_at)
   select
-    case n.media_type when 'listening' then 'podcast' else 'book' end as source_type,
-    n.book_title as title,
-    min(n.created_at) as created_at,
-    max(n.updated_at) as updated_at
-  from notes n
-  where n.media_type in ('reading', 'listening')
-    and n.book_title is not null
-    and n.book_title <> ''
-  group by 1, 2
-) grp
-where not exists (
-  select 1 from learning_sources ls
-  where ls.title = grp.title and ls.source_type = grp.source_type
-);
-
--- 5b) ย้าย notes → learning_notes ผูกกับ learning_sources ที่สร้างไว้ (reading/listening)
---     ส่วน mind/self ไม่มีแหล่งข้อมูลภายนอก จึงย้ายเป็น learning_notes แบบไม่ผูก source
---     และใส่ tag เดิม (mind/self) ไว้เพื่อไม่ให้ข้อมูลเดิมหายไป
-insert into learning_notes (
-  source_id, note_level, captured_at, highlight, learned, thought, will_apply,
-  importance, tags, image_urls, created_at, updated_at
-)
-select
-  ls.id as source_id,
-  case when coalesce(n.insight, '') <> '' or coalesce(n.action, '') <> '' then 'deep' else 'quick' end as note_level,
-  n.created_at as captured_at,
-  array_to_string(n.highlights, ' / ') as highlight,
-  coalesce(n.insight, '') as learned,
-  '' as thought,
-  coalesce(n.action, '') as will_apply,
-  n.importance,
-  n.tags || array['migrated:' || n.media_type, 'orig_note:' || n.id::text] as tags,
-  n.image_urls,
-  n.created_at,
-  n.updated_at
-from notes n
-left join learning_sources ls
-  on ls.title = n.book_title
- and ls.source_type = case n.media_type when 'listening' then 'podcast' else 'book' end
- and n.media_type in ('reading', 'listening')
-where not exists (
-  select 1 from learning_notes ln
-  where ('orig_note:' || n.id::text) = any (ln.tags)
-);
-
--- 5c) ย้าย action ของแต่ละ note (ที่มีข้อความ) ไปเป็นรายการใน action_tracker
-insert into action_tracker (note_id, source_id, action_text, status, created_at, updated_at)
-select
-  ln.id as note_id,
-  ln.source_id,
-  n.action,
-  case when n.action_done then 'done' else 'planned' end as status,
-  n.created_at,
-  n.updated_at
-from notes n
-join learning_notes ln on ('orig_note:' || n.id::text) = any (ln.tags)
-where coalesce(n.action, '') <> ''
-  and not exists (
-    select 1 from action_tracker at2 where at2.note_id = ln.id
+    grp.source_type,
+    grp.title,
+    'in_progress',
+    '{}'::text[],
+    grp.created_at,
+    grp.updated_at
+  from (
+    select
+      case n.media_type when 'listening' then 'podcast' else 'book' end as source_type,
+      n.book_title as title,
+      min(n.created_at) as created_at,
+      max(n.updated_at) as updated_at
+    from notes n
+    where n.media_type in ('reading', 'listening')
+      and n.book_title is not null
+      and n.book_title <> ''
+    group by 1, 2
+  ) grp
+  where not exists (
+    select 1 from learning_sources ls
+    where ls.title = grp.title and ls.source_type = grp.source_type
   );
+
+  -- 5b) ย้าย notes → learning_notes ผูกกับ learning_sources ที่สร้างไว้ (reading/listening)
+  --     ส่วน mind/self ไม่มีแหล่งข้อมูลภายนอก จึงย้ายเป็น learning_notes แบบไม่ผูก source
+  --     และใส่ tag เดิม (mind/self) ไว้เพื่อไม่ให้ข้อมูลเดิมหายไป
+  insert into learning_notes (
+    source_id, note_level, captured_at, highlight, learned, thought, will_apply,
+    importance, tags, image_urls, created_at, updated_at
+  )
+  select
+    ls.id as source_id,
+    case when coalesce(n.insight, '') <> '' or coalesce(n.action, '') <> '' then 'deep' else 'quick' end as note_level,
+    n.created_at as captured_at,
+    array_to_string(n.highlights, ' / ') as highlight,
+    coalesce(n.insight, '') as learned,
+    '' as thought,
+    coalesce(n.action, '') as will_apply,
+    n.importance,
+    n.tags || array['migrated:' || n.media_type, 'orig_note:' || n.id::text] as tags,
+    n.image_urls,
+    n.created_at,
+    n.updated_at
+  from notes n
+  left join learning_sources ls
+    on ls.title = n.book_title
+   and ls.source_type = case n.media_type when 'listening' then 'podcast' else 'book' end
+   and n.media_type in ('reading', 'listening')
+  where not exists (
+    select 1 from learning_notes ln
+    where ('orig_note:' || n.id::text) = any (ln.tags)
+  );
+
+  -- 5c) ย้าย action ของแต่ละ note (ที่มีข้อความ) ไปเป็นรายการใน action_tracker
+  insert into action_tracker (note_id, source_id, action_text, status, created_at, updated_at)
+  select
+    ln.id as note_id,
+    ln.source_id,
+    n.action,
+    case when n.action_done then 'done' else 'planned' end as status,
+    n.created_at,
+    n.updated_at
+  from notes n
+  join learning_notes ln on ('orig_note:' || n.id::text) = any (ln.tags)
+  where coalesce(n.action, '') <> ''
+    and not exists (
+      select 1 from action_tracker at2 where at2.note_id = ln.id
+    );
+end $$;
 
 -- ============================================================
 -- หมายเหตุ: ตาราง friends เดิม (เมนูเพื่อน) ไม่มีเมนูใหม่ที่รองรับตามสเปค 5 เมนู
