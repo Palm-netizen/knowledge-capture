@@ -12,6 +12,7 @@ import { Menu } from "@/components/ui/Menu";
 import { useFeedback } from "@/components/ui/Feedback";
 import { relativeDayLabel, isoToDateStr } from "@/lib/date";
 import { cn } from "@/lib/utils";
+import { studioHref } from "@/lib/routes";
 
 export function useContentActions() {
   const store = useStore();
@@ -39,7 +40,7 @@ export function useContentActions() {
         store.addPublication(copy.id, p.platform, { hook: p.hook, caption: p.caption, hashtags: p.hashtags, format: p.format }),
       );
       toast("ทำสำเนาแล้ว");
-      router.push(`/studio/${copy.id}`);
+      router.push(studioHref(copy.id));
     },
   };
 }
@@ -56,7 +57,7 @@ export function ContentRow({ item, showStatusSelect = true }: { item: ContentIte
   return (
     <div className="group relative flex items-center gap-3 rounded-xl border border-line bg-card p-3.5 transition-colors hover:border-line-strong md:gap-4 md:p-4">
       <div className="min-w-0 flex-1">
-        <Link href={`/studio/${item.id}`} className="block after:absolute after:inset-0 after:content-['']">
+        <Link href={studioHref(item.id)} className="block after:absolute after:inset-0 after:content-['']">
           <p className="truncate text-[15px] font-medium text-ink">{item.title}</p>
         </Link>
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted">
@@ -100,7 +101,7 @@ export function ContentRow({ item, showStatusSelect = true }: { item: ContentIte
         )}
         <Menu
           items={[
-            { label: "เปิดห้องผลิต", icon: ExternalLink, onSelect: () => router.push(`/studio/${item.id}`) },
+            { label: "เปิดห้องผลิต", icon: ExternalLink, onSelect: () => router.push(studioHref(item.id)) },
             ...CONTENT_STATUSES.filter((s) => s.value !== item.status).map((s) => ({
               label: `ย้ายไป “${s.label}”`,
               onSelect: () => store.updateContent(item.id, { status: s.value }),

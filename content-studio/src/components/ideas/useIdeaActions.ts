@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import type { Idea } from "@/lib/types";
 import { useStore } from "@/lib/store/StoreProvider";
 import { useFeedback } from "@/components/ui/Feedback";
+import { studioHref } from "@/lib/routes";
 
 export function useIdeaActions() {
   const store = useStore();
@@ -25,13 +26,13 @@ export function useIdeaActions() {
     toContent(idea: Idea) {
       const existing = store.contents.find((c) => c.ideaId === idea.id);
       if (existing) {
-        router.push(`/studio/${existing.id}`);
+        router.push(studioHref(existing.id));
         return;
       }
       const item = store.createContentFromIdea(idea.id);
       if (item) {
         toast("สร้างคอนเทนต์จากไอเดียแล้ว");
-        router.push(`/studio/${item.id}`);
+        router.push(studioHref(item.id));
       }
     },
   };

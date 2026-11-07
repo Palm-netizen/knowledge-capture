@@ -2,7 +2,7 @@
 
 แอปเว็บสำหรับบันทึกและสกัดความรู้จากการอ่านหนังสือ **แยกอิสระจาก VegFarm โดยสิ้นเชิง** — คนละ repository, คนละโปรเจกต์ Supabase, คนละหน้าเว็บ, คนละธีมสี
 
-> 🌱 **ใหม่:** แอป **SUPPERPALM — Content Studio** (Next.js) อยู่ในโฟลเดอร์ [`content-studio/`](content-studio/README.md) แยกจากแอปนี้
+> 🌱 **ใหม่:** แอป **SUPPERPALM — Content Studio** (Next.js) อยู่ในโฟลเดอร์ [`content-studio/`](content-studio/README.md) แยกจากแอปนี้ — เปิดใช้ที่ https://palm-netizen.github.io/knowledge-capture/studio/
 
 ## โครงสร้างไฟล์
 

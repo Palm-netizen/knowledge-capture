@@ -11,6 +11,7 @@ import { ChipGroup, Field, Select, TextInput } from "@/components/ui/Form";
 import { PlatformMark } from "@/components/ui/Badge";
 import { useFeedback } from "@/components/ui/Feedback";
 import { cn } from "@/lib/utils";
+import { studioHref } from "@/lib/routes";
 
 export function NewContentDialog({
   open,
@@ -81,7 +82,7 @@ export function NewContentDialog({
     platforms.forEach((p) => store.addPublication(item.id, p, date ? { scheduledDate: date } : {}));
     onClose();
     toast("สร้างคอนเทนต์แล้ว");
-    router.push(`/studio/${item.id}`);
+    router.push(studioHref(item.id));
   };
 
   return (

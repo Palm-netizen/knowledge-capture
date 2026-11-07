@@ -17,6 +17,7 @@ import type { Platform, Publication } from "@/lib/types";
 import { fmt, isoToDateStr, parseDateStr, relativeDayLabel, todayStr } from "@/lib/date";
 import { engagementRate, hasMetrics } from "@/lib/selectors";
 import { cn, formatNumber } from "@/lib/utils";
+import { studioHref } from "@/lib/routes";
 
 type Filter = "pending" | "recorded" | "all";
 
@@ -69,7 +70,7 @@ export default function PerformancePage() {
             {overdue.map((p) => (
               <div key={p.id} className="flex items-center gap-3 py-1">
                 <PlatformMark platform={p.platform} size="xs" />
-                <Link href={`/studio/${p.contentId}?v=${p.platform}`} className="min-w-0 flex-1 truncate text-[13px] hover:text-primary">
+                <Link href={studioHref(p.contentId, p.platform)} className="min-w-0 flex-1 truncate text-[13px] hover:text-primary">
                   {title(p)} <span className="text-muted">· {relativeDayLabel(p.scheduledDate!)}</span>
                 </Link>
                 <Button
@@ -156,7 +157,7 @@ export default function PerformancePage() {
                           <div className="flex items-center gap-2.5">
                             <PlatformMark platform={p.platform} size="xs" />
                             <div className="min-w-0">
-                              <Link href={`/studio/${p.contentId}?v=${p.platform}`} className="block truncate font-medium hover:text-primary">
+                              <Link href={studioHref(p.contentId, p.platform)} className="block truncate font-medium hover:text-primary">
                                 {title(p)}
                               </Link>
                               <span className="text-xs text-muted">{postedDate(p) ? fmt.short(parseDateStr(postedDate(p))) : ""}</span>
@@ -187,7 +188,7 @@ export default function PerformancePage() {
                       <div className="flex items-center gap-2.5">
                         <PlatformMark platform={p.platform} />
                         <div className="min-w-0 flex-1">
-                          <Link href={`/studio/${p.contentId}?v=${p.platform}`} className="block truncate text-sm font-medium">
+                          <Link href={studioHref(p.contentId, p.platform)} className="block truncate text-sm font-medium">
                             {title(p)}
                           </Link>
                           <span className="text-xs text-muted">{postedDate(p) ? relativeDayLabel(postedDate(p)) : ""}</span>

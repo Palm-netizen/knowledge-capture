@@ -19,6 +19,7 @@ import { addDays, fmt, parseDateStr, relativeDayLabel, startOfWeek, toDateStr, t
 import { sortBySchedule } from "@/lib/selectors";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { studioHref } from "@/lib/routes";
 
 type View = "week" | "month";
 const WEEKDAYS = ["จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส.", "อา."];
@@ -290,7 +291,7 @@ export default function CalendarPage() {
                   return (
                     <div key={p.id} className="flex items-center gap-2 rounded-lg px-1 py-1.5 hover:bg-subtle/70">
                       <PlatformMark platform={p.platform} size="xs" />
-                      <Link href={`/studio/${p.contentId}?v=${p.platform}`} className="min-w-0 flex-1 truncate text-[13px] hover:text-primary">
+                      <Link href={studioHref(p.contentId, p.platform)} className="min-w-0 flex-1 truncate text-[13px] hover:text-primary">
                         {c?.title}
                       </Link>
                       <button

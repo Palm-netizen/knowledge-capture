@@ -7,6 +7,7 @@ import { useStore } from "@/lib/store/StoreProvider";
 import { PlatformMark, PublicationStatusBadge } from "@/components/ui/Badge";
 import { useFeedback } from "@/components/ui/Feedback";
 import { cn } from "@/lib/utils";
+import { studioHref } from "@/lib/routes";
 
 /** A scheduled post (one platform version) with a one-tap "โพสต์แล้ว". */
 export function PostItem({ pub, showDate, dateLabel }: { pub: Publication; showDate?: boolean; dateLabel?: string }) {
@@ -20,7 +21,7 @@ export function PostItem({ pub, showDate, dateLabel }: { pub: Publication; showD
       <PlatformMark platform={pub.platform} />
       <div className="min-w-0 flex-1">
         <Link
-          href={`/studio/${pub.contentId}?v=${pub.platform}`}
+          href={studioHref(pub.contentId, pub.platform)}
           className={cn("block truncate text-sm font-medium after:absolute after:inset-0 after:content-['']", posted ? "text-muted" : "text-ink")}
         >
           {content?.title ?? "(ไม่พบคอนเทนต์)"}

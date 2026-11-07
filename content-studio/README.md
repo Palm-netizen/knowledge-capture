@@ -28,8 +28,14 @@ npm run dev        # http://localhost:3000
 
 > RLS ตั้งเป็น allow-all สำหรับใช้งานคนเดียว ใครมีลิงก์เว็บก็อ่าน/เขียนได้ ถ้าจะเปิดสาธารณะหรือหลายคน ให้เพิ่ม Supabase Auth + `user_id` ก่อน
 
-## Deploy
-Vercel → Import repo → ตั้ง **Root Directory = `content-studio`** (ค่า Supabase อ่านจาก `.env` อัตโนมัติ)
+## Deploy (GitHub Pages)
+
+ทุกครั้งที่ merge เข้า `main` workflow `.github/workflows/deploy-pages.yml` จะ build แอปนี้แบบ static export แล้วเผยแพร่ที่
+**https://palm-netizen.github.io/knowledge-capture/studio/** (แอป Knowledge Capture เดิมยังอยู่ที่ `/knowledge-capture/`)
+
+- ค่า Supabase อ่านจาก `.env` ตอน build อัตโนมัติ
+- หน้าห้องผลิตใช้ลิงก์แบบ `/studio/edit/?id=…` เพื่อให้เป็นไฟล์ static ได้
+- build เองในเครื่อง: `NEXT_PUBLIC_BASE_PATH=/knowledge-capture/studio npm run build` → ไฟล์อยู่ใน `out/`
 
 ## โครงสร้าง
 
@@ -39,7 +45,7 @@ src/
 │   ├── page.tsx               # Overview — สิ่งที่ต้องทำวันนี้
 │   ├── ideas/                 # Idea Inbox
 │   ├── studio/                # Content Studio (รายการ)
-│   │   └── [id]/              # ห้องผลิต: ต้นฉบับ + เวอร์ชันแพลตฟอร์ม
+│   │   └── edit/              # ห้องผลิต (?id=…): ต้นฉบับ + เวอร์ชันแพลตฟอร์ม
 │   ├── calendar/              # ปฏิทิน สัปดาห์ / เดือน
 │   └── performance/           # บันทึกผล + บทเรียน
 ├── components/

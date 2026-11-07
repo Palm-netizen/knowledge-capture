@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Cloud, Copy, FileQuestion, HardDrive, Loader2, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store/StoreProvider";
 import { CONTENT_STATUSES } from "@/lib/constants";
@@ -28,8 +28,8 @@ export default function ContentWorkspacePage() {
 }
 
 function Workspace() {
-  const { id } = useParams<{ id: string }>();
   const params = useSearchParams();
+  const id = params.get("id") ?? "";
   const router = useRouter();
   const store = useStore();
   const actions = useContentActions();

@@ -1,5 +1,9 @@
 name: Deploy to GitHub Pages
 
+# Publishes:
+#   /            → Knowledge Capture (static files at the repo root)
+#   /studio/     → SUPPERPALM Content Studio (Next.js static export from content-studio/)
+
 on:
   push:
     branches: [main]
@@ -22,9 +26,36 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/configure-pages@v5
+        id: pages
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: content-studio/package-lock.json
+
+      - name: Build Content Studio
+        working-directory: content-studio
+        env:
+          # e.g. "/knowledge-capture" + "/studio"
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}/studio
+        run: |
+          npm ci
+          npm run build
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp index.html apple-touch-icon.png _site/
+          cp -r css js _site/
+          cp -r content-studio/out _site/studio
+          touch _site/.nojekyll
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
+
       - id: deployment
         uses: actions/deploy-pages@v4

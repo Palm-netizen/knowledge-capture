@@ -5,6 +5,7 @@ import type { Publication } from "@/lib/types";
 import { platformMeta } from "@/lib/constants";
 import { useStore } from "@/lib/store/StoreProvider";
 import { cn } from "@/lib/utils";
+import { studioHref } from "@/lib/routes";
 
 /** Compact post block for calendar cells. Opens the version in the studio. */
 export function PostChip({ pub, compact }: { pub: Publication; compact?: boolean }) {
@@ -15,7 +16,7 @@ export function PostChip({ pub, compact }: { pub: Publication; compact?: boolean
 
   return (
     <Link
-      href={`/studio/${pub.contentId}?v=${pub.platform}`}
+      href={studioHref(pub.contentId, pub.platform)}
       onClick={(e) => e.stopPropagation()}
       title={`${meta.label} · ${content?.title ?? ""}${pub.scheduledTime ? ` · ${pub.scheduledTime}` : ""}`}
       className={cn(
