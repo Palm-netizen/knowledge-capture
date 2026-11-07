@@ -41,6 +41,15 @@ export const CATEGORIES: { value: Category; label: string }[] = [
   { value: "product", label: "สินค้า" },
 ];
 
+/** Colours per category: tag = soft pill, bar = solid swatch (content-mix bar, legend). */
+export const CATEGORY_STYLE: Record<Category, { tag: string; bar: string }> = {
+  health: { tag: "bg-success-soft text-success", bar: "bg-success" },
+  growth: { tag: "bg-violet-soft text-violet", bar: "bg-violet" },
+  business: { tag: "bg-primary-soft text-primary", bar: "bg-primary" },
+  experience: { tag: "bg-orange-soft text-[#B65A00]", bar: "bg-orange" },
+  product: { tag: "bg-[#FCEBF3] text-[#B23A78]", bar: "bg-[#D2559A]" },
+};
+
 export const CONTENT_STATUSES: { value: ContentStatus; label: string; tone: Tone }[] = [
   { value: "draft", label: "ร่างไอเดีย", tone: "neutral" },
   { value: "producing", label: "กำลังผลิต", tone: "amber" },

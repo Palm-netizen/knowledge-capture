@@ -3,11 +3,11 @@
 import { useRouter } from "next/navigation";
 import { CalendarX2, Check, PenLine, Trash2, Undo2 } from "lucide-react";
 import type { Publication } from "@/lib/types";
-import { platformMeta } from "@/lib/constants";
+import { CATEGORIES, platformMeta } from "@/lib/constants";
 import { useStore } from "@/lib/store/StoreProvider";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { Field, TextInput } from "@/components/ui/Form";
+import { ChipGroup, Field, TextInput } from "@/components/ui/Form";
 import { ContentStatusBadge, PlatformMark, PublicationStatusBadge } from "@/components/ui/Badge";
 import { useFeedback } from "@/components/ui/Feedback";
 import { studioHref } from "@/lib/routes";
@@ -36,6 +36,19 @@ export function PostDialog({ pubId, onClose }: { pubId: string | null; onClose: 
           <PublicationStatusBadge status={pub.status} />
           {content && <ContentStatusBadge status={content.status} />}
         </div>
+
+        {content && (
+          <div>
+            <p className="mb-2 text-[13px] font-medium">หมวดหมู่</p>
+            <ChipGroup
+              value={content.category}
+              onChange={(v) => store.updateContent(content.id, { category: v })}
+              options={CATEGORIES}
+              allowClear
+              size="sm"
+            />
+          </div>
+        )}
 
         <div className="grid grid-cols-[minmax(0,1fr)_8rem] gap-2">
           <Field label="วันที่">

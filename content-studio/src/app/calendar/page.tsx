@@ -14,6 +14,10 @@ import { PostChip } from "@/components/calendar/PostChip";
 import { PostItem } from "@/components/calendar/PostItem";
 import { ScheduleDialog } from "@/components/calendar/ScheduleDialog";
 import { PostDialog } from "@/components/calendar/PostDialog";
+import { CategoryTags } from "@/components/calendar/CategoryTags";
+import { ContentMix, type CategoryFilter } from "@/components/calendar/ContentMix";
+import { CATEGORIES } from "@/lib/constants";
+import type { Category } from "@/lib/types";
 import { PLATFORMS, platformMeta } from "@/lib/constants";
 import type { Platform, Publication } from "@/lib/types";
 import { addDays, fmt, parseDateStr, relativeDayLabel, startOfWeek, toDateStr, todayStr } from "@/lib/date";
@@ -35,6 +39,7 @@ export default function CalendarPage() {
   const [platform, setPlatform] = useState<Platform | null>(null);
   const [scheduleFor, setScheduleFor] = useState<string | null>(null);
   const [openPost, setOpenPost] = useState<string | null>(null);
+  const [catFilter, setCatFilter] = useState<CategoryFilter>(null);
 
   const today = todayStr();
   const { toast } = useFeedback();
@@ -70,7 +75,20 @@ export default function CalendarPage() {
     },
   });
 
-  const byDay = useMemo(() => {
+  const categoryOf = useMemo(() => {
+    const m = new Map<string, Category | null>();
+    store.contents.forEach((c) => m.set(c.id, c.category));
+    return m;
+  }, [store.contents]);
+
+  const matchesCat = (p: Publication) => {
+    if (!catFilter) return true;
+    const c = categoryOf.get(p.contentId) ?? null;
+    return catFilter === "none" ? c === null : c === catFilter;
+  };
+
+  // posts per day (platform filter only) — used for category tags & content mix
+  const allByDay = useMemo(() => {
     const map = new Map<string, Publication[]>();
     store.publications
       .filter((p) => p.scheduledDate && (!platform || p.platform === platform))
@@ -78,6 +96,30 @@ export default function CalendarPage() {
       .forEach((p) => map.set(p.scheduledDate!, [...(map.get(p.scheduledDate!) ?? []), p]));
     return map;
   }, [store.publications, platform]);
+
+  // posts shown in cells (platform + category filter)
+  const byDay = useMemo(() => {
+    const map = new Map<string, Publication[]>();
+    allByDay.forEach((list, d) => {
+      const f = list.filter(matchesCat);
+      if (f.length) map.set(d, f);
+    });
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allByDay, catFilter, categoryOf]);
+
+  /** Categories planned on a day, most frequent first (one count per content). */
+  const catsOf = (ds: string): Category[] => {
+    const counts = new Map<Category, number>();
+    const seen = new Set<string>();
+    (allByDay.get(ds) ?? []).forEach((p) => {
+      if (seen.has(p.contentId)) return;
+      seen.add(p.contentId);
+      const c = categoryOf.get(p.contentId);
+      if (c) counts.set(c, (counts.get(c) ?? 0) + 1);
+    });
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([c]) => c);
+  };
 
   const unscheduled = store.publications.filter((p) => !p.scheduledDate && p.status !== "published" && (!platform || p.platform === platform));
 
@@ -106,6 +148,24 @@ export default function CalendarPage() {
     view === "month"
       ? fmt.month(cursor)
       : `${fmt.short(days[0])} – ${fmt.short(days[6])} ${days[6].getFullYear() + 543}`;
+
+  // content mix for the visible period (each content counted once)
+  const mix = (() => {
+    const counts = Object.fromEntries(CATEGORIES.map((c) => [c.value, 0])) as Record<Category, number>;
+    let none = 0;
+    const seen = new Set<string>();
+    const inPeriod = view === "week" ? days : days.filter((d) => d.getMonth() === cursor.getMonth());
+    inPeriod.forEach((d) =>
+      (allByDay.get(toDateStr(d)) ?? []).forEach((p) => {
+        if (seen.has(p.contentId)) return;
+        seen.add(p.contentId);
+        const c = categoryOf.get(p.contentId);
+        if (c) counts[c]++;
+        else none++;
+      }),
+    );
+    return { counts, none };
+  })();
 
   const selectedPosts = byDay.get(selected) ?? [];
   const periodPosts = days.reduce((n, d) => n + (byDay.get(toDateStr(d))?.length ?? 0), 0);
@@ -163,6 +223,14 @@ export default function CalendarPage() {
         </div>
       </div>
 
+      <ContentMix
+        counts={mix.counts}
+        none={mix.none}
+        periodLabel={view === "week" ? "สัปดาห์นี้ที่แสดง" : fmt.month(cursor)}
+        filter={catFilter}
+        onFilter={setCatFilter}
+      />
+
       <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <div>
           {view === "week" ? (
@@ -177,12 +245,13 @@ export default function CalendarPage() {
                       <button
                         onClick={() => setSelected(ds)}
                         title="เลือกวันนี้"
-                        className={cn("flex items-center justify-between px-2.5 pt-2.5 pb-2 text-left", selected === ds && "bg-subtle")}
+                        className={cn("flex items-center gap-1.5 px-2.5 pt-2.5 pb-2 text-left", selected === ds && "bg-subtle")}
                       >
-                        <span className="text-xs text-muted">{fmt.weekday(d)}</span>
+                        <span className="shrink-0 text-xs text-muted">{fmt.weekday(d)}</span>
+                        <CategoryTags cats={catsOf(ds)} max={1} className="flex-1" />
                         <span
                           className={cn(
-                            "flex h-6 min-w-6 items-center justify-center rounded-full text-[13px] font-semibold",
+                            "ml-auto flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold",
                             ds === today ? "bg-primary text-white" : "text-ink",
                           )}
                         >
@@ -229,6 +298,7 @@ export default function CalendarPage() {
                           {fmt.weekday(d)} {d.getDate()}
                           {ds === today && <span className="ml-2 text-xs font-normal text-primary">วันนี้</span>}
                         </p>
+                        <CategoryTags cats={catsOf(ds)} max={3} className="mr-auto ml-2" />
                         <button onClick={() => setScheduleFor(ds)} className="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-subtle" aria-label="วางโพสต์">
                           <Plus size={16} />
                         </button>
@@ -285,14 +355,17 @@ export default function CalendarPage() {
                           selected === ds && "ring-2 ring-primary ring-inset",
                         )}
                       >
-                        <span
-                          className={cn(
-                            "flex h-6 w-6 items-center justify-center self-end rounded-full text-xs md:self-start",
-                            ds === today ? "bg-primary font-semibold text-white" : inMonth ? "text-ink" : "text-faint",
-                          )}
-                        >
-                          {d.getDate()}
-                        </span>
+                        <div className="flex items-center gap-1">
+                          <span
+                            className={cn(
+                              "ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs md:ml-0",
+                              ds === today ? "bg-primary font-semibold text-white" : inMonth ? "text-ink" : "text-faint",
+                            )}
+                          >
+                            {d.getDate()}
+                          </span>
+                          <CategoryTags cats={catsOf(ds)} max={2} className="hidden md:flex" />
+                        </div>
                         {/* mobile: dots */}
                         <div className="flex flex-wrap gap-0.5 md:hidden">
                           {posts.slice(0, 6).map((p) => (
