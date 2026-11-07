@@ -101,3 +101,18 @@ drop policy if exists "allow all content_publications" on content_publications;
 create policy "allow all content_publications" on content_publications for all to anon, authenticated using (true) with check (true);
 
 grant select, insert, update, delete on ideas, content_items, content_publications to anon, authenticated;
+
+-- ---------- daily_logs (Daily Journal: 5 to-dos + daily experience) ----------
+create table if not exists daily_logs (
+  id          uuid primary key default gen_random_uuid(),
+  date        date not null unique,
+  todos       jsonb not null default '[]'::jsonb,
+  experience  text not null default '',
+  lesson      text not null default '',
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+alter table daily_logs enable row level security;
+drop policy if exists "allow all daily_logs" on daily_logs;
+create policy "allow all daily_logs" on daily_logs for all to anon, authenticated using (true) with check (true);
+grant select, insert, update, delete on daily_logs to anon, authenticated;
