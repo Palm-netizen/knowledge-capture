@@ -11,6 +11,7 @@ export interface LearningSource {
   title: string;
   creator: string;
   cover_url: string;
+  category: string;
   status: SourceStatus;
   started_at: string | null;
   finished_at: string | null;

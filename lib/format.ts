@@ -36,6 +36,28 @@ export function formatHours(totalMinutes: number): string {
   return Math.round(hours).toString();
 }
 
+export function dayLabelThai(iso: string): string {
+  const d = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return "วันนี้";
+  if (d.toDateString() === yesterday.toDateString()) return "เมื่อวาน";
+  return formatThaiDate(iso, { short: true });
+}
+
+export function timeThai(iso: string): string {
+  const d = new Date(iso);
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+export function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} นาที`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m ? `${h} ชม. ${m} นาที` : `${h} ชม.`;
+}
+
 export function greetingForNow(): string {
   const hour = new Date().getHours();
   if (hour < 11) return "สวัสดีตอนเช้า";

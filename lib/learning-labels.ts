@@ -20,6 +20,22 @@ export const NOTE_LEVEL_LABEL: Record<NoteLevel, string> = {
   deep: "Deep Note",
 };
 
+export const PRESET_CATEGORIES = ["N21 Mobile"];
+
+export function collectCategories(sources: { category?: string | null }[]): string[] {
+  const set = new Set(PRESET_CATEGORIES);
+  sources.forEach((s) => {
+    if (s.category) set.add(s.category);
+  });
+  return [...set].sort((a, b) => a.localeCompare(b, "th"));
+}
+
+export function sessionVerb(type: SourceType): string {
+  if (type === "podcast" || type === "audiobook") return "ฟัง";
+  if (type === "video" || type === "course") return "ดู";
+  return "อ่าน";
+}
+
 export const ACTION_STATUS_LABEL: Record<ActionStatus, string> = {
   planned: "ยังไม่ทำ",
   in_progress: "กำลังทำ",

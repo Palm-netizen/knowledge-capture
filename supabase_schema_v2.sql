@@ -37,6 +37,10 @@ create table if not exists learning_sources (
 create index if not exists learning_sources_type_idx on learning_sources (source_type);
 create index if not exists learning_sources_status_idx on learning_sources (status);
 create index if not exists learning_sources_title_idx on learning_sources (title);
+
+-- หมวด (เช่น "N21 Mobile") — แยกจากประเภทสื่อ (source_type)
+alter table learning_sources add column if not exists category text not null default '';
+create index if not exists learning_sources_category_idx on learning_sources (category);
 -- No full-text GIN index here: the app's search (Library page, source
 -- picker) filters client-side, so Postgres full-text search is unused.
 
@@ -249,6 +253,25 @@ begin
       select 1 from action_tracker at2 where at2.note_id = ln.id
     );
 end $$;
+
+-- ============================================================
+-- Storage: bucket สาธารณะสำหรับรูปปก (แอปบีบอัดเป็น JPEG ~30KB ก่อนอัปโหลด)
+-- ============================================================
+insert into storage.buckets (id, name, public)
+values ('knowledge-photos', 'knowledge-photos', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "kc photos read" on storage.objects;
+create policy "kc photos read" on storage.objects
+  for select using (bucket_id = 'knowledge-photos');
+
+drop policy if exists "kc photos insert" on storage.objects;
+create policy "kc photos insert" on storage.objects
+  for insert with check (bucket_id = 'knowledge-photos');
+
+drop policy if exists "kc photos delete" on storage.objects;
+create policy "kc photos delete" on storage.objects
+  for delete using (bucket_id = 'knowledge-photos');
 
 -- ============================================================
 -- หมายเหตุ: ตาราง friends เดิม (เมนูเพื่อน) ไม่มีเมนูใหม่ที่รองรับตามสเปค 5 เมนู

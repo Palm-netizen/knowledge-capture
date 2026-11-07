@@ -3,12 +3,40 @@ import type { LearningSource, LearningNote, ActionItem, Reflection, LearningGoal
 
 export type NoteWithSource = LearningNote & { source: LearningSource | null };
 
+export async function fetchSourceById(id: string): Promise<LearningSource | null> {
+  const { data, error } = await supabase.from("learning_sources").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data ?? null;
+}
+
+export async function fetchNotesBySource(sourceId: string): Promise<LearningNote[]> {
+  const { data, error } = await supabase
+    .from("learning_notes")
+    .select("*")
+    .eq("source_id", sourceId)
+    .order("captured_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchSessionStats(): Promise<
+  Pick<LearningNote, "source_id" | "captured_at" | "duration_minutes">[]
+> {
+  const { data, error } = await supabase
+    .from("learning_notes")
+    .select("source_id, captured_at, duration_minutes")
+    .not("source_id", "is", null)
+    .limit(5000);
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function fetchAllSourcesLite(
   limit = 300
-): Promise<Pick<LearningSource, "id" | "title" | "source_type">[]> {
+): Promise<Pick<LearningSource, "id" | "title" | "source_type" | "category">[]> {
   const { data, error } = await supabase
     .from("learning_sources")
-    .select("id, title, source_type")
+    .select("*")
     .order("title", { ascending: true })
     .limit(limit);
   if (error) throw error;

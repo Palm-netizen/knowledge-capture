@@ -31,6 +31,24 @@ export function startOfMonthIso(date = new Date()): string {
   return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().slice(0, 10);
 }
 
+export type SessionStats = { count: number; minutes: number; firstAt: string | null; lastAt: string | null };
+
+export function sessionStatsBySource(
+  items: { source_id: string | null; captured_at: string; duration_minutes: number | null }[]
+): Map<string, SessionStats> {
+  const map = new Map<string, SessionStats>();
+  items.forEach((item) => {
+    if (!item.source_id) return;
+    const s = map.get(item.source_id) ?? { count: 0, minutes: 0, firstAt: null, lastAt: null };
+    s.count += 1;
+    s.minutes += item.duration_minutes ?? 0;
+    if (!s.firstAt || item.captured_at < s.firstAt) s.firstAt = item.captured_at;
+    if (!s.lastAt || item.captured_at > s.lastAt) s.lastAt = item.captured_at;
+    map.set(item.source_id, s);
+  });
+  return map;
+}
+
 export type HeatmapCell = { date: Date; count: number };
 
 export function buildHeatmapWeeks(captureDates: string[], weeks = 12): HeatmapCell[][] {
