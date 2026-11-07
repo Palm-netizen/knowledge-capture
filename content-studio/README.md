@@ -14,19 +14,22 @@ npm run dev        # http://localhost:3000
 
 ถ้ายังไม่ตั้งค่า Supabase แอปจะเก็บข้อมูลไว้ในเบราว์เซอร์ (localStorage) และทุกฟังก์ชันใช้งานได้ครบ
 
-## เชื่อม Supabase
+## Supabase
 
-1. Supabase → SQL Editor → รัน `supabase/schema.sql` (สร้าง 3 ตาราง: `ideas`, `content_items`, `content_publications`)
-2. `cp .env.example .env.local` แล้วใส่ `NEXT_PUBLIC_SUPABASE_URL` และ `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-3. รีสตาร์ท `npm run dev` — แถบด้านล่างของ Sidebar จะขึ้นว่า “ซิงก์กับ Supabase”
+เชื่อมกับ Supabase project ของ Content Studio แล้ว (แยกจาก Knowledge Capture):
+`https://nnyyrzojdujpwwdhwgxj.supabase.co` — ค่าอยู่ในไฟล์ `.env` (publishable key เปิดเผยได้ สิทธิ์ถูกคุมด้วย RLS)
 
-การบันทึกเป็นแบบอัตโนมัติ (รวมคำขอหลายครั้งที่พิมพ์ต่อเนื่องเป็นครั้งเดียวทุก ~0.7 วินาที) และมีสำเนาใน localStorage เสมอ
-ถ้าเชื่อมไม่ได้ (เช่น ยังไม่ได้รัน SQL) แอปจะใช้ข้อมูลในเครื่องแทนโดยอัตโนมัติ
+- ตารางถูกสร้างแล้วจาก `supabase/schema.sql` (รันซ้ำได้ปลอดภัย ถ้าต้องสร้าง project ใหม่)
+- ถ้าจะชี้ไป project อื่น สร้าง `.env.local` แล้วใส่ `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` (จะทับค่าใน `.env`)
+- **ห้าม**ใส่ service_role / secret key ในไฟล์ใด ๆ ของแอปนี้
 
-> RLS ตั้งเป็น allow-all สำหรับใช้งานคนเดียว ถ้าจะเปิดให้หลายคนใช้ ให้เพิ่ม `user_id` + Supabase Auth ก่อน
+การบันทึกเป็นแบบอัตโนมัติ (รวมการพิมพ์ต่อเนื่องเป็นคำขอเดียวทุก ~0.7 วินาที) และมีสำเนาใน localStorage เสมอ
+ถ้าเชื่อม Supabase ไม่ได้ (เช่น ออฟไลน์) แอปจะใช้ข้อมูลในเครื่องแทน และ Sidebar จะแสดงว่า “เก็บในเครื่องนี้”
+
+> RLS ตั้งเป็น allow-all สำหรับใช้งานคนเดียว ใครมีลิงก์เว็บก็อ่าน/เขียนได้ ถ้าจะเปิดสาธารณะหรือหลายคน ให้เพิ่ม Supabase Auth + `user_id` ก่อน
 
 ## Deploy
-Vercel → Import repo → ตั้ง **Root Directory = `content-studio`** → ใส่ env 2 ตัวข้างบน
+Vercel → Import repo → ตั้ง **Root Directory = `content-studio`** (ค่า Supabase อ่านจาก `.env` อัตโนมัติ)
 
 ## โครงสร้าง
 

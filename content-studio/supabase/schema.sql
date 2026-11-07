@@ -94,8 +94,10 @@ alter table content_items enable row level security;
 alter table content_publications enable row level security;
 
 drop policy if exists "allow all ideas" on ideas;
-create policy "allow all ideas" on ideas for all using (true) with check (true);
+create policy "allow all ideas" on ideas for all to anon, authenticated using (true) with check (true);
 drop policy if exists "allow all content_items" on content_items;
-create policy "allow all content_items" on content_items for all using (true) with check (true);
+create policy "allow all content_items" on content_items for all to anon, authenticated using (true) with check (true);
 drop policy if exists "allow all content_publications" on content_publications;
-create policy "allow all content_publications" on content_publications for all using (true) with check (true);
+create policy "allow all content_publications" on content_publications for all to anon, authenticated using (true) with check (true);
+
+grant select, insert, update, delete on ideas, content_items, content_publications to anon, authenticated;
