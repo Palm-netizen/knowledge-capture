@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import type { AppData, ContentItem, Idea, Platform, Publication } from "../types";
+import type { AppData, ContentItem, DailyLog, Idea, Platform, Publication } from "../types";
 import { nowIso, uid } from "../utils";
 import type { Collection } from "./mappers";
 import {
@@ -35,11 +35,16 @@ interface StoreValue extends AppData {
   addPublication: (contentId: string, platform: Platform, patch?: Partial<Publication>) => Publication;
   updatePublication: (id: string, patch: Partial<Publication>) => void;
   deletePublication: (id: string) => void;
+
+  /** Create-or-update the journal row for a day (YYYY-MM-DD). */
+  saveDailyLog: (date: string, patch: Partial<Pick<DailyLog, "todos" | "experience" | "lesson">>) => void;
 }
 
 const StoreContext = createContext<StoreValue | null>(null);
 
-const EMPTY: AppData = { ideas: [], contents: [], publications: [] };
+const EMPTY: AppData = { ideas: [], contents: [], publications: [], dailyLogs: [] };
+
+export const EMPTY_TODOS = () => Array.from({ length: 5 }, () => ({ text: "", done: false }));
 
 export function newIdea(input: IdeaInput): Idea {
   const now = nowIso();
@@ -95,6 +100,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const dataRef = useRef<AppData>(EMPTY);
   const remoteRef = useRef<RemoteSync | null>(null);
+  // false while the daily_logs table doesn't exist in Supabase: journal stays local-only
+  const dailyRemoteRef = useRef(true);
 
   // ---- initial load -------------------------------------------------
   useEffect(() => {
@@ -115,9 +122,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           setSyncStatus(s);
           setSyncError(s === "error" ? msg ?? "บันทึกไม่สำเร็จ" : null);
         });
-        dataRef.current = remote;
-        setData(remote);
-        writeLocal(remote);
+        const { dailyLogsAvailable, ...rest } = remote;
+        dailyRemoteRef.current = dailyLogsAvailable;
+        const merged: AppData = dailyLogsAvailable ? rest : { ...rest, dailyLogs: local.dailyLogs };
+        dataRef.current = merged;
+        setData(merged);
+        writeLocal(merged);
         setSyncMode("supabase");
       })
       .catch((e: unknown) => {
@@ -158,7 +168,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       // deletes: children first
-      const removeOrder: Collection[] = ["publications", "contents", "ideas"];
+      if (!dailyRemoteRef.current) {
+        ops = {
+          upsert: ops.upsert?.filter(([c]) => c !== "dailyLogs"),
+          remove: ops.remove?.filter(([c]) => c !== "dailyLogs"),
+        };
+        if (!ops.upsert?.length && !ops.remove?.length) {
+          setSyncStatus("saved");
+          return;
+        }
+      }
+      const removeOrder: Collection[] = ["publications", "contents", "ideas", "dailyLogs"];
       const removes = [...(ops.remove ?? [])].sort(
         (a, b) => removeOrder.indexOf(a[0]) - removeOrder.indexOf(b[0]),
       );
@@ -351,6 +371,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [commit],
   );
 
+  const saveDailyLog = useCallback<StoreValue["saveDailyLog"]>(
+    (date, patch) => {
+      const d = dataRef.current;
+      const cur = d.dailyLogs.find((l) => l.date === date);
+      const now = nowIso();
+      const row: DailyLog = cur
+        ? { ...cur, ...patch, updatedAt: now }
+        : { id: uid(), date, todos: EMPTY_TODOS(), experience: "", lesson: "", ...patch, createdAt: now, updatedAt: now };
+      commit(
+        { ...d, dailyLogs: cur ? d.dailyLogs.map((l) => (l.id === row.id ? row : l)) : [row, ...d.dailyLogs] },
+        { upsert: [["dailyLogs", row]] },
+      );
+    },
+    [commit],
+  );
+
   const value = useMemo<StoreValue>(
     () => ({
       ...data,
@@ -368,8 +404,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       addPublication,
       updatePublication,
       deletePublication,
+      saveDailyLog,
     }),
-    [data, ready, syncMode, syncStatus, syncError, addIdea, updateIdea, deleteIdea, addContent, updateContent, deleteContent, createContentFromIdea, addPublication, updatePublication, deletePublication],
+    [data, ready, syncMode, syncStatus, syncError, addIdea, updateIdea, deleteIdea, addContent, updateContent, deleteContent, createContentFromIdea, addPublication, updatePublication, deletePublication, saveDailyLog],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -8,7 +8,7 @@ import type { AppData } from "../types";
 import { TABLES, fromRow, toRow, type Collection } from "./mappers";
 
 const STORAGE_KEY = "supperpalm-content-studio:v1";
-const EMPTY: AppData = { ideas: [], contents: [], publications: [] };
+const EMPTY: AppData = { ideas: [], contents: [], publications: [], dailyLogs: [] };
 
 export type SyncMode = "local" | "supabase";
 export type SyncStatus = "idle" | "saving" | "saved" | "error";
@@ -22,6 +22,7 @@ export function readLocal(): AppData {
       ideas: parsed.ideas ?? [],
       contents: parsed.contents ?? [],
       publications: parsed.publications ?? [],
+      dailyLogs: parsed.dailyLogs ?? [],
     };
   } catch {
     return EMPTY;
@@ -46,11 +47,12 @@ export function getSupabase(): SupabaseClient | null {
   return client;
 }
 
-export async function loadRemote(sb: SupabaseClient): Promise<AppData> {
-  const [ideas, contents, pubs] = await Promise.all([
+export async function loadRemote(sb: SupabaseClient): Promise<AppData & { dailyLogsAvailable: boolean }> {
+  const [ideas, contents, pubs, logs] = await Promise.all([
     sb.from(TABLES.ideas).select("*").order("created_at", { ascending: false }),
     sb.from(TABLES.contents).select("*").order("updated_at", { ascending: false }),
     sb.from(TABLES.publications).select("*").order("created_at", { ascending: true }),
+    sb.from(TABLES.dailyLogs).select("*").order("date", { ascending: false }),
   ]);
   const err = ideas.error ?? contents.error ?? pubs.error;
   if (err) throw err;
@@ -58,6 +60,9 @@ export async function loadRemote(sb: SupabaseClient): Promise<AppData> {
     ideas: (ideas.data ?? []).map((r) => fromRow(r)),
     contents: (contents.data ?? []).map((r) => fromRow(r)),
     publications: (pubs.data ?? []).map((r) => fromRow(r)),
+    // daily_logs is newer: if the table isn't there yet, keep the core app on Supabase anyway
+    dailyLogs: logs.error ? [] : (logs.data ?? []).map((r) => fromRow(r)),
+    dailyLogsAvailable: !logs.error,
   };
 }
 
@@ -90,7 +95,7 @@ export class RemoteSync {
     const batch = [...this.pending.values()];
     this.pending.clear();
     // Parents first so foreign keys resolve.
-    const order: Collection[] = ["ideas", "contents", "publications"];
+    const order: Collection[] = ["ideas", "contents", "publications", "dailyLogs"];
     for (const c of order) {
       const rows = batch.filter((b) => b.collection === c).map((b) => toRow(b.row));
       if (rows.length) await this.run(() => this.sb.from(TABLES[c]).upsert(rows));

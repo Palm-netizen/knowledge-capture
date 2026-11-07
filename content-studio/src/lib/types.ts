@@ -80,8 +80,25 @@ export interface Publication extends Metrics {
   updatedAt: string;
 }
 
+export interface TodoItem {
+  text: string;
+  done: boolean;
+}
+
+/** One row per day: 5 to-dos + the day's experience journal. */
+export interface DailyLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  todos: TodoItem[]; // always 5 slots
+  experience: string;
+  lesson: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AppData {
   ideas: Idea[];
   contents: ContentItem[];
   publications: Publication[];
+  dailyLogs: DailyLog[];
 }
