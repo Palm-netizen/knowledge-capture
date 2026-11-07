@@ -1,11 +1,24 @@
-import { CalendarDays, ChartColumn, Inbox, LayoutDashboard, PenLine, type LucideIcon } from "lucide-react";
+import { CalendarDays, ChartColumn, Inbox, LayoutGrid, PenLine, type LucideIcon } from "lucide-react";
 
-export const NAV_ITEMS: { href: string; label: string; short: string; icon: LucideIcon }[] = [
-  { href: "/", label: "Overview", short: "ภาพรวม", icon: LayoutDashboard },
-  { href: "/ideas", label: "Idea Inbox", short: "ไอเดีย", icon: Inbox },
-  { href: "/studio", label: "Content Studio", short: "สตูดิโอ", icon: PenLine },
-  { href: "/calendar", label: "Content Calendar", short: "ปฏิทิน", icon: CalendarDays },
-  { href: "/performance", label: "Performance", short: "ผลงาน", icon: ChartColumn },
+export interface NavItem {
+  href: string;
+  label: string;
+  short: string;
+  icon: LucideIcon;
+  group: "main" | "plan";
+}
+
+export const NAV_ITEMS: NavItem[] = [
+  { href: "/", label: "Overview", short: "ภาพรวม", icon: LayoutGrid, group: "main" },
+  { href: "/ideas", label: "Idea Inbox", short: "ไอเดีย", icon: Inbox, group: "main" },
+  { href: "/studio", label: "Content Studio", short: "สตูดิโอ", icon: PenLine, group: "main" },
+  { href: "/calendar", label: "Content Calendar", short: "ปฏิทิน", icon: CalendarDays, group: "plan" },
+  { href: "/performance", label: "Performance", short: "ผลงาน", icon: ChartColumn, group: "plan" },
+];
+
+export const NAV_GROUPS: { key: NavItem["group"]; label: string }[] = [
+  { key: "main", label: "พื้นที่ทำงาน" },
+  { key: "plan", label: "วางแผน & ผลลัพธ์" },
 ];
 
 export function isActive(pathname: string, href: string) {

@@ -25,7 +25,7 @@ export function InlineCapture({ placeholder = "จดไอเดียสั้
   };
 
   return (
-    <div className="rounded-xl border border-line bg-card shadow-card transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15">
+    <div className="rounded-2xl border border-transparent bg-card shadow-card shadow-card transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15">
       <form
         className="flex items-center gap-2 pr-2 pl-3.5"
         onSubmit={(e) => {

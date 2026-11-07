@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Cloud, CloudOff, Loader2, Plus, Sprout, AlertCircle } from "lucide-react";
+import { AlertCircle, Cloud, CloudOff, Loader2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store/StoreProvider";
 import { useQuickActions } from "@/components/capture/QuickActions";
-import { NAV_ITEMS, isActive } from "./nav";
+import { DiamondMark, Logo } from "@/components/ui/Logo";
+import { NAV_GROUPS, NAV_ITEMS, isActive } from "./nav";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -15,51 +16,61 @@ export function Sidebar() {
   const newIdeas = ideas.filter((i) => i.status === "new").length;
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-[68px] shrink-0 flex-col border-r border-line bg-card md:flex lg:w-60">
-      <Link href="/" className="flex h-16 items-center gap-2.5 px-4 lg:px-5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
-          <Sprout size={17} strokeWidth={2} />
+    <aside className="sticky top-3 hidden h-[calc(100dvh-24px)] w-[76px] shrink-0 flex-col rounded-[28px] bg-panel md:flex lg:w-64">
+      <Link href="/" className="flex h-20 items-center justify-center px-4 lg:justify-start lg:px-6">
+        <span className="lg:hidden">
+          <DiamondMark size={30} />
         </span>
-        <span className="hidden leading-tight lg:block">
-          <span className="block text-[13px] font-semibold tracking-wide">SUPPERPALM</span>
-          <span className="block text-[11px] text-muted">Content Studio</span>
+        <span className="hidden lg:block">
+          <Logo />
         </span>
       </Link>
 
-      <div className="px-3 pb-3 lg:px-4">
+      <div className="px-3 pb-2 lg:px-4">
         <button
           onClick={() => openCapture()}
           title="บันทึกไอเดีย (กด N)"
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-white transition-colors hover:bg-primary-hover lg:justify-start lg:px-3"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-ink text-sm font-medium text-white transition-colors hover:bg-[#2a2d35] lg:justify-start lg:px-4"
         >
-          <Plus size={17} />
+          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/15">
+            <Plus size={15} />
+          </span>
           <span className="hidden lg:inline">บันทึกไอเดีย</span>
-          <kbd className="ml-auto hidden rounded border border-white/25 px-1.5 text-[10px] font-normal text-white/80 lg:inline">N</kbd>
+          <kbd className="ml-auto hidden rounded-md bg-white/15 px-1.5 text-[10px] font-normal text-white/80 lg:inline">N</kbd>
         </button>
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-3 lg:px-4">
-        {NAV_ITEMS.map((item) => {
-          const active = isActive(pathname, item.href);
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              title={item.label}
-              className={cn(
-                "group flex h-10 items-center justify-center gap-3 rounded-lg px-0 text-sm transition-colors lg:justify-start lg:px-3",
-                active ? "bg-primary-soft font-medium text-primary" : "text-muted hover:bg-subtle hover:text-ink",
-              )}
-            >
-              <Icon size={18} strokeWidth={active ? 2 : 1.8} />
-              <span className="hidden lg:inline">{item.label}</span>
-              {item.href === "/ideas" && newIdeas > 0 && (
-                <span className="ml-auto hidden rounded-md bg-card px-1.5 text-xs text-muted tabular-nums lg:inline">{newIdeas}</span>
-              )}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 space-y-5 overflow-y-auto px-3 pt-4 lg:px-4">
+        {NAV_GROUPS.map((g) => (
+          <div key={g.key}>
+            <p className="mb-1.5 hidden px-3 text-[11px] font-medium tracking-wider text-faint uppercase lg:block">{g.label}</p>
+            <div className="space-y-1">
+              {NAV_ITEMS.filter((i) => i.group === g.key).map((item) => {
+                const active = isActive(pathname, item.href);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    title={item.label}
+                    className={cn(
+                      "flex h-11 items-center justify-center gap-3 rounded-2xl text-[14px] transition-colors lg:justify-start lg:px-3",
+                      active ? "bg-card font-medium text-ink shadow-card" : "text-muted hover:bg-card/60 hover:text-ink",
+                    )}
+                  >
+                    <Icon size={19} strokeWidth={active ? 2.1 : 1.8} className={active ? "text-primary" : ""} />
+                    <span className="hidden lg:inline">{item.label}</span>
+                    {item.href === "/ideas" && newIdeas > 0 && (
+                      <span className="ml-auto hidden h-5 min-w-5 items-center justify-center rounded-full bg-orange px-1.5 text-[11px] font-medium text-white tabular-nums lg:flex">
+                        {newIdeas}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <SyncIndicator />
@@ -84,7 +95,7 @@ function SyncIndicator() {
     }
   }
   return (
-    <div className="flex items-center justify-center gap-2 border-t border-line px-3 py-3 text-xs text-muted lg:justify-start lg:px-5" title={syncError ?? text}>
+    <div className="m-3 flex items-center justify-center gap-2 rounded-2xl bg-card/70 px-3 py-2.5 text-xs text-muted lg:m-4 lg:justify-start" title={syncError ?? text}>
       {icon}
       <span className="hidden lg:inline">{text}</span>
     </div>

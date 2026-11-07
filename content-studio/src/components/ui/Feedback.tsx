@@ -60,11 +60,11 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
       <div className="pointer-events-none fixed inset-x-0 bottom-24 z-[60] flex flex-col items-center gap-2 px-4 md:bottom-6 md:items-end md:px-6">
         {toasts.map((t) => (
           <div key={t.id} role="status" className="animate-pop pointer-events-auto flex items-center gap-3 rounded-lg bg-ink px-4 py-2.5 text-sm text-white shadow-pop">
-            {t.tone === "success" ? <CheckCircle2 size={16} className="text-[#8FD3AE]" /> : <AlertCircle size={16} className="text-[#F5A97F]" />}
+            {t.tone === "success" ? <CheckCircle2 size={16} className="text-[#9DB5FF]" /> : <AlertCircle size={16} className="text-[#F5A97F]" />}
             <span>{t.message}</span>
             {t.action && (
               <button
-                className="ml-1 font-medium text-[#8FD3AE] hover:underline"
+                className="ml-1 font-medium text-[#9DB5FF] hover:underline"
                 onClick={() => {
                   t.action!.onClick();
                   setToasts((all) => all.filter((x) => x.id !== t.id));

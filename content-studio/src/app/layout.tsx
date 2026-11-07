@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans_Thai } from "next/font/google";
+import { IBM_Plex_Sans_Thai, Outfit } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
 
@@ -7,6 +7,13 @@ const thai = IBM_Plex_Sans_Thai({
   subsets: ["thai", "latin"],
   weight: ["400", "500", "600"],
   variable: "--font-thai",
+  display: "swap",
+});
+
+const num = Outfit({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-num",
   display: "swap",
 });
 
@@ -18,12 +25,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#F8FAF8",
+  themeColor: "#F5F6F8",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th" className={thai.variable}>
+    <html lang="th" className={`${thai.variable} ${num.variable}`}>
       <body>
         <AppShell>{children}</AppShell>
       </body>

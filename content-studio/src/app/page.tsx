@@ -17,6 +17,8 @@ import { ContentRow } from "@/components/studio/ContentRow";
 import { PostItem } from "@/components/calendar/PostItem";
 import { MetricsDialog } from "@/components/performance/MetricsDialog";
 import { PageSkeleton } from "@/components/ui/Skeleton";
+import { WeeklySummary } from "@/components/overview/WeeklySummary";
+import { NextPostCard } from "@/components/overview/NextPostCard";
 import type { Idea, Publication } from "@/lib/types";
 import { addDays, fmt, greeting, isoToDateStr, relativeDayLabel, toDateStr, todayStr } from "@/lib/date";
 import { engagementRate, hasMetrics, sortBySchedule } from "@/lib/selectors";
@@ -51,7 +53,7 @@ export default function OverviewPage() {
   return (
     <PageContainer wide>
       <PageHeader
-        title={`${greeting()} 🌱`}
+        title={`${greeting()}!`}
         description={`${fmt.long(new Date())} · วันนี้จะทำคอนเทนต์อะไรดี?`}
         actions={
           <>
@@ -66,12 +68,18 @@ export default function OverviewPage() {
       />
 
       {/* --- 4 key numbers: each one is a shortcut --- */}
-      <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile href="/ideas?status=new" icon={Inbox} label="ไอเดียใหม่" value={newIdeas.length} hint="รอคัดเลือก" />
-        <StatTile href="/studio?status=producing" icon={PenLine} label="กำลังผลิต" value={producing.length} hint="รวมร่างไอเดีย" />
-        <StatTile href="/studio?status=ready" icon={Send} label="พร้อมโพสต์" value={ready.length} hint="รอเผยแพร่" />
-        <StatTile href="/calendar" icon={CalendarPlus} label="โพสต์วันนี้" value={todayPosts.length} hint={`โพสต์แล้ว ${todayPosts.filter((p) => p.status === "published").length}`} accent />
+      <div className="mb-4 grid grid-cols-2 gap-3 md:mb-5 md:gap-4 lg:grid-cols-4">
+        <StatTile href="/ideas?status=new" icon={Inbox} iconClass="bg-ink text-white" value={newIdeas.length} unit="ไอเดีย" label="ใหม่ รอคัดเลือก" />
+        <StatTile href="/studio?status=producing" icon={PenLine} iconClass="bg-violet text-white" value={producing.length} unit="ชิ้น" label="กำลังผลิต" />
+        <StatTile href="/studio?status=ready" icon={Send} iconClass="bg-primary text-white" value={ready.length} unit="ชิ้น" label="พร้อมโพสต์" />
+        <StatTile href="/calendar" icon={CalendarPlus} iconClass="bg-orange-soft text-orange" value={todayPosts.length} unit="โพสต์" label={`วันนี้ · โพสต์แล้ว ${todayPosts.filter((p) => p.status === "published").length}`} />
       </div>
+
+      {!isEmpty && (
+        <div className="mb-8">
+          <WeeklySummary />
+        </div>
+      )}
 
       {isEmpty ? (
         <Card className="p-6 md:p-10">
@@ -181,7 +189,7 @@ export default function OverviewPage() {
             <section>
               <SectionTitle title="พร้อมโพสต์" count={ready.length} />
               {ready.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-line-strong px-4 py-5 text-center text-[13px] text-muted">
+                <p className="rounded-2xl border border-dashed border-line-strong px-4 py-5 text-center text-[13px] text-muted">
                   เมื่อเขียนคอนเทนต์เสร็จ เปลี่ยนสถานะเป็น “พร้อมโพสต์” แล้วจะแสดงที่นี่
                 </p>
               ) : (
@@ -195,6 +203,7 @@ export default function OverviewPage() {
           </div>
 
           <div className="space-y-8">
+            <NextPostCard />
             {/* --- new ideas --- */}
             <section>
               <SectionTitle
@@ -274,26 +283,28 @@ export default function OverviewPage() {
 function StatTile({
   href,
   icon: Icon,
-  label,
+  iconClass,
   value,
-  hint,
-  accent,
+  unit,
+  label,
 }: {
   href: string;
   icon: typeof Inbox;
-  label: string;
+  iconClass: string;
   value: number;
-  hint: string;
-  accent?: boolean;
+  unit: string;
+  label: string;
 }) {
   return (
-    <Link href={href} className="group rounded-xl border border-line bg-card p-4 transition-colors hover:border-line-strong md:p-5">
-      <div className="flex items-center justify-between text-[13px] text-muted">
-        <span>{label}</span>
-        <Icon size={16} className={cn("transition-colors group-hover:text-primary", accent && "text-primary")} />
-      </div>
-      <p className="mt-2 text-[28px] leading-none font-semibold tabular-nums">{value}</p>
-      <p className="mt-2 text-xs text-faint">{hint}</p>
+    <Link href={href} className="group rounded-3xl bg-card p-5 shadow-card transition-shadow hover:shadow-pop md:p-6">
+      <span className={cn("flex h-11 w-11 items-center justify-center rounded-2xl transition-transform group-hover:scale-105", iconClass)}>
+        <Icon size={20} />
+      </span>
+      <p className="mt-6 font-display text-[38px] leading-none font-semibold tracking-tight tabular-nums md:text-[44px]">
+        {value}
+        <span className="ml-1.5 text-base font-medium text-ink/80">{unit}</span>
+      </p>
+      <p className="mt-2 text-sm text-muted">{label}</p>
     </Link>
   );
 }
