@@ -15,16 +15,20 @@ begin
 end;
 $$ language plpgsql;
 
--- to_tsvector(regconfig, text) is only STABLE in Postgres (the config
--- could theoretically change), so it can't be used directly inside a
--- GIN index expression, which requires IMMUTABLE. This wrapper pins the
--- 'simple' config and is safe to mark IMMUTABLE.
+-- to_tsvector(regconfig, text) is only STABLE in Postgres, so it can't
+-- be used directly inside a GIN index expression, which requires
+-- IMMUTABLE. A single-statement `language sql` wrapper gets inlined by
+-- the planner (exposing the real to_tsvector call and the same error),
+-- so this is `language plpgsql` instead — plpgsql functions are never
+-- inlined, so Postgres just trusts the IMMUTABLE marking.
 create or replace function simple_tsvector(input text)
 returns tsvector
-language sql
+language plpgsql
 immutable
 as $$
-  select to_tsvector('simple', coalesce(input, ''));
+begin
+  return to_tsvector('simple', coalesce(input, ''));
+end;
 $$;
 
 -- ------------------------------------------------------------
