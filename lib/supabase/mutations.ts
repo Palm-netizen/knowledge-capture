@@ -1,5 +1,5 @@
 import { supabase } from "./client";
-import type { LearningSource, LearningNote, ActionItem, Reflection } from "./types";
+import type { LearningSource, LearningNote, ActionItem, Reflection, LearningGoal } from "./types";
 
 export async function createLearningSource(input: {
   title: string;
@@ -69,6 +69,19 @@ export async function createReflection(input: Partial<Reflection>): Promise<Refl
 
 export async function updateReflection(id: string, patch: Partial<Reflection>): Promise<Reflection> {
   const { data, error } = await supabase.from("reflections").update(patch).eq("id", id).select("*").single();
+  if (error) throw error;
+  return data;
+}
+
+export async function upsertMonthlyHoursGoal(periodMonthIso: string, targetHours: number): Promise<LearningGoal> {
+  const { data, error } = await supabase
+    .from("learning_goals")
+    .upsert(
+      { goal_type: "hours", period_month: periodMonthIso, target_value: targetHours },
+      { onConflict: "goal_type,period_month" }
+    )
+    .select("*")
+    .single();
   if (error) throw error;
   return data;
 }

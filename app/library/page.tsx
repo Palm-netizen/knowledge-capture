@@ -86,10 +86,10 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="px-6 py-8 md:px-10 md:py-10 max-w-5xl space-y-6">
+    <div className="px-5 py-8 md:px-12 md:py-12 max-w-6xl space-y-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl text-ink">คลังความรู้</h1>
+          <h1 className="font-display text-4xl text-ink">คลังความรู้</h1>
           <p className="mt-1 text-muted">หนังสือ Podcast วิดีโอ และบทความทั้งหมดของคุณ</p>
         </div>
         <button
@@ -136,7 +136,7 @@ export default function LibraryPage() {
               {addBusy ? "กำลังเพิ่ม..." : "เพิ่ม"}
             </button>
           </div>
-          {addError ? <p className="mt-2 text-xs text-accent">{addError}</p> : null}
+          {addError ? <p className="mt-2 text-xs text-danger">{addError}</p> : null}
         </Card>
       ) : null}
 

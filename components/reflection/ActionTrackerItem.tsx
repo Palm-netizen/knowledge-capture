@@ -62,7 +62,7 @@ export default function ActionTrackerItem({
         <p className={`text-sm text-ink ${item.status === "done" ? "line-through text-muted" : ""}`}>
           {item.action_text}
         </p>
-        {err ? <p className="text-xs text-accent">{err}</p> : null}
+        {err ? <p className="text-xs text-danger">{err}</p> : null}
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <button type="button" disabled={busy} onClick={cycleStatus}>
@@ -72,7 +72,7 @@ export default function ActionTrackerItem({
           type="button"
           disabled={busy}
           onClick={handleDelete}
-          className="text-xs text-muted hover:text-accent"
+          className="text-xs text-muted hover:text-danger"
         >
           ลบ
         </button>

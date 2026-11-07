@@ -8,7 +8,10 @@ export default function TopicBars({ items }: { items: { tag: string; count: numb
             <span className="text-muted">{item.count} บันทึก</span>
           </div>
           <div className="mt-1 h-2 rounded-full bg-secondary">
-            <div className="h-2 rounded-full bg-primary" style={{ width: `${Math.max(item.pct, 4)}%` }} />
+            <div
+              className="h-2 rounded-full bg-linear-to-r from-primary to-accent"
+              style={{ width: `${Math.max(item.pct, 4)}%` }}
+            />
           </div>
         </div>
       ))}

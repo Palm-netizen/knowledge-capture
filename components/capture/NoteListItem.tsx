@@ -80,7 +80,7 @@ export default function NoteListItem({
           rows={2}
           className="w-full resize-none rounded-[8px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
-        {err ? <p className="text-xs text-accent">{err}</p> : null}
+        {err ? <p className="text-xs text-danger">{err}</p> : null}
         <div className="flex gap-2">
           <button
             type="button"
@@ -115,7 +115,7 @@ export default function NoteListItem({
         </div>
         <Pill tone={note.note_level === "deep" ? "accent" : "neutral"}>{NOTE_LEVEL_LABEL[note.note_level]}</Pill>
       </div>
-      {err ? <p className="mt-2 text-xs text-accent">{err}</p> : null}
+      {err ? <p className="mt-2 text-xs text-danger">{err}</p> : null}
       <div className="mt-3 flex gap-3 text-xs">
         <button type="button" onClick={() => setEditing(true)} className="text-primary hover:underline">
           แก้ไข
@@ -124,7 +124,7 @@ export default function NoteListItem({
           type="button"
           disabled={busyDelete}
           onClick={handleDelete}
-          className="text-accent hover:underline disabled:opacity-50"
+          className="text-danger hover:underline disabled:opacity-50"
         >
           {busyDelete ? "กำลังลบ..." : "ลบ"}
         </button>

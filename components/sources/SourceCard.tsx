@@ -5,7 +5,7 @@ import { SOURCE_TYPE_LABEL } from "@/lib/learning-labels";
 export default function SourceCard({ source }: { source: LearningSource }) {
   return (
     <Link href="/library" className="w-36 shrink-0">
-      <div className="relative aspect-[3/4] overflow-hidden rounded-[10px] border border-border bg-secondary">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-linear-to-br from-hero-from via-hero-via to-hero-to">
         {source.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

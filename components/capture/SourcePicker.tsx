@@ -79,7 +79,7 @@ export default function SourcePicker({
             onChange(null);
             setQuery("");
           }}
-          className="mt-1 text-xs text-muted hover:text-accent"
+          className="mt-1 text-xs text-muted hover:text-danger"
         >
           ล้างการเลือก
         </button>

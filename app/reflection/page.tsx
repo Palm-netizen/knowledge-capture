@@ -90,9 +90,9 @@ export default function ReflectionPage() {
   const doneActions = (actions ?? []).filter((a) => a.status === "done");
 
   return (
-    <div className="px-6 py-8 md:px-10 md:py-10 max-w-3xl space-y-10">
+    <div className="px-5 py-8 md:px-12 md:py-12 max-w-3xl space-y-12">
       <div>
-        <h1 className="font-display text-3xl text-ink">ทบทวน</h1>
+        <h1 className="font-display text-4xl text-ink">ทบทวน</h1>
         <p className="mt-1 text-muted">เปลี่ยนความรู้ให้เป็นการลงมือทำ</p>
       </div>
 
@@ -161,7 +161,7 @@ export default function ReflectionPage() {
           />
         </div>
 
-        {saveError ? <p className="text-sm text-accent">{saveError}</p> : null}
+        {saveError ? <p className="text-sm text-danger">{saveError}</p> : null}
         {savedMessage ? <p className="text-sm text-primary">{savedMessage}</p> : null}
 
         <button

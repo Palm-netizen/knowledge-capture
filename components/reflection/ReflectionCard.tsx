@@ -89,7 +89,7 @@ export default function ReflectionCard({
           rows={2}
           className="w-full resize-none rounded-[8px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
-        {err ? <p className="text-xs text-accent">{err}</p> : null}
+        {err ? <p className="text-xs text-danger">{err}</p> : null}
         <div className="flex gap-2">
           <button
             type="button"
@@ -132,12 +132,12 @@ export default function ReflectionCard({
         </p>
       ) : null}
       {reflection.improve_summary ? (
-        <p className="text-sm text-accent">
+        <p className="text-sm text-warn">
           <span className="text-muted">ต้องปรับปรุง: </span>
           {reflection.improve_summary}
         </p>
       ) : null}
-      {err ? <p className="text-xs text-accent">{err}</p> : null}
+      {err ? <p className="text-xs text-danger">{err}</p> : null}
       <div className="flex gap-3 pt-1 text-xs">
         <button type="button" onClick={() => setEditing(true)} className="text-primary hover:underline">
           แก้ไข
@@ -146,7 +146,7 @@ export default function ReflectionCard({
           type="button"
           disabled={busyDelete}
           onClick={handleDelete}
-          className="text-accent hover:underline disabled:opacity-50"
+          className="text-danger hover:underline disabled:opacity-50"
         >
           {busyDelete ? "กำลังลบ..." : "ลบ"}
         </button>

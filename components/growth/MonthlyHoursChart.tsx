@@ -25,7 +25,7 @@ export default function MonthlyHoursChart({
           <div key={d.label} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
             <div
               title={`${d.label} — ${h.toFixed(1)} ชม.`}
-              className="w-full max-w-8 rounded-t-[4px] bg-primary"
+              className="w-full max-w-8 rounded-t-[6px] bg-linear-to-t from-primary to-accent"
               style={{ height: `${Math.max(heightPct, h > 0 ? 3 : 0)}%` }}
             />
             <span className="text-[11px] text-muted">{d.label}</span>

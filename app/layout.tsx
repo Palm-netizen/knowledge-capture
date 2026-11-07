@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans_Thai, DM_Sans, Playfair_Display } from "next/font/google";
+import { IBM_Plex_Sans_Thai, Plus_Jakarta_Sans } from "next/font/google";
 import AppShell from "@/components/layout/AppShell";
 import "./globals.css";
 
@@ -9,15 +9,10 @@ const ibmPlexThai = IBM_Plex_Sans_Thai({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
-});
-
-const playfairDisplay = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -29,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="th"
-      className={`${ibmPlexThai.variable} ${dmSans.variable} ${playfairDisplay.variable} h-full antialiased`}
+      className={`${ibmPlexThai.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-bg text-ink">
         <AppShell>{children}</AppShell>

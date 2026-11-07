@@ -116,9 +116,9 @@ export default function CapturePage() {
   }
 
   return (
-    <div className="px-6 py-8 md:px-10 md:py-10 max-w-3xl space-y-10">
+    <div className="px-5 py-8 md:px-12 md:py-12 max-w-3xl space-y-12">
       <div>
-        <h1 className="font-display text-3xl text-ink">บันทึก</h1>
+        <h1 className="font-display text-4xl text-ink">บันทึก</h1>
         <p className="mt-1 text-muted">จดสิ่งที่ได้เรียนรู้จากหนังสือ, Podcast, วิดีโอ หรือบทความ</p>
       </div>
 
@@ -255,7 +255,7 @@ export default function CapturePage() {
                         <button
                           type="button"
                           onClick={() => setActionInputs((prev) => prev.filter((_, i) => i !== idx))}
-                          className="text-xs text-muted hover:text-accent"
+                          className="text-xs text-muted hover:text-danger"
                         >
                           ลบ
                         </button>
@@ -274,7 +274,7 @@ export default function CapturePage() {
             </div>
           )}
 
-          {saveError ? <p className="text-sm text-accent">{saveError}</p> : null}
+          {saveError ? <p className="text-sm text-danger">{saveError}</p> : null}
           {savedMessage ? <p className="text-sm text-primary">{savedMessage}</p> : null}
 
           <button

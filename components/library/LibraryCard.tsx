@@ -72,7 +72,7 @@ export default function LibraryCard({
 
   return (
     <Card className="p-3">
-      <div className="relative aspect-[3/4] overflow-hidden rounded-[10px] border border-border bg-secondary">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-linear-to-br from-hero-from via-hero-via to-hero-to">
         {source.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -119,7 +119,7 @@ export default function LibraryCard({
             placeholder="ลิงก์รูปปก (ถ้ามี)"
             className="w-full rounded-[8px] border border-border bg-card px-2 py-1.5 text-xs text-ink"
           />
-          {err ? <p className="text-xs text-accent">{err}</p> : null}
+          {err ? <p className="text-xs text-danger">{err}</p> : null}
           <div className="flex gap-2">
             <button
               type="button"
@@ -141,7 +141,7 @@ export default function LibraryCard({
             type="button"
             disabled={busyDelete}
             onClick={handleDelete}
-            className="w-full text-xs text-accent hover:underline disabled:opacity-50"
+            className="w-full text-xs text-danger hover:underline disabled:opacity-50"
           >
             {busyDelete ? "กำลังลบ..." : "ลบรายการนี้"}
           </button>

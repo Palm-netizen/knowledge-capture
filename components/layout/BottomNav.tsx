@@ -21,7 +21,7 @@ export default function BottomNav() {
             <li key={href} className="flex-1">
               <Link
                 href={href}
-                className={`flex flex-col items-center gap-1 py-2.5 text-[11px] ${
+                className={`flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${
                   active ? "text-primary" : "text-muted"
                 }`}
               >

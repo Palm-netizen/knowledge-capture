@@ -82,7 +82,7 @@ export default function GrowthPage() {
 
   if (error) {
     return (
-      <div className="px-6 py-8 md:px-10 md:py-10 max-w-5xl">
+      <div className="px-5 py-8 md:px-12 md:py-12 max-w-6xl">
         <ErrorState message={error} />
       </div>
     );
@@ -90,16 +90,16 @@ export default function GrowthPage() {
 
   if (!data) {
     return (
-      <div className="px-6 py-8 md:px-10 md:py-10 max-w-5xl">
+      <div className="px-5 py-8 md:px-12 md:py-12 max-w-6xl">
         <LoadingState />
       </div>
     );
   }
 
   return (
-    <div className="px-6 py-8 md:px-10 md:py-10 max-w-5xl space-y-10">
+    <div className="px-5 py-8 md:px-12 md:py-12 max-w-6xl space-y-10">
       <div>
-        <h1 className="font-display text-3xl text-ink">เติบโต</h1>
+        <h1 className="font-display text-4xl text-ink">เติบโต</h1>
         <p className="mt-1 text-muted">เทียบกับตัวเองเมื่อก่อน ไม่ใช่แข่งกับใคร</p>
       </div>
 
@@ -141,9 +141,9 @@ export default function GrowthPage() {
 
       <section>
         <SectionHeading title="การเปลี่ยนแปลงในชีวิตจริง" />
-        <Card className="p-5">
+        <Card className="bg-linear-to-br from-hero-from via-hero-via to-hero-to p-6">
           {data.latestReflection?.reflection_text ? (
-            <p className="italic text-ink">&ldquo;{data.latestReflection.reflection_text}&rdquo;</p>
+            <p className="text-lg text-ink">&ldquo;{data.latestReflection.reflection_text}&rdquo;</p>
           ) : (
             <EmptyState message="ยังไม่มีข้อความสะท้อนตัวเอง ลองเขียนที่หน้าทบทวน" />
           )}
