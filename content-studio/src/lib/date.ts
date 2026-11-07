@@ -68,3 +68,12 @@ export function greeting(): string {
   if (h < 17) return "สวัสดีตอนบ่าย";
   return "สวัสดีตอนเย็น";
 }
+
+/** Whole days from today until 1 January next year (0 on New Year's Day itself). */
+export function daysUntilNewYear(now = new Date()): number {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const isNewYearsDay = today.getMonth() === 0 && today.getDate() === 1;
+  if (isNewYearsDay) return 0;
+  const next = new Date(now.getFullYear() + 1, 0, 1);
+  return Math.round((next.getTime() - today.getTime()) / 86400000);
+}
