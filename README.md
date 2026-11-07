@@ -1,88 +1,98 @@
-# 📚 Knowledge Capture — สกัดความรู้จากหนังสือ
+# 📚 Knowledge Capture — สมุดบันทึกการเรียนรู้ส่วนตัว
 
-แอปเว็บสำหรับบันทึกและสกัดความรู้จากการอ่านหนังสือ **แยกอิสระจาก VegFarm โดยสิ้นเชิง** — คนละ repository, คนละโปรเจกต์ Supabase, คนละหน้าเว็บ, คนละธีมสี
+แอปเว็บสำหรับจดสิ่งที่ได้เรียนรู้จากหนังสือ, Podcast/Audiobook, วิดีโอ, บทความและคอร์สเรียน แล้วเปลี่ยนความรู้ให้เป็นการลงมือทำจริง — ดีไซน์แบบ "Modern Editorial Reading Journal" เรียบ อบอุ่น ใช้งานง่าย
+
+สร้างด้วย **Next.js (App Router) + TypeScript + Tailwind CSS**, export เป็นไฟล์ static แล้ว deploy ขึ้น GitHub Pages อัตโนมัติผ่าน GitHub Actions
 
 ## โครงสร้างไฟล์
 
 ```
 ./
-├── index.html                       # SPA รวมทุกเมนู
-├── css/
-│   └── style.css                    # ธีม Indigo Study (แยกจาก VegFarm)
-├── js/
-│   ├── supabase.js                  # config + helper functions
-│   ├── app.js                       # router/navigation
-│   ├── entry.js                     # ฟอร์มบันทึก/แก้ไข/ลบ (ใช้ร่วมทุกเมนู)
-│   ├── calendar.js                  # เมนู 1: ปฏิทิน + คลิกวันเพื่อบันทึก
-│   ├── dashboard.js                 # เมนู 2: Dashboard + Quote of the Day
-│   ├── review.js                    # เมนู 3: สุ่มทบทวน (Spaced Repetition)
-│   ├── search.js                    # เมนู 4: ค้นหาด้วย AI (+ fallback คำสำคัญ)
-│   ├── connections.js               # เมนู 5: เชื่อมโยงความรู้
-│   └── mindmap.js                   # เมนู 6: Mind Map อัตโนมัติ
-├── supabase/
-│   └── functions/ai-knowledge/      # Edge Function (ใช้ Claude ช่วยค้นหา/เชื่อมโยง) — ออปชันนัล
-└── supabase_schema.sql              # SQL สร้างตาราง notes ใน Supabase
+├── app/
+│   ├── page.tsx              # 01 ภาพรวม (Dashboard)
+│   ├── capture/page.tsx      # 02 บันทึก (Quick Note / Deep Note)
+│   ├── library/page.tsx      # 03 คลังความรู้
+│   ├── reflection/page.tsx   # 04 ทบทวน
+│   ├── growth/page.tsx       # 05 เติบโต
+│   ├── layout.tsx            # root layout — ฟอนต์ + AppShell
+│   └── globals.css           # ธีมสี/ฟอนต์ (Tailwind v4 @theme)
+├── components/
+│   ├── layout/                # Sidebar (desktop) / BottomNav (mobile)
+│   ├── ui/                    # Card, Pill, StatTile, Loading/Error/EmptyState ฯลฯ
+│   ├── sources/                # SourceCard (ใช้ใน Dashboard)
+│   ├── capture/                # SourcePicker, NoteListItem
+│   ├── library/                # LibraryCard
+│   ├── reflection/             # ReflectionCard, ActionTrackerItem
+│   └── growth/                 # ConsistencyHeatmap, TopicBars, MonthlyHoursChart
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts           # Supabase client (public anon key)
+│   │   ├── types.ts            # TypeScript types ของแต่ละตาราง
+│   │   ├── queries.ts          # ฟังก์ชันอ่านข้อมูล
+│   │   └── mutations.ts        # ฟังก์ชันเขียน/แก้ไข/ลบข้อมูล
+│   ├── format.ts / stats.ts / learning-labels.ts
+├── supabase_schema_v2.sql      # schema ใหม่ (5 เมนู) + migration จากตารางเดิม
+├── supabase_schema.sql         # schema เดิม (เก็บไว้อ้างอิง ไม่ได้ใช้แล้ว)
+└── .github/workflows/deploy-pages.yml   # build + deploy ขึ้น GitHub Pages
 ```
 
-## โครงสร้างข้อมูลการบันทึก 1 รายการ (ตาราง `notes`)
+## โครงสร้างข้อมูล (Supabase)
 
-| ฟิลด์ | ความหมาย |
+| ตาราง | ใช้เก็บอะไร |
 |---|---|
-| `book_title` | 📖 ชื่อหนังสือ |
-| `read_date` | 📅 วันที่อ่าน |
-| `highlights` | ✨ ไฮไลท์วันนี้ (1-5 ข้อ) |
-| `insight` | 💡 สิ่งที่ได้เรียนรู้ (Key Insight) |
-| `action` / `action_done` | 🎯 จะนำไปใช้ยังไง + สถานะลงมือทำแล้วหรือยัง |
-| `importance` | ⭐ ระดับความสำคัญ (1-5) |
-| `tags` | 🏷️ แท็ก (ธุรกิจ, การเงิน, จิตวิทยา, สุขภาพ, หรือเพิ่มเอง) |
-| `image_urls` | อัปโหลดได้สูงสุด 2 รูป |
+| `learning_sources` | หนังสือ / Podcast / Audiobook / วิดีโอ / บทความ / คอร์สเรียน |
+| `learning_notes` | บันทึก Quick Note / Deep Note — สิ่งที่ได้เรียนรู้, ความคิดที่เกิดขึ้น, สิ่งที่จะนำไปใช้ |
+| `action_tracker` | สิ่งที่นำไปทดลองทำ และสถานะ (ยังไม่ทำ / กำลังทำ / ทำแล้ว) |
+| `reflections` | รีเฟลกชันรายวัน/รายสัปดาห์ + ข้อความสะท้อนตัวเอง |
+| `learning_goals` | เป้าหมายชั่วโมงเรียนรู้รายเดือน |
+
+ตารางเดิม `notes` และ `friends` จากแอปเวอร์ชันก่อนหน้ายังอยู่ใน Supabase project เดิม **ไม่ได้ถูกลบ** — ดูวิธี migrate ข้อมูลเก่าเข้าโครงสร้างใหม่ด้านล่าง
 
 ## ขั้นตอนติดตั้ง
 
-### 1. สร้างโปรเจกต์ Supabase ใหม่ (แยกจาก VegFarm)
-1. ไปที่ https://supabase.com → สร้างโปรเจกต์ใหม่ชื่อ เช่น `knowledge-capture`
-2. เปิด **SQL Editor** → รัน `supabase_schema.sql` เพื่อสร้างตาราง `notes`
-3. ไปที่ **Storage** → สร้าง bucket ชื่อ `knowledge-photos` (ตั้งเป็น Public)
+### 1. รัน schema ใหม่ใน Supabase
 
-### 2. เชื่อมต่อ Supabase กับเว็บแอป
-แก้ไฟล์ `js/supabase.js`:
-```js
-const SUPABASE_URL = 'https://YOUR_KC_PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_KC_ANON_KEY_HERE';
+เปิด Supabase Dashboard ของโปรเจกต์เดิม (`ubtowmtqxakjfwllcali`) → **SQL Editor** → รันไฟล์ `supabase_schema_v2.sql` ทั้งไฟล์
+
+ไฟล์นี้จะ:
+1. สร้างตารางใหม่ทั้ง 5 ตารางด้านบน
+2. ย้ายข้อมูลจากตาราง `notes` เดิม (โหมดอ่าน/ฟัง/Mind/ตัวเอง) เข้าสู่ `learning_sources` + `learning_notes` + `action_tracker` อัตโนมัติ
+3. ไม่แตะต้อง/ไม่ลบตาราง `notes` และ `friends` เดิม — รันซ้ำได้อย่างปลอดภัย
+
+### 2. ตั้งค่าการเชื่อมต่อ Supabase (ออปชันนัล)
+
+ค่าเริ่มต้นใน `lib/supabase/client.ts` ชี้ไปที่โปรเจกต์ Supabase เดิมอยู่แล้ว (public anon key — ปลอดภัยที่จะฝังในโค้ดฝั่ง client เพราะมี RLS คุม) ถ้าต้องการเปลี่ยนไปใช้โปรเจกต์อื่น ตั้งค่า environment variables แทน:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=xxxxx
 ```
-หาค่าได้จาก Supabase Dashboard → Project Settings → API
 
 ### 3. รันแอปบนเครื่อง
+
 ```bash
-python3 -m http.server 8000
+npm install
+npm run dev
 ```
-เปิด `http://localhost:8000`
 
-### 4. (ออปชันนัล) เปิดใช้งาน "ค้นหาด้วย AI" และ "เชื่อมโยงความรู้ (AI)" แบบเข้าใจภาษาธรรมชาติจริง
-ถ้าไม่ทำขั้นตอนนี้ แอปจะยังใช้งานได้ปกติ โดยระบบค้นหาจะ fallback เป็นค้นหาด้วยคำสำคัญ และหน้าเชื่อมโยงความรู้จะจัดกลุ่มด้วยแท็กแทน
+เปิด `http://localhost:3000`
 
-1. ติดตั้ง [Supabase CLI](https://supabase.com/docs/guides/cli) แล้ว `supabase login` และ `supabase link --project-ref YOUR_PROJECT_REF`
-2. ขอ API key จาก https://console.anthropic.com แล้วตั้งค่า secret:
-   ```bash
-   supabase secrets set ANTHROPIC_API_KEY=sk-ant-xxxxx
-   ```
-3. Deploy ฟังก์ชัน:
-   ```bash
-   supabase functions deploy ai-knowledge --no-verify-jwt
-   ```
-4. รีเฟรชหน้าเว็บ — ปุ่ม "ค้นหา" และ "วิเคราะห์เชิงลึกด้วย AI" จะเรียกใช้ Claude อัตโนมัติ
+### 4. Build แบบ static export
 
-### 5. Deploy ออนไลน์ (ฟรี)
-- **GitHub Pages**: Settings → Pages → เลือก branch `main` → save
-- หรือใช้ **Netlify** / **Vercel**: เชื่อม GitHub repo นี้แล้ว deploy อัตโนมัติ (ไม่ต้องตั้ง base directory เพราะไฟล์อยู่ที่ root)
+```bash
+npm run build
+```
 
-> ⚠️ **สำคัญ**: อย่า commit `js/supabase.js` ที่มี key จริงขึ้น public repo ถ้าต้องการความปลอดภัยสูง — ตอนนี้ RLS ตั้งเป็น "allow all" เพื่อความง่ายในการเริ่มต้น ควรปรับให้เหมาะกับการใช้งานจริง (เช่นผูกกับผู้ใช้ที่ล็อกอิน) ก่อนใช้งานสาธารณะ
+ไฟล์ static จะออกมาที่ `out/`
 
-## ฟีเจอร์หลัก
+### 5. Deploy ขึ้น GitHub Pages
 
-1. **ปฏิทิน** — แตะวันที่เพื่อบันทึกหนังสือที่อ่าน หรือดู/แก้ไข/ลบบันทึกของวันนั้น (รองรับหลายเล่มต่อวัน)
-2. **Dashboard** — อ่านต่อเนื่องกี่วัน, สรุปแล้วกี่เล่ม, ไฮไลท์ทั้งหมดกี่ข้อ, ลงมือทำแล้วกี่ข้อ, Quote of the Day (สุ่มไฮไลท์ประจำวันแบบ deterministic ต่อวัน), กราฟจำนวนบันทึกใน 8 สัปดาห์
-3. **สุ่มทบทวน** — ดูสิ่งที่บันทึกไว้เมื่อ 1 / 7 / 30 / 90 / 365 วันก่อน ตามหลัก Spaced Repetition
-4. **ค้นหาด้วย AI** — ค้นหาด้วยประโยคธรรมชาติ ผ่าน Edge Function ที่เรียก Claude (ถ้าตั้งค่าไว้) หรือค้นหาด้วยคำสำคัญแบบ client-side (fallback อัตโนมัติ)
-5. **เชื่อมโยงความรู้** — จัดกลุ่มหนังสือที่ใช้แท็กร่วมกัน และมีปุ่ม "วิเคราะห์เชิงลึกด้วย AI" ให้ Claude หาความเชื่อมโยงเชิงเนื้อหาระหว่างเล่ม
-6. **Mind Map อัตโนมัติ** — วาดผังความรู้แบบ canvas (ศูนย์กลาง → แท็ก → หนังสือ) อัตโนมัติจากข้อมูลที่มี แตะโหนดเพื่อดูรายละเอียด
+Push ขึ้น branch `main` แล้ว GitHub Actions (`.github/workflows/deploy-pages.yml`) จะ build และ deploy ให้อัตโนมัติ — ต้องเปิด **Settings → Pages → Source: GitHub Actions** ไว้ก่อน
+
+## ฟีเจอร์หลัก (5 เมนู)
+
+1. **ภาพรวม** — สถิติการเรียนรู้, กำลังเรียนอยู่, เรียนรู้ล่าสุด, บันทึกล่าสุด, เป้าหมายเดือนนี้, รีเฟลกชันประจำสัปดาห์
+2. **บันทึก** — Quick Note (จดเร็ว) และ Deep Note (จดละเอียด: สิ่งที่ได้เรียนรู้ / ความคิดที่เกิดขึ้น / สิ่งที่จะนำไปใช้) ผูกกับแหล่งความรู้ได้ พร้อมดู/แก้ไข/ลบบันทึกย้อนหลัง
+3. **คลังความรู้** — ตารางหนังสือ/Podcast/วิดีโอ/บทความทั้งหมด ค้นหาและกรองตามประเภท/สถานะได้
+4. **ทบทวน** — เขียนรีเฟลกชันรายวัน/รายสัปดาห์ และติดตามสิ่งที่ต้องลงมือทำ (Action Tracker)
+5. **เติบโต** — กราฟความสม่ำเสมอ, ชั่วโมงเรียนรู้รายเดือนเทียบเป้าหมาย, หัวข้อที่เรียนรู้บ่อย, และข้อความสะท้อนการเปลี่ยนแปลงในชีวิตจริง
