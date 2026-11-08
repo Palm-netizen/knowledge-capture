@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navItems } from "./nav-items";
-import ThemeToggle from "./ThemeToggle";
+import { SidebarAccount } from "./AccountMenu";
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -36,7 +36,7 @@ export default function Sidebar() {
         })}
       </nav>
       <div className="mt-auto pt-6">
-        <ThemeToggle />
+        <SidebarAccount />
       </div>
     </aside>
   );

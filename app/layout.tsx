@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Thai, Plus_Jakarta_Sans } from "next/font/google";
 import AppShell from "@/components/layout/AppShell";
+import AuthGate from "@/components/auth/AuthGate";
 import "./globals.css";
 
 const ibmPlexThai = IBM_Plex_Sans_Thai({
@@ -35,7 +36,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="min-h-full bg-bg text-ink">
-        <AppShell>{children}</AppShell>
+        <AuthGate>
+          <AppShell>{children}</AppShell>
+        </AuthGate>
       </body>
     </html>
   );

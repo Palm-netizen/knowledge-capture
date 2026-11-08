@@ -59,9 +59,20 @@
 ไฟล์นี้จะ:
 1. สร้างตารางใหม่ทั้ง 5 ตารางด้านบน
 2. ย้ายข้อมูลจากตาราง `notes` เดิม (โหมดอ่าน/ฟัง/Mind/ตัวเอง) เข้าสู่ `learning_sources` + `learning_notes` + `action_tracker` อัตโนมัติ
-3. ไม่แตะต้อง/ไม่ลบตาราง `notes` และ `friends` เดิม — รันซ้ำได้อย่างปลอดภัย
+3. ไม่ลบตาราง `notes` และ `friends` เดิม — รันซ้ำได้อย่างปลอดภัย
+4. ล็อกทุกตาราง (รวมตารางเดิม) ให้เข้าถึงได้เฉพาะบัญชีเจ้าของ — ดูฟังก์ชัน `is_owner()` ในไฟล์
 
-### 2. ตั้งค่าการเชื่อมต่อ Supabase (ออปชันนัล)
+### 2. สร้างบัญชีล็อกอิน
+
+แอปต้องล็อกอินก่อนใช้งาน ชื่อผู้ใช้ `diamondpalm` จะถูกแปลงเป็นอีเมล `diamondpalm@example.com` (ดู `lib/auth.ts`)
+
+1. Supabase Dashboard → **Authentication → Users → Add user → Create new user**
+2. Email: `diamondpalm@example.com` · ตั้งรหัสผ่าน · ติ๊ก **Auto Confirm User**
+3. แนะนำ: **Authentication → Sign In / Providers** → ปิด **Allow new users to sign up**
+
+ถ้าต้องการเปลี่ยนชื่อผู้ใช้/อีเมล ให้แก้ทั้ง `is_owner()` ใน `supabase_schema_v2.sql` และ `LOGIN_EMAIL_DOMAIN` ใน `lib/auth.ts`
+
+### 3. ตั้งค่าการเชื่อมต่อ Supabase (ออปชันนัล)
 
 ค่าเริ่มต้นใน `lib/supabase/client.ts` ชี้ไปที่โปรเจกต์ Supabase เดิมอยู่แล้ว (public anon key — ปลอดภัยที่จะฝังในโค้ดฝั่ง client เพราะมี RLS คุม) ถ้าต้องการเปลี่ยนไปใช้โปรเจกต์อื่น ตั้งค่า environment variables แทน:
 
@@ -70,7 +81,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=xxxxx
 ```
 
-### 3. รันแอปบนเครื่อง
+### 4. รันแอปบนเครื่อง
 
 ```bash
 npm install
@@ -79,7 +90,7 @@ npm run dev
 
 เปิด `http://localhost:3000`
 
-### 4. Build แบบ static export
+### 5. Build แบบ static export
 
 ```bash
 npm run build
@@ -87,7 +98,7 @@ npm run build
 
 ไฟล์ static จะออกมาที่ `out/`
 
-### 5. Deploy ขึ้น GitHub Pages
+### 6. Deploy ขึ้น GitHub Pages
 
 Push ขึ้น branch `main` แล้ว GitHub Actions (`.github/workflows/deploy-pages.yml`) จะ build และ deploy ให้อัตโนมัติ — ต้องเปิด **Settings → Pages → Source: GitHub Actions** ไว้ก่อน
 

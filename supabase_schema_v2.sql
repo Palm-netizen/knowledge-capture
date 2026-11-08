@@ -7,6 +7,16 @@
 
 create extension if not exists pgcrypto;
 
+-- เจ้าของข้อมูล: บัญชีเดียวที่อ่าน/เขียนได้ (ล็อกอินด้วยชื่อผู้ใช้ diamondpalm
+-- ซึ่งแอปแปลงเป็นอีเมล diamondpalm@example.com) — ถ้าเปลี่ยนอีเมลล็อกอิน แก้ที่นี่ที่เดียว
+create or replace function is_owner()
+returns boolean
+language sql
+stable
+as $$
+  select coalesce(auth.jwt() ->> 'email', '') = 'diamondpalm@example.com';
+$$;
+
 create or replace function set_updated_at()
 returns trigger as $$
 begin
@@ -51,7 +61,9 @@ create trigger learning_sources_set_updated_at
 
 alter table learning_sources enable row level security;
 drop policy if exists "allow all" on learning_sources;
-create policy "allow all" on learning_sources for all using (true) with check (true);
+drop policy if exists "owner only" on learning_sources;
+create policy "owner only" on learning_sources for all to authenticated
+  using ((select is_owner())) with check ((select is_owner()));
 
 -- ------------------------------------------------------------
 -- 2) learning_notes — Quick Note / Deep Note
@@ -86,7 +98,9 @@ create trigger learning_notes_set_updated_at
 
 alter table learning_notes enable row level security;
 drop policy if exists "allow all" on learning_notes;
-create policy "allow all" on learning_notes for all using (true) with check (true);
+drop policy if exists "owner only" on learning_notes;
+create policy "owner only" on learning_notes for all to authenticated
+  using ((select is_owner())) with check ((select is_owner()));
 
 -- ------------------------------------------------------------
 -- 3) action_tracker — สิ่งที่นำไปทดลองทำ / งานที่ต้องตามต่อ
@@ -114,7 +128,9 @@ create trigger action_tracker_set_updated_at
 
 alter table action_tracker enable row level security;
 drop policy if exists "allow all" on action_tracker;
-create policy "allow all" on action_tracker for all using (true) with check (true);
+drop policy if exists "owner only" on action_tracker;
+create policy "owner only" on action_tracker for all to authenticated
+  using ((select is_owner())) with check ((select is_owner()));
 
 -- ------------------------------------------------------------
 -- 4) reflections — ทบทวนประจำวัน/สัปดาห์ + Growth Timeline
@@ -141,7 +157,9 @@ create trigger reflections_set_updated_at
 
 alter table reflections enable row level security;
 drop policy if exists "allow all" on reflections;
-create policy "allow all" on reflections for all using (true) with check (true);
+drop policy if exists "owner only" on reflections;
+create policy "owner only" on reflections for all to authenticated
+  using ((select is_owner())) with check ((select is_owner()));
 
 -- ------------------------------------------------------------
 -- 5) learning_goals — เป้าหมายการเรียนรู้รายเดือน (goal vs. result)
@@ -163,7 +181,9 @@ create trigger learning_goals_set_updated_at
 
 alter table learning_goals enable row level security;
 drop policy if exists "allow all" on learning_goals;
-create policy "allow all" on learning_goals for all using (true) with check (true);
+drop policy if exists "owner only" on learning_goals;
+create policy "owner only" on learning_goals for all to authenticated
+  using ((select is_owner())) with check ((select is_owner()));
 
 -- เป้าหมายรายสัปดาห์ "จำนวนไฟล์ N21 Mobile ที่จะฟัง" ใช้ตาราง learning_goals
 -- เดิม: goal_type = 'sources', period_month = วันจันทร์ของสัปดาห์นั้น
@@ -182,7 +202,9 @@ create table if not exists weekly_plan (
 
 alter table weekly_plan enable row level security;
 drop policy if exists "allow all" on weekly_plan;
-create policy "allow all" on weekly_plan for all using (true) with check (true);
+drop policy if exists "owner only" on weekly_plan;
+create policy "owner only" on weekly_plan for all to authenticated
+  using ((select is_owner())) with check ((select is_owner()));
 
 -- ============================================================
 -- Migration — ย้ายข้อมูลเดิมจากตาราง notes เข้าโครงสร้างใหม่
@@ -286,11 +308,25 @@ create policy "kc photos read" on storage.objects
 
 drop policy if exists "kc photos insert" on storage.objects;
 create policy "kc photos insert" on storage.objects
-  for insert with check (bucket_id = 'knowledge-photos');
+  for insert to authenticated with check (bucket_id = 'knowledge-photos' and (select is_owner()));
 
 drop policy if exists "kc photos delete" on storage.objects;
 create policy "kc photos delete" on storage.objects
-  for delete using (bucket_id = 'knowledge-photos');
+  for delete to authenticated using (bucket_id = 'knowledge-photos' and (select is_owner()));
+
+-- ตารางเดิมจากแอปเวอร์ชันแรก (ยังมีข้อมูลจริงอยู่) — ล็อกให้เจ้าของเท่านั้นเช่นกัน
+do $$
+declare t text;
+begin
+  foreach t in array array['notes', 'friends'] loop
+    if to_regclass('public.' || t) is not null then
+      execute format('alter table %I enable row level security', t);
+      execute format('drop policy if exists "allow all" on %I', t);
+      execute format('drop policy if exists "owner only" on %I', t);
+      execute format('create policy "owner only" on %I for all to authenticated using ((select is_owner())) with check ((select is_owner()))', t);
+    end if;
+  end loop;
+end $$;
 
 -- ============================================================
 -- หมายเหตุ: ตาราง friends เดิม (เมนูเพื่อน) ไม่มีเมนูใหม่ที่รองรับตามสเปค 5 เมนู
