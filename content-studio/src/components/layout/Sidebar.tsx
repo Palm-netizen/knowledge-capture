@@ -8,6 +8,7 @@ import { useStore } from "@/lib/store/StoreProvider";
 import { useQuickActions } from "@/components/capture/QuickActions";
 import { DiamondMark, Logo } from "@/components/ui/Logo";
 import { NAV_GROUPS, NAV_ITEMS, isActive } from "./nav";
+import { InstallApp } from "./InstallApp";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -73,6 +74,7 @@ export function Sidebar() {
         ))}
       </nav>
 
+      <InstallApp variant="sidebar" />
       <SyncIndicator />
     </aside>
   );
