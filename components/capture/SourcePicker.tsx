@@ -1,32 +1,32 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { fetchAllSourcesLite } from "@/lib/supabase/queries";
+import { fetchAllSources } from "@/lib/supabase/queries";
 import { createLearningSource } from "@/lib/supabase/mutations";
 import { SOURCE_TYPE_LABEL } from "@/lib/learning-labels";
-import type { SourceType } from "@/lib/supabase/types";
+import { kindOf, type CAPTURE_KINDS } from "@/lib/kinds";
+import type { LearningSource } from "@/lib/supabase/types";
 
-type LiteSource = { id: string; title: string; source_type: SourceType };
 type SelectedSource = { id: string; title: string };
-
-const SOURCE_TYPES: SourceType[] = ["book", "podcast", "audiobook", "video", "article", "course"];
+type Kind = (typeof CAPTURE_KINDS)[number];
 
 export default function SourcePicker({
+  kind,
   value,
   onChange,
 }: {
+  kind: Kind;
   value: SelectedSource | null;
   onChange: (source: SelectedSource | null) => void;
 }) {
-  const [sources, setSources] = useState<LiteSource[]>([]);
+  const [sources, setSources] = useState<LearningSource[]>([]);
   const [query, setQuery] = useState(value?.title ?? "");
   const [open, setOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [newType, setNewType] = useState<SourceType>("book");
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchAllSourcesLite()
+    fetchAllSources()
       .then(setSources)
       .catch(() => {});
   }, []);
@@ -35,23 +35,26 @@ export default function SourcePicker({
     setQuery(value?.title ?? "");
   }, [value?.id, value?.title]);
 
+  const ofKind = useMemo(() => sources.filter((s) => kindOf(s) === kind.value), [sources, kind.value]);
+
+  const q = query.trim();
   const matches = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return sources.slice(0, 8);
-    return sources.filter((s) => s.title.toLowerCase().includes(q)).slice(0, 8);
-  }, [sources, query]);
+    const lower = q.toLowerCase();
+    return (lower ? ofKind.filter((s) => s.title.toLowerCase().includes(lower)) : ofKind).slice(0, 8);
+  }, [ofKind, q]);
+  const exact = ofKind.some((s) => s.title.trim().toLowerCase() === q.toLowerCase());
 
   async function handleCreate() {
-    if (!query.trim()) return;
+    if (!q) return;
     setBusy(true);
+    setErr(null);
     try {
-      const created = await createLearningSource({ title: query.trim(), source_type: newType });
+      const created = await createLearningSource({ title: q, ...kind.createAs });
       setSources((prev) => [...prev, created]);
       onChange({ id: created.id, title: created.title });
-      setCreating(false);
       setOpen(false);
     } catch {
-      // picker stays open so the user can retry
+      setErr("เพิ่มไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setBusy(false);
     }
@@ -59,7 +62,7 @@ export default function SourcePicker({
 
   return (
     <div className="relative">
-      <label className="text-sm text-muted">แหล่งความรู้ (ไม่บังคับ)</label>
+      <label className="text-sm text-muted">{kind.pickerLabel}</label>
       <input
         type="text"
         value={query}
@@ -69,8 +72,8 @@ export default function SourcePicker({
           if (value) onChange(null);
         }}
         onFocus={() => setOpen(true)}
-        placeholder="ค้นหาหนังสือ / Podcast / วิดีโอ..."
-        className="mt-1 w-full rounded-[10px] border border-border bg-card px-3 py-2.5 text-sm text-ink outline-none focus:border-primary"
+        placeholder={`ค้นหา${kind.pickerLabel} หรือพิมพ์ชื่อใหม่...`}
+        className="mt-1 w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-ink outline-none focus:border-primary"
       />
       {value ? (
         <button
@@ -84,9 +87,10 @@ export default function SourcePicker({
           ล้างการเลือก
         </button>
       ) : null}
+      {err ? <p className="mt-1 text-xs text-danger">{err}</p> : null}
 
       {open && !value ? (
-        <div className="absolute z-10 mt-1 w-full rounded-[10px] border border-border bg-card shadow-sm">
+        <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           {matches.map((s) => (
             <button
               key={s.id}
@@ -95,49 +99,32 @@ export default function SourcePicker({
                 onChange({ id: s.id, title: s.title });
                 setOpen(false);
               }}
-              className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-secondary/60"
+              className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-panel"
             >
-              <span className="text-ink">{s.title}</span>
-              <span className="text-xs text-muted">{SOURCE_TYPE_LABEL[s.source_type]}</span>
+              <span className="truncate text-ink">{s.title}</span>
+              <span className="shrink-0 text-xs text-muted">{SOURCE_TYPE_LABEL[s.source_type]}</span>
             </button>
           ))}
-
-          {query.trim() ? (
-            creating ? (
-              <div className="border-t border-border p-3 space-y-2">
-                <p className="text-xs text-muted">
-                  เพิ่ม &ldquo;{query.trim()}&rdquo; เป็นแหล่งใหม่
-                </p>
-                <select
-                  value={newType}
-                  onChange={(e) => setNewType(e.target.value as SourceType)}
-                  className="w-full rounded-[8px] border border-border bg-card px-2 py-1.5 text-sm text-ink"
-                >
-                  {SOURCE_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {SOURCE_TYPE_LABEL[t]}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={handleCreate}
-                  className="w-full rounded-[8px] bg-primary px-3 py-1.5 text-sm text-white disabled:opacity-50"
-                >
-                  {busy ? "กำลังเพิ่ม..." : "เพิ่มแหล่งนี้"}
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setCreating(true)}
-                className="w-full border-t border-border px-3 py-2 text-left text-sm text-primary hover:bg-secondary/60"
-              >
-                + เพิ่ม &ldquo;{query.trim()}&rdquo; เป็นแหล่งใหม่
-              </button>
-            )
+          {q && !exact ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={handleCreate}
+              className="w-full border-t border-border px-3 py-2 text-left text-sm font-medium text-primary hover:bg-panel disabled:opacity-50"
+            >
+              {busy ? "กำลังเพิ่ม..." : `+ เพิ่ม “${q}” เป็น${kind.pickerLabel}ใหม่`}
+            </button>
           ) : null}
+          {!q && matches.length === 0 ? (
+            <p className="px-3 py-2 text-sm text-muted">ยังไม่มี{kind.pickerLabel} พิมพ์ชื่อเพื่อเพิ่มได้เลย</p>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="w-full border-t border-border px-3 py-1.5 text-left text-xs text-muted hover:bg-panel"
+          >
+            ปิด
+          </button>
         </div>
       ) : null}
     </div>

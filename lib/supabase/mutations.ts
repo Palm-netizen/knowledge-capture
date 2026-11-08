@@ -39,12 +39,12 @@ export async function uploadSourceCover(
 
   const publicUrl = bucket.getPublicUrl(path).data.publicUrl;
   const updated = await updateLearningSource(sourceId, { cover_url: publicUrl });
-  await removeStoredCovers([previousUrl]);
+  await removeStoredPhotos([previousUrl]);
   return updated;
 }
 
-// Best effort: delete covers we uploaded ourselves so unused photos don't pile up.
-async function removeStoredCovers(urls: string[]): Promise<void> {
+// Best effort: delete photos we uploaded ourselves so unused files don't pile up.
+export async function removeStoredPhotos(urls: string[]): Promise<void> {
   const marker = `/object/public/${PHOTO_BUCKET}/`;
   const paths = urls
     .map((url) => {
@@ -98,7 +98,7 @@ export async function mergeSources(keep: LearningSource, others: LearningSource[
   const { error: deleteError } = await supabase.from("learning_sources").delete().in("id", ids);
   if (deleteError) throw deleteError;
 
-  await removeStoredCovers(others.map((o) => o.cover_url).filter((url) => url && url !== adoptedCover));
+  await removeStoredPhotos(others.map((o) => o.cover_url).filter((url) => url && url !== adoptedCover));
   return merged;
 }
 
@@ -125,9 +125,27 @@ export async function updateLearningNote(id: string, patch: Partial<LearningNote
   return data;
 }
 
-export async function deleteLearningNote(id: string): Promise<void> {
-  const { error } = await supabase.from("learning_notes").delete().eq("id", id);
+export async function deleteLearningNote(note: Pick<LearningNote, "id" | "image_urls">): Promise<void> {
+  const { error } = await supabase.from("learning_notes").delete().eq("id", note.id);
   if (error) throw error;
+  await removeStoredPhotos(note.image_urls ?? []);
+}
+
+// Uploads already-compressed note photos and returns their public URLs.
+export async function uploadNotePhotos(images: Blob[]): Promise<string[]> {
+  const bucket = supabase.storage.from(PHOTO_BUCKET);
+  const month = new Date().toISOString().slice(0, 7);
+  const urls: string[] = [];
+  for (const image of images) {
+    const path = `notes/${month}/${crypto.randomUUID()}.jpg`;
+    const { error } = await bucket.upload(path, image, { contentType: "image/jpeg", cacheControl: "31536000" });
+    if (error) {
+      await removeStoredPhotos(urls);
+      throw error;
+    }
+    urls.push(bucket.getPublicUrl(path).data.publicUrl);
+  }
+  return urls;
 }
 
 export async function createActionItems(

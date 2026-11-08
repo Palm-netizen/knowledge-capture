@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { QuoteIcon } from "@/components/ui/icons";
 
 type IconProps = { className?: string };
 
@@ -70,6 +71,7 @@ export const navItems: NavItem[] = [
   { href: "/", label: "ภาพรวม", icon: IconOverview },
   { href: "/capture", label: "บันทึก", icon: IconCapture },
   { href: "/library", label: "คลังความรู้", icon: IconLibrary },
+  { href: "/quotes", label: "คลังคำพูด", icon: QuoteIcon },
   { href: "/reflection", label: "ทบทวน", icon: IconReflection },
   { href: "/growth", label: "เติบโต", icon: IconGrowth },
 ];

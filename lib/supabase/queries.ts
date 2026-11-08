@@ -39,18 +39,6 @@ export async function fetchSessionStats(): Promise<
   return data ?? [];
 }
 
-export async function fetchAllSourcesLite(
-  limit = 300
-): Promise<Pick<LearningSource, "id" | "title" | "source_type" | "category">[]> {
-  const { data, error } = await supabase
-    .from("learning_sources")
-    .select("*")
-    .order("title", { ascending: true })
-    .limit(limit);
-  if (error) throw error;
-  return data ?? [];
-}
-
 export async function fetchAllSources(limit = 500): Promise<LearningSource[]> {
   const { data, error } = await supabase
     .from("learning_sources")
@@ -172,16 +160,21 @@ export async function fetchWeeklyPlan(weekStartIso: string): Promise<WeeklyPlanS
   return data ?? [];
 }
 
-export type QuoteNote = Pick<LearningNote, "id" | "highlight" | "learned" | "source_id"> & {
-  source: Pick<LearningSource, "title"> | null;
+export type QuoteNote = Pick<LearningNote, "id" | "highlight" | "learned" | "source_id" | "captured_at"> & {
+  source: Pick<LearningSource, "title" | "category" | "source_type"> | null;
 };
 
-export async function fetchQuoteNotes(limit = 500): Promise<QuoteNote[]> {
-  const { data, error } = await supabase
+export async function fetchQuoteNotes({
+  highlightsOnly = false,
+  limit = 1000,
+}: { highlightsOnly?: boolean; limit?: number } = {}): Promise<QuoteNote[]> {
+  let query = supabase
     .from("learning_notes")
-    .select("id, highlight, learned, source_id, source:learning_sources(title)")
+    .select("id, highlight, learned, source_id, captured_at, source:learning_sources(*)")
     .order("captured_at", { ascending: false })
     .limit(limit);
+  if (highlightsOnly) query = query.neq("highlight", "");
+  const { data, error } = await query;
   if (error) throw error;
   return (data ?? []) as unknown as QuoteNote[];
 }

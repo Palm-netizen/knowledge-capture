@@ -4,12 +4,14 @@ import { useState } from "react";
 import { dayLabelThai, formatDuration, timeThai } from "@/lib/format";
 import { deleteLearningNote, updateLearningNote } from "@/lib/supabase/mutations";
 import type { LearningNote } from "@/lib/supabase/types";
+import NotePhotos, { HighlightList } from "@/components/notes/NotePhotos";
+import { joinHighlights, splitHighlights } from "@/lib/highlights";
 
 const FIELDS = [
   { key: "learned", label: "สิ่งที่ได้เรียนรู้" },
   { key: "thought", label: "ความคิดที่เกิดขึ้น" },
   { key: "will_apply", label: "สิ่งที่จะนำไปใช้" },
-  { key: "highlight", label: "ข้อความที่ประทับใจ" },
+  { key: "highlight", label: "ข้อความที่ประทับใจ (บรรทัดละ 1 ประโยค)" },
 ] as const;
 
 type FieldKey = (typeof FIELDS)[number]["key"];
@@ -36,13 +38,15 @@ export default function TimelineEntry({
     learned: note.learned,
     thought: note.thought,
     will_apply: note.will_apply,
-    highlight: note.highlight,
+    highlight: splitHighlights(note.highlight).join("\n"),
   });
   const [minutes, setMinutes] = useState(note.duration_minutes ? String(note.duration_minutes) : "");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const preview = note.learned || note.highlight || note.thought || "(ยังไม่มีรายละเอียด)";
+  const highlights = splitHighlights(note.highlight);
+  const preview = note.learned || highlights[0] || note.thought || "(ยังไม่มีรายละเอียด)";
+  const hasDetails = !!(note.learned || note.thought || note.will_apply || highlights.length || note.image_urls?.length);
 
   async function handleSave() {
     setBusy(true);
@@ -52,7 +56,7 @@ export default function TimelineEntry({
         learned: draft.learned.trim(),
         thought: draft.thought.trim(),
         will_apply: draft.will_apply.trim(),
-        highlight: draft.highlight.trim(),
+        highlight: joinHighlights(draft.highlight.split("\n")),
         duration_minutes: minutes ? Number(minutes) : null,
       });
       onUpdated(updated);
@@ -69,7 +73,7 @@ export default function TimelineEntry({
     setBusy(true);
     setErr(null);
     try {
-      await deleteLearningNote(note.id);
+      await deleteLearningNote(note);
       onDeleted(note.id);
     } catch {
       setErr("ลบไม่สำเร็จ ลองใหม่อีกครั้ง");
@@ -100,13 +104,20 @@ export default function TimelineEntry({
 
         {open && !editing ? (
           <div className="mt-3 space-y-3 rounded-2xl bg-panel p-4">
-            {FIELDS.filter((f) => note[f.key]).map((f) => (
+            {FIELDS.filter((f) => f.key !== "highlight" && note[f.key]).map((f) => (
               <div key={f.key}>
                 <p className="text-xs font-medium text-muted">{f.label}</p>
                 <p className="mt-0.5 whitespace-pre-line text-sm text-ink">{note[f.key]}</p>
               </div>
             ))}
-            {FIELDS.every((f) => !note[f.key]) ? <p className="text-sm text-muted">ยังไม่มีรายละเอียด</p> : null}
+            {highlights.length ? (
+              <div>
+                <p className="mb-1 text-xs font-medium text-muted">ข้อความที่ประทับใจ</p>
+                <HighlightList items={highlights} />
+              </div>
+            ) : null}
+            <NotePhotos urls={note.image_urls} />
+            {!hasDetails ? <p className="text-sm text-muted">ยังไม่มีรายละเอียด</p> : null}
             <div className="flex gap-4 pt-1 text-xs">
               <button type="button" onClick={() => setEditing(true)} className="font-medium text-primary hover:underline">
                 แก้ไข

@@ -9,7 +9,8 @@ import LoadingState from "@/components/ui/LoadingState";
 import ErrorState from "@/components/ui/ErrorState";
 import SourceCard from "@/components/sources/SourceCard";
 import QuoteCard from "@/components/dashboard/QuoteCard";
-import FocusCard, { BookIcon, HeadphonesIcon } from "@/components/dashboard/FocusCard";
+import FocusCard from "@/components/dashboard/FocusCard";
+import { BookIcon, HeadphonesIcon } from "@/components/ui/icons";
 import WeeklyGoalCard from "@/components/dashboard/WeeklyGoalCard";
 import WeeklyPlanCard from "@/components/dashboard/WeeklyPlanCard";
 import {

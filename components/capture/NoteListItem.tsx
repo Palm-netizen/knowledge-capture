@@ -7,6 +7,8 @@ import { NOTE_LEVEL_LABEL } from "@/lib/learning-labels";
 import { timeAgoThai } from "@/lib/format";
 import { updateLearningNote, deleteLearningNote } from "@/lib/supabase/mutations";
 import type { NoteWithSource } from "@/lib/supabase/queries";
+import NotePhotos, { HighlightList } from "@/components/notes/NotePhotos";
+import { splitHighlights } from "@/lib/highlights";
 
 export default function NoteListItem({
   note,
@@ -48,7 +50,7 @@ export default function NoteListItem({
     setBusyDelete(true);
     setErr(null);
     try {
-      await deleteLearningNote(note.id);
+      await deleteLearningNote(note);
       onDeleted(note.id);
     } catch {
       setErr("ลบไม่สำเร็จ ลองใหม่อีกครั้ง");
@@ -102,13 +104,19 @@ export default function NoteListItem({
     );
   }
 
+  const highlights = splitHighlights(note.highlight);
+
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-ink">{note.learned || note.highlight || "(ยังไม่มีรายละเอียด)"}</p>
-          {note.thought ? <p className="mt-1 text-sm text-muted">คิดว่า: {note.thought}</p> : null}
-          {note.will_apply ? <p className="mt-1 text-sm text-primary">จะนำไปใช้: {note.will_apply}</p> : null}
+        <div className="min-w-0 space-y-2">
+          {note.learned || highlights.length === 0 ? (
+            <p className="text-ink">{note.learned || "(ยังไม่มีรายละเอียด)"}</p>
+          ) : null}
+          <HighlightList items={highlights} />
+          {note.thought ? <p className="text-sm text-muted">คิดว่า: {note.thought}</p> : null}
+          {note.will_apply ? <p className="text-sm text-primary">จะนำไปใช้: {note.will_apply}</p> : null}
+          <NotePhotos urls={note.image_urls} />
           <p className="mt-2 text-xs text-muted">
             {note.source?.title ?? "ไม่ได้ผูกกับแหล่งข้อมูล"} · {timeAgoThai(note.captured_at)}
           </p>

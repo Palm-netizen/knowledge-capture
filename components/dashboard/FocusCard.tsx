@@ -35,26 +35,3 @@ export default function FocusCard({
     </Link>
   );
 }
-
-export function HeadphonesIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
-      <path d="M4 15v-3a8 8 0 0 1 16 0v3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <rect x="3" y="14" width="5" height="7" rx="2" stroke="currentColor" strokeWidth="1.7" />
-      <rect x="16" y="14" width="5" height="7" rx="2" stroke="currentColor" strokeWidth="1.7" />
-    </svg>
-  );
-}
-
-export function BookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
-      <path
-        d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5v-13ZM13 4h5.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H13V4Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
