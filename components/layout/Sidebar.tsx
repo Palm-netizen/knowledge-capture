@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navItems } from "./nav-items";
+import ThemeToggle from "./ThemeToggle";
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -13,8 +14,8 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex md:w-72 md:shrink-0 md:flex-col bg-card px-6 py-10">
-      <Link href="/" className="mb-10 px-3 font-display text-xl font-bold text-nav">
+    <aside className="hidden md:sticky md:top-0 md:flex md:h-screen md:w-72 md:shrink-0 md:flex-col md:overflow-y-auto bg-card px-6 py-10">
+      <Link href="/" className="mb-10 px-3 font-display text-xl font-bold text-ink">
         Knowledge Capture<span className="text-primary">.</span>
       </Link>
       <nav className="flex flex-col gap-1.5">
@@ -34,6 +35,9 @@ export default function Sidebar() {
           );
         })}
       </nav>
+      <div className="mt-auto pt-6">
+        <ThemeToggle />
+      </div>
     </aside>
   );
 }

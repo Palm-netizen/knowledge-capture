@@ -20,12 +20,20 @@ export const metadata: Metadata = {
   description: "สมุดบันทึกการเรียนรู้ส่วนตัว",
 };
 
+// Applies the saved theme before first paint so dark mode doesn't flash white.
+const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem("kc-theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}})()`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="th"
+      data-theme="light"
+      suppressHydrationWarning
       className={`${ibmPlexThai.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-full bg-bg text-ink">
         <AppShell>{children}</AppShell>
       </body>

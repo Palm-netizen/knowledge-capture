@@ -15,7 +15,7 @@ export default function GoalGauge({ pct, label }: { pct: number; label: string }
             <stop offset="100%" stopColor="var(--color-accent)" />
           </linearGradient>
         </defs>
-        <path d={ARC} fill="none" stroke="white" strokeWidth="16" strokeLinecap="round" />
+        <path d={ARC} fill="none" stroke="var(--color-card)" strokeWidth="16" strokeLinecap="round" />
         {pct > 0 ? (
           <path
             d={ARC}

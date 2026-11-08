@@ -34,6 +34,36 @@ html {
   color-scheme: light;
 }
 
+/* Dark mode: same token names, so every component follows automatically.
+   Set on <html> by the toggle (and by the inline script in layout.tsx
+   before first paint). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0B1120;
+  --color-panel: #131B2E;
+  --color-card: #1B2540;
+  --color-primary: #3B82F6;
+  --color-primary-dark: #2563EB;
+  --color-secondary: #22304A;
+  --color-ink: #E6EAF2;
+  --color-muted: #94A3B8;
+  --color-accent: #38BDF8;
+  --color-accent-light: #0E2A45;
+  --color-border: #2A3650;
+  --color-nav: #2563EB;
+
+  --color-good: #4ADE80;
+  --color-good-tint: #0F2E1D;
+  --color-warn: #FBBF24;
+  --color-warn-tint: #33260A;
+  --color-danger: #FB7185;
+  --color-danger-tint: #3A1220;
+
+  --color-hero-from: #13264A;
+  --color-hero-via: #0F2A40;
+  --color-hero-to: #221C45;
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-ink);
