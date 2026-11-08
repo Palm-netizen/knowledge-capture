@@ -24,7 +24,7 @@ export function MobileNav() {
       </button>
 
       <nav className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/95 backdrop-blur md:hidden">
-        <div className="grid h-16 grid-cols-6">
+        <div className="grid h-16 grid-cols-7">
           {NAV_ITEMS.map((item) => {
             const active = isActive(pathname, item.href);
             const Icon = item.icon;
@@ -32,7 +32,7 @@ export function MobileNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn("flex flex-col items-center justify-center gap-1 text-[10.5px]", active ? "font-medium text-primary" : "text-muted")}
+                className={cn("flex flex-col items-center justify-center gap-1 text-[10px] whitespace-nowrap", active ? "font-medium text-primary" : "text-muted")}
               >
                 <Icon size={21} strokeWidth={active ? 2.1 : 1.7} />
                 {item.short}
