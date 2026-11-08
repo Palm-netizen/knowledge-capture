@@ -156,6 +156,41 @@ export function TeamScene({ className }: { className?: string }) {
   );
 }
 
+/** Placeholder for the family photo: two adults and two kids under a heart. */
+export function FamilyScene({ className }: { className?: string }) {
+  const id = useIds("bg", "glow");
+  const people = [
+    { x: 110, y: 330, s: 1.0, c: "#FFFFFF" },
+    { x: 290, y: 330, s: 0.95, c: "#FFE1C7" },
+    { x: 175, y: 372, s: 0.62, c: "#FFD0E0" },
+    { x: 225, y: 380, s: 0.52, c: "#FFF3C4" },
+  ];
+  return (
+    <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" className={className} role="img" aria-label="พื้นที่สำหรับรูปครอบครัว">
+      <defs>
+        <linearGradient id={id.bg} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FF8A1F" />
+          <stop offset="1" stopColor="#F2557A" />
+        </linearGradient>
+        <radialGradient id={id.glow} cx=".5" cy=".55" r=".55">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity=".4" />
+          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="400" height="500" fill={`url(#${id.bg})`} />
+      <circle cx="200" cy="300" r="220" fill={`url(#${id.glow})`} />
+      <path d="M200 205 c-22 -30 -70 -20 -64 18 c4 26 40 44 64 64 c24 -20 60 -38 64 -64 c6 -38 -42 -48 -64 -18 z" fill="#FFFFFF" opacity=".35" />
+      {people.map((p) => (
+        <g key={p.x} transform={`translate(${p.x} ${p.y}) scale(${p.s})`} fill={p.c} fillOpacity=".92">
+          <circle cx="0" cy="-70" r="30" />
+          <path d="M-54 60 q0 -80 54 -80 q54 0 54 80 z" />
+        </g>
+      ))}
+      <rect x="0" y="420" width="400" height="80" fill="#7A1F3D" opacity=".25" />
+    </svg>
+  );
+}
+
 /** Fit, strong body — stylised flex pose. */
 export function BodyScene({ className }: { className?: string }) {
   const id = useIds("bg", "skin", "sun");
