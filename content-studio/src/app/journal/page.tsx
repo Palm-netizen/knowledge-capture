@@ -11,6 +11,7 @@ import { useFeedback } from "@/components/ui/Feedback";
 import type { TodoItem } from "@/lib/types";
 import { addDays, fmt, parseDateStr, relativeDayLabel, toDateStr, todayStr } from "@/lib/date";
 import { cn } from "@/lib/utils";
+import { GratitudeToday } from "@/components/goal/Gratitude";
 
 const TODO_COUNT = 5;
 
@@ -220,6 +221,10 @@ export default function JournalPage() {
             </Button>
           </div>
         </section>
+      </div>
+
+      <div className="mt-5">
+        <GratitudeToday date={date} compact />
       </div>
 
       {/* ---- history ---- */}

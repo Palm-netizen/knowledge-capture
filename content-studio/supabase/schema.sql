@@ -129,3 +129,18 @@ drop policy if exists "vision-board update" on storage.objects;
 create policy "vision-board update" on storage.objects for update to anon, authenticated using (bucket_id = 'vision-board') with check (bucket_id = 'vision-board');
 drop policy if exists "vision-board delete" on storage.objects;
 create policy "vision-board delete" on storage.objects for delete to anon, authenticated using (bucket_id = 'vision-board');
+
+-- ---------- Gratitude (Goal page) ----------
+alter table daily_logs add column if not exists gratitude jsonb not null default '[]'::jsonb;
+
+-- ---------- app_settings (small key → JSON values, e.g. advance-gratitude) ----------
+create table if not exists app_settings (
+  id          text primary key,
+  value       jsonb not null default 'null'::jsonb,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+alter table app_settings enable row level security;
+drop policy if exists "allow all app_settings" on app_settings;
+create policy "allow all app_settings" on app_settings for all to anon, authenticated using (true) with check (true);
+grant select, insert, update, delete on app_settings to anon, authenticated;
