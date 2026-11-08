@@ -11,6 +11,10 @@ import type {
 
 export type NoteWithSource = LearningNote & { source: LearningSource | null };
 
+// The Overview and Reflection pages both pick today's review set from "the
+// latest N notes"; they must load the same N to pick the same notes.
+export const REVIEW_NOTE_LIMIT = 2000;
+
 export async function fetchSourceById(id: string): Promise<LearningSource | null> {
   const { data, error } = await supabase.from("learning_sources").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
@@ -160,17 +164,20 @@ export async function fetchWeeklyPlan(weekStartIso: string): Promise<WeeklyPlanS
   return data ?? [];
 }
 
-export type QuoteNote = Pick<LearningNote, "id" | "highlight" | "learned" | "source_id" | "captured_at"> & {
+export type QuoteNote = Pick<
+  LearningNote,
+  "id" | "highlight" | "learned" | "thought" | "source_id" | "captured_at"
+> & {
   source: Pick<LearningSource, "title" | "category" | "source_type"> | null;
 };
 
 export async function fetchQuoteNotes({
   highlightsOnly = false,
-  limit = 1000,
+  limit = REVIEW_NOTE_LIMIT,
 }: { highlightsOnly?: boolean; limit?: number } = {}): Promise<QuoteNote[]> {
   let query = supabase
     .from("learning_notes")
-    .select("id, highlight, learned, source_id, captured_at, source:learning_sources(*)")
+    .select("id, highlight, learned, thought, source_id, captured_at, source:learning_sources(*)")
     .order("captured_at", { ascending: false })
     .limit(limit);
   if (highlightsOnly) query = query.neq("highlight", "");

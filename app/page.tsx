@@ -13,6 +13,7 @@ import FocusCard from "@/components/dashboard/FocusCard";
 import { BookIcon, HeadphonesIcon } from "@/components/ui/icons";
 import WeeklyGoalCard from "@/components/dashboard/WeeklyGoalCard";
 import WeeklyPlanCard from "@/components/dashboard/WeeklyPlanCard";
+import DailyReviewCard from "@/components/dashboard/DailyReviewCard";
 import {
   fetchAllSources,
   fetchSessionStats,
@@ -28,6 +29,8 @@ import { N21_CATEGORY } from "@/lib/learning-labels";
 import { formatThaiDate, greetingForNow } from "@/lib/format";
 import { localDateIso, sessionStatsBySource, startOfWeek } from "@/lib/stats";
 import { buildQuotePool, randomIndex, type Quote } from "@/lib/quotes";
+import { dailyReviewSet, pastNotes, type AgedNote } from "@/lib/review";
+import type { QuoteNote } from "@/lib/supabase/queries";
 
 type Session = Pick<LearningNote, "source_id" | "captured_at" | "duration_minutes">;
 
@@ -40,6 +43,7 @@ type DashboardData = {
   plan: WeeklyPlanSlot[] | null; // null = weekly_plan table not available yet
   quotes: Quote[];
   quoteIndex: number;
+  reviewSet: AgedNote<QuoteNote>[];
 };
 
 const wrap = "px-5 py-8 md:px-12 md:py-12 max-w-6xl";
@@ -84,6 +88,7 @@ export default function DashboardPage() {
           plan,
           quotes,
           quoteIndex: randomIndex(quotes.length),
+          reviewSet: dailyReviewSet(pastNotes(quoteNotes)),
         });
       } catch {
         if (active) setError("โหลดข้อมูลไม่สำเร็จ ตรวจสอบการเชื่อมต่อ Supabase แล้วลองใหม่อีกครั้ง");
@@ -171,6 +176,8 @@ export default function DashboardPage() {
       </div>
 
       <QuoteCard quotes={data.quotes} initialIndex={data.quoteIndex} />
+
+      <DailyReviewCard items={data.reviewSet} />
 
       {/* Focus: N21 Mobile + Books */}
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
