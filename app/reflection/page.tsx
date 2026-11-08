@@ -8,6 +8,7 @@ import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import ReflectionCard from "@/components/reflection/ReflectionCard";
 import ActionTrackerItem from "@/components/reflection/ActionTrackerItem";
+import ReviewOldKnowledge from "@/components/reflection/ReviewOldKnowledge";
 import { fetchAllReflections, fetchAllActionItems } from "@/lib/supabase/queries";
 import { createReflection } from "@/lib/supabase/mutations";
 import type { Reflection, ActionItem, ReflectionPeriod } from "@/lib/supabase/types";
@@ -96,7 +97,10 @@ export default function ReflectionPage() {
         <p className="mt-1 text-muted">เปลี่ยนความรู้ให้เป็นการลงมือทำ</p>
       </div>
 
+      <ReviewOldKnowledge />
+
       <Card className="p-5 space-y-3">
+        <h2 className="font-display text-xl text-ink">เขียนรีเฟลกชัน</h2>
         <div className="flex gap-2">
           <button
             type="button"
