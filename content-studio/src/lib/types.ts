@@ -86,6 +86,8 @@ export interface TodoItem {
   done: boolean;
 }
 
+export type ReviewKey = "courage" | "communication" | "consistency" | "letGo" | "growth";
+
 /** One row per day: 5 to-dos + the day's experience journal. */
 export interface DailyLog {
   id: string;
@@ -94,6 +96,7 @@ export interface DailyLog {
   experience: string;
   lesson: string;
   gratitude: string[]; // 3 things I'm grateful for today
+  review: Partial<Record<ReviewKey, number>>; // 1–5 self-rating on the 5 success metrics
   createdAt: string;
   updatedAt: string;
 }

@@ -5,6 +5,7 @@ import { PageContainer, PageHeader } from "@/components/layout/PageHeader";
 import { VisionBoard } from "@/components/goal/VisionBoard";
 import { Highlight } from "@/components/goal/Highlight";
 import { AdvanceGratitude, GratitudeRecall, GratitudeToday } from "@/components/goal/Gratitude";
+import { ReviewTrends } from "@/components/goal/Review";
 import { CLOSING, GOALS, HERO_REMINDER, METRICS, METRICS_INTRO, MISSION, REMINDERS } from "@/lib/goal-content";
 import { cn } from "@/lib/utils";
 
@@ -87,6 +88,10 @@ export default function GoalPage() {
           ))}
         </div>
       </section>
+
+      <div className="mt-4">
+        <ReviewTrends />
+      </div>
 
       {/* reminders */}
       <section className="mt-8">

@@ -18,6 +18,7 @@ import { PostItem } from "@/components/calendar/PostItem";
 import { MetricsDialog } from "@/components/performance/MetricsDialog";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import { WeeklySummary } from "@/components/overview/WeeklySummary";
+import { WeeklyReview } from "@/components/overview/WeeklyReview";
 import { PostLink } from "@/components/ui/PostLink";
 import { NextPostCard } from "@/components/overview/NextPostCard";
 import type { Idea, Publication } from "@/lib/types";
@@ -79,10 +80,13 @@ export default function OverviewPage() {
       </div>
 
       {!isEmpty && (
-        <div className="mb-8">
+        <div className="mb-4">
           <WeeklySummary />
         </div>
       )}
+      <div className="mb-8">
+        <WeeklyReview />
+      </div>
 
       {isEmpty ? (
         <Card className="p-6 md:p-10">

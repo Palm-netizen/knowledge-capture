@@ -39,7 +39,7 @@ interface StoreValue extends AppData {
   deletePublication: (id: string) => void;
 
   /** Create-or-update the journal row for a day (YYYY-MM-DD). */
-  saveDailyLog: (date: string, patch: Partial<Pick<DailyLog, "todos" | "experience" | "lesson" | "gratitude">>) => void;
+  saveDailyLog: (date: string, patch: Partial<Pick<DailyLog, "todos" | "experience" | "lesson" | "gratitude" | "review">>) => void;
   /** Read / write a small JSON setting by key. */
   getSetting: <T>(id: string, fallback: T) => T;
   saveSetting: (id: string, value: unknown) => void;
@@ -387,7 +387,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const now = nowIso();
       const row: DailyLog = cur
         ? { ...cur, ...patch, updatedAt: now }
-        : { id: uid(), date, todos: EMPTY_TODOS(), experience: "", lesson: "", gratitude: ["", "", ""], ...patch, createdAt: now, updatedAt: now };
+        : { id: uid(), date, todos: EMPTY_TODOS(), experience: "", lesson: "", gratitude: ["", "", ""], review: {}, ...patch, createdAt: now, updatedAt: now };
       commit(
         { ...d, dailyLogs: cur ? d.dailyLogs.map((l) => (l.id === row.id ? row : l)) : [row, ...d.dailyLogs] },
         { upsert: [["dailyLogs", row]] },
