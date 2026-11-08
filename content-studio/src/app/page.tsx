@@ -18,6 +18,7 @@ import { PostItem } from "@/components/calendar/PostItem";
 import { MetricsDialog } from "@/components/performance/MetricsDialog";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import { WeeklySummary } from "@/components/overview/WeeklySummary";
+import { PostLink } from "@/components/ui/PostLink";
 import { NextPostCard } from "@/components/overview/NextPostCard";
 import type { Idea, Publication } from "@/lib/types";
 import { addDays, daysUntilNewYear, fmt, greeting, isoToDateStr, relativeDayLabel, toDateStr, todayStr } from "@/lib/date";
@@ -259,6 +260,7 @@ export default function OverviewPage() {
                             {hasMetrics(p) && ` · เข้าถึง ${formatNumber(p.reach)}${er !== null ? ` · มีส่วนร่วม ${(er * 100).toFixed(1)}%` : ""}`}
                           </p>
                         </div>
+                        <PostLink url={p.postUrl} />
                         <Button size="sm" variant={hasMetrics(p) ? "ghost" : "secondary"} onClick={() => setMetricsFor(p)}>
                           {hasMetrics(p) ? "แก้ไขผล" : "บันทึกผล"}
                         </Button>

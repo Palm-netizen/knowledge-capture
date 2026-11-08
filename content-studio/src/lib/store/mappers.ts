@@ -32,6 +32,6 @@ function isTextColumn(k: string) {
   return [
     "details", "source_note", "objective", "audience", "pain_point", "hook", "main_message",
     "story", "takeaway", "cta", "script", "on_image_text", "caption", "hashtags",
-    "learnings", "improvements", "experience", "lesson",
+    "learnings", "improvements", "experience", "lesson", "post_url",
   ].includes(k);
 }

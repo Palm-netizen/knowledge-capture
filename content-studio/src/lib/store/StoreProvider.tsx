@@ -323,6 +323,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         scheduledTime: null,
         status: "draft",
         publishedAt: null,
+        postUrl: "",
         reach: null,
         views: null,
         likes: null,

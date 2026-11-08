@@ -18,6 +18,7 @@ import { fmt, isoToDateStr, parseDateStr, relativeDayLabel, todayStr } from "@/l
 import { engagementRate, hasMetrics } from "@/lib/selectors";
 import { cn, formatNumber } from "@/lib/utils";
 import { studioHref } from "@/lib/routes";
+import { PostLink } from "@/components/ui/PostLink";
 
 type Filter = "pending" | "recorded" | "all";
 
@@ -46,6 +47,10 @@ export default function PerformancePage() {
   );
 
   const overdue = store.publications.filter((p) => p.status === "scheduled" && p.scheduledDate && p.scheduledDate < today);
+  // posted at least a day ago but no numbers yet → time to record results
+  const needResults = store.publications.filter(
+    (p) => p.status === "published" && !hasMetrics(p) && postedDate(p) && postedDate(p) < today,
+  );
 
   const recorded = published.filter(hasMetrics);
   const list = filter === "pending" ? published.filter((p) => !hasMetrics(p)) : filter === "recorded" ? recorded : published;
@@ -62,6 +67,25 @@ export default function PerformancePage() {
   return (
     <PageContainer wide>
       <PageHeader title="Performance" description="บันทึกผลหลังโพสต์ แล้วเรียนรู้ว่าคอนเทนต์แบบไหนได้ผล" />
+
+      {needResults.length > 0 && filter !== "pending" && (
+        <Card className="mb-6 flex flex-wrap items-center gap-3 border border-primary/20 bg-primary-soft p-4">
+          <ChartColumn size={18} className="text-primary" />
+          <p className="min-w-0 flex-1 text-sm">
+            <span className="font-semibold">{needResults.length} โพสต์</span> โพสต์ไปแล้วเกิน 1 วัน ยังไม่ได้บันทึกยอด — เปิดโพสต์ดูตัวเลข แล้วกรอกได้เลย
+          </p>
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={() => {
+              setMonth(null);
+              setFilter("pending");
+            }}
+          >
+            ดูรายการ
+          </Button>
+        </Card>
+      )}
 
       {overdue.length > 0 && (
         <Card className="mb-6 border-[#EBD9B4] bg-[#FDF9F0] p-4">
@@ -169,7 +193,8 @@ export default function PerformancePage() {
                             {formatNumber(p[m.key])}
                           </td>
                         ))}
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-4 py-3 text-right whitespace-nowrap">
+                          <PostLink url={p.postUrl} />
                           <Button size="sm" variant={hasMetrics(p) ? "ghost" : "secondary"} onClick={() => setEditing(p)}>
                             {hasMetrics(p) ? "แก้ไข" : "บันทึกผล"}
                           </Button>
@@ -193,6 +218,7 @@ export default function PerformancePage() {
                           </Link>
                           <span className="text-xs text-muted">{postedDate(p) ? relativeDayLabel(postedDate(p)) : ""}</span>
                         </div>
+                        <PostLink url={p.postUrl} />
                         <Button size="sm" variant={hasMetrics(p) ? "ghost" : "primary"} onClick={() => setEditing(p)}>
                           {hasMetrics(p) ? "แก้ไข" : "บันทึกผล"}
                         </Button>

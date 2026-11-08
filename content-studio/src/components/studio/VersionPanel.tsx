@@ -12,6 +12,7 @@ import { ChipGroup, TextInput } from "@/components/ui/Form";
 import { Menu } from "@/components/ui/Menu";
 import { useFeedback } from "@/components/ui/Feedback";
 import { MetricsDialog } from "@/components/performance/MetricsDialog";
+import { PostLink } from "@/components/ui/PostLink";
 import { cn, formatNumber } from "@/lib/utils";
 import { WriteBlock } from "./EditorBlocks";
 
@@ -208,6 +209,18 @@ function VersionEditor({ pub, master, onDeleted }: { pub: Publication; master: C
             className="flex-1"
           />
           <TextInput type="time" aria-label="เวลา" value={pub.scheduledTime ?? ""} onChange={(e) => set("scheduledTime")(e.target.value || null)} className="w-32" />
+        </div>
+        <p className="mt-3 mb-1.5 text-xs font-medium tracking-wide text-muted">ลิงก์โพสต์</p>
+        <div className="flex items-center gap-1">
+          <TextInput
+            inputMode="url"
+            aria-label="ลิงก์โพสต์"
+            value={pub.postUrl ?? ""}
+            onChange={(e) => set("postUrl")(e.target.value)}
+            placeholder={`วางลิงก์โพสต์ ${meta.label} หลังโพสต์แล้ว`}
+            className="flex-1"
+          />
+          <PostLink url={pub.postUrl} label="เปิด" />
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
           {posted ? (

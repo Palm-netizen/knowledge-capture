@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { AutoTextarea, Field, TextInput } from "@/components/ui/Form";
 import { useFeedback } from "@/components/ui/Feedback";
 import { toDateStr, isoToDateStr } from "@/lib/date";
+import { PostLink } from "@/components/ui/PostLink";
 
 type Draft = Record<keyof Metrics, string>;
 
@@ -20,6 +21,7 @@ export function MetricsDialog({ pub, onClose }: { pub: Publication | null; onClo
   const [learnings, setLearnings] = useState("");
   const [improvements, setImprovements] = useState("");
   const [postedDate, setPostedDate] = useState("");
+  const [postUrl, setPostUrl] = useState("");
 
   useEffect(() => {
     if (!pub) return;
@@ -28,6 +30,7 @@ export function MetricsDialog({ pub, onClose }: { pub: Publication | null; onClo
     setDraft(d);
     setLearnings(pub.learnings);
     setImprovements(pub.improvements);
+    setPostUrl(pub.postUrl ?? "");
     setPostedDate(pub.publishedAt ? isoToDateStr(pub.publishedAt) : pub.scheduledDate ?? toDateStr(new Date()));
   }, [pub]);
 
@@ -45,6 +48,7 @@ export function MetricsDialog({ pub, onClose }: { pub: Publication | null; onClo
       ...metrics,
       learnings: learnings.trim(),
       improvements: improvements.trim(),
+      postUrl: postUrl.trim(),
       status: "published",
       publishedAt: postedDate ? new Date(`${postedDate}T12:00:00`).toISOString() : pub.publishedAt,
     });
@@ -77,9 +81,17 @@ export function MetricsDialog({ pub, onClose }: { pub: Publication | null; onClo
           save();
         }}
       >
-        <Field label="วันที่โพสต์จริง" className="max-w-[12rem]">
-          <TextInput type="date" value={postedDate} onChange={(e) => setPostedDate(e.target.value)} />
-        </Field>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
+          <Field label="ลิงก์โพสต์" hint="เปิดดูยอดแล้วกลับมากรอก">
+            <div className="flex items-center gap-1">
+              <TextInput inputMode="url" value={postUrl} onChange={(e) => setPostUrl(e.target.value)} placeholder="https://www.facebook.com/…" />
+              <PostLink url={postUrl} label="เปิดโพสต์" className="shrink-0" />
+            </div>
+          </Field>
+          <Field label="วันที่โพสต์จริง">
+            <TextInput type="date" value={postedDate} onChange={(e) => setPostedDate(e.target.value)} />
+          </Field>
+        </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {METRIC_FIELDS.map(({ key, label }) => (
             <Field key={key} label={label}>

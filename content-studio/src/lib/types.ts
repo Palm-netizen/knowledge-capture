@@ -74,6 +74,7 @@ export interface Publication extends Metrics {
   scheduledTime: string | null; // HH:mm
   status: PublicationStatus;
   publishedAt: string | null; // ISO
+  postUrl: string; // link to the live post (Facebook / IG / TikTok)
   learnings: string;
   improvements: string;
   createdAt: string;
