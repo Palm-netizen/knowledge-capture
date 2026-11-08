@@ -144,3 +144,6 @@ alter table app_settings enable row level security;
 drop policy if exists "allow all app_settings" on app_settings;
 create policy "allow all app_settings" on app_settings for all to anon, authenticated using (true) with check (true);
 grant select, insert, update, delete on app_settings to anon, authenticated;
+
+-- ---------- Link to the live post (per platform version) ----------
+alter table content_publications add column if not exists post_url text not null default '';

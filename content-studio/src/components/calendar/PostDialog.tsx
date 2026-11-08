@@ -11,6 +11,7 @@ import { ChipGroup, Field, TextInput } from "@/components/ui/Form";
 import { ContentStatusBadge, PlatformMark, PublicationStatusBadge } from "@/components/ui/Badge";
 import { useFeedback } from "@/components/ui/Feedback";
 import { studioHref } from "@/lib/routes";
+import { PostLink } from "@/components/ui/PostLink";
 import { usePostActions } from "./usePostActions";
 
 /** Click a post on the calendar → quick edit: date/time, posted, open, remove, delete. */
@@ -84,6 +85,13 @@ export function PostDialog({ pubId, onClose }: { pubId: string | null; onClose: 
             </Button>
           )}
         </div>
+
+        <Field label="ลิงก์โพสต์">
+          <div className="flex items-center gap-1">
+            <TextInput inputMode="url" value={pub.postUrl ?? ""} onChange={(e) => set({ postUrl: e.target.value })} placeholder="วางลิงก์หลังโพสต์แล้ว" />
+            <PostLink url={pub.postUrl} label="เปิด" className="shrink-0" />
+          </div>
+        </Field>
 
         <div className="space-y-1 border-t border-line pt-3">
           {!posted && pub.scheduledDate && (
