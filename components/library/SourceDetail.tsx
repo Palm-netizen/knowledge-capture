@@ -10,7 +10,8 @@ import ErrorState from "@/components/ui/ErrorState";
 import LoadingState from "@/components/ui/LoadingState";
 import CoverPicker from "./CoverPicker";
 import TimelineEntry from "./TimelineEntry";
-import { fetchAllSourcesLite, fetchNotesBySource, fetchSourceById } from "@/lib/supabase/queries";
+import MergePicker from "./MergePicker";
+import { fetchAllSources, fetchNotesBySource, fetchSourceById } from "@/lib/supabase/queries";
 import { createLearningNote, deleteLearningSource, updateLearningSource } from "@/lib/supabase/mutations";
 import {
   SOURCE_STATUS_LABEL,
@@ -47,7 +48,8 @@ export default function SourceDetail() {
 
   const [source, setSource] = useState<LearningSource | null>(null);
   const [notes, setNotes] = useState<LearningNote[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [allSources, setAllSources] = useState<LearningSource[]>([]);
+  const [merging, setMerging] = useState(false);
   const [state, setState] = useState<"loading" | "ready" | "missing" | "error">("loading");
 
   const [logging, setLogging] = useState(false);
@@ -75,8 +77,8 @@ export default function SourceDetail() {
       return;
     }
     let active = true;
-    Promise.all([fetchSourceById(id), fetchNotesBySource(id), fetchAllSourcesLite()])
-      .then(([s, n, lite]) => {
+    Promise.all([fetchSourceById(id), fetchNotesBySource(id), fetchAllSources()])
+      .then(([s, n, all]) => {
         if (!active) return;
         if (!s) {
           setState("missing");
@@ -84,7 +86,7 @@ export default function SourceDetail() {
         }
         setSource(s);
         setNotes(n);
-        setCategories(collectCategories(lite));
+        setAllSources(all);
         setState("ready");
       })
       .catch(() => {
@@ -121,6 +123,19 @@ export default function SourceDetail() {
   }
 
   const verb = sessionVerb(source.source_type);
+  const categories = collectCategories(allSources);
+
+  async function handleMerged(merged: LearningSource, mergedIds: string[]) {
+    setSource(merged);
+    setAllSources((prev) => prev.filter((s) => !mergedIds.includes(s.id)));
+    setMerging(false);
+    setEditing(false);
+    try {
+      setNotes(await fetchNotesBySource(merged.id));
+    } catch {
+      // Merge already succeeded; the timeline will be correct on next visit.
+    }
+  }
   const totalMinutes = notes.reduce((sum, n) => sum + (n.duration_minutes ?? 0), 0);
   const firstAt = notes.length ? notes[notes.length - 1].captured_at : source.started_at;
   const lastAt = notes.length ? notes[0].captured_at : null;
@@ -320,15 +335,25 @@ export default function SourceDetail() {
             >
               {editBusy ? "กำลังบันทึก..." : "บันทึก"}
             </button>
-            <button
-              type="button"
-              disabled={editBusy}
-              onClick={handleDelete}
-              className="text-sm text-danger hover:underline disabled:opacity-50"
-            >
-              ลบรายการนี้
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setMerging((v) => !v)}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                {merging ? "ปิดการรวม" : "รวมกับรายการอื่น"}
+              </button>
+              <button
+                type="button"
+                disabled={editBusy}
+                onClick={handleDelete}
+                className="text-sm text-danger hover:underline disabled:opacity-50"
+              >
+                ลบรายการนี้
+              </button>
+            </div>
           </div>
+          {merging ? <MergePicker source={source} candidates={allSources} onMerged={handleMerged} /> : null}
         </Card>
       ) : null}
 

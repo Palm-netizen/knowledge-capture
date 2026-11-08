@@ -7,6 +7,8 @@ import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import SourceRow from "@/components/library/SourceRow";
 import LibrarySummary from "@/components/library/LibrarySummary";
+import DuplicateReview from "@/components/library/DuplicateReview";
+import { findDuplicateGroups, groupKey } from "@/lib/duplicates";
 import { fetchAllSources, fetchSessionStats } from "@/lib/supabase/queries";
 import { createLearningSource, setSourcesCategory } from "@/lib/supabase/mutations";
 import { SOURCE_TYPE_LABEL, SOURCE_STATUS_LABEL, collectCategories } from "@/lib/learning-labels";
@@ -16,6 +18,15 @@ import type { LearningSource, SourceType, SourceStatus } from "@/lib/supabase/ty
 const ALL = "__all";
 const NO_CATEGORY = "__none";
 const CATEGORY_LIST_ID = "kc-library-categories";
+const DISMISSED_KEY = "kc-dismissed-duplicates";
+
+function readDismissed(): Set<string> {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(DISMISSED_KEY) ?? "[]"));
+  } catch {
+    return new Set();
+  }
+}
 
 const TYPE_FILTERS: { value: SourceType | "all"; label: string }[] = [
   { value: "all", label: "ทุกประเภท" },
@@ -68,9 +79,29 @@ export default function LibraryPage() {
     }
   }
 
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     load();
+    setDismissed(readDismissed());
   }, []);
+
+  function dismissGroup(key: string) {
+    setDismissed((prev) => {
+      const next = new Set(prev).add(key);
+      try {
+        localStorage.setItem(DISMISSED_KEY, JSON.stringify([...next]));
+      } catch {
+        // Storage unavailable (private mode etc.) — dismissal just won't persist.
+      }
+      return next;
+    });
+  }
+
+  const duplicateGroups = useMemo(
+    () => findDuplicateGroups(sources ?? []).filter((g) => !dismissed.has(groupKey(g))),
+    [sources, dismissed]
+  );
 
   const categories = useMemo(() => collectCategories(sources ?? []), [sources]);
   const hasUncategorized = (sources ?? []).some((s) => !s.category);
@@ -241,6 +272,8 @@ export default function LibraryPage() {
           {addError ? <p className="mt-2 text-xs text-danger">{addError}</p> : null}
         </Card>
       ) : null}
+
+      <DuplicateReview groups={duplicateGroups} statsById={statsById} onMerged={load} onDismiss={dismissGroup} />
 
       {/* หมวด */}
       <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
