@@ -20,7 +20,8 @@ export const NOTE_LEVEL_LABEL: Record<NoteLevel, string> = {
   deep: "Deep Note",
 };
 
-export const PRESET_CATEGORIES = ["N21 Mobile"];
+export const N21_CATEGORY = "N21 Mobile";
+export const PRESET_CATEGORIES = [N21_CATEGORY];
 
 export function collectCategories(sources: { category?: string | null }[]): string[] {
   const set = new Set(PRESET_CATEGORIES);

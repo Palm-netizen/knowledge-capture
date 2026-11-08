@@ -15,20 +15,21 @@ export function sumMinutes(items: { duration_minutes: number | null }[]): number
   return items.reduce((sum, item) => sum + (item.duration_minutes ?? 0), 0);
 }
 
-export function minutesInMonth(
-  items: { duration_minutes: number | null; captured_at: string }[],
-  monthDate: Date
-): number {
-  return items
-    .filter((item) => {
-      const d = new Date(item.captured_at);
-      return d.getFullYear() === monthDate.getFullYear() && d.getMonth() === monthDate.getMonth();
-    })
-    .reduce((sum, item) => sum + (item.duration_minutes ?? 0), 0);
+// YYYY-MM-DD in local time (toISOString would shift to UTC and can land on
+// the previous day in Thailand).
+export function localDateIso(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 export function startOfMonthIso(date = new Date()): string {
-  return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().slice(0, 10);
+  return localDateIso(new Date(date.getFullYear(), date.getMonth(), 1));
+}
+
+// Weeks start on Monday.
+export function startOfWeek(date = new Date()): Date {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return d;
 }
 
 export type SessionStats = { count: number; minutes: number; firstAt: string | null; lastAt: string | null };

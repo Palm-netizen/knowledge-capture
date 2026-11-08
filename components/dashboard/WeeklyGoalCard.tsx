@@ -2,38 +2,33 @@
 
 import { useState } from "react";
 import GoalGauge from "./GoalGauge";
-import { upsertMonthlyHoursGoal } from "@/lib/supabase/mutations";
-import { startOfMonthIso } from "@/lib/stats";
-import { formatHours } from "@/lib/format";
 
-export default function MonthlyGoalCard({
-  goalHours,
-  monthMinutes,
-  onGoalSaved,
+export default function WeeklyGoalCard({
+  goal,
+  done,
+  onSave,
 }: {
-  goalHours: number | null;
-  monthMinutes: number;
-  onGoalSaved: (targetHours: number) => void;
+  goal: number | null;
+  done: number;
+  onSave: (target: number) => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
-  const [input, setInput] = useState(goalHours ? String(goalHours) : "");
+  const [input, setInput] = useState(goal ? String(goal) : "");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const pct =
-    goalHours && goalHours > 0 ? Math.min(100, Math.round((monthMinutes / 60 / goalHours) * 100)) : 0;
+  const pct = goal && goal > 0 ? Math.min(100, Math.round((done / goal) * 100)) : 0;
 
   async function handleSave() {
-    const target = Number(input);
+    const target = Math.round(Number(input));
     if (!Number.isFinite(target) || target <= 0) {
-      setErr("ใส่จำนวนชั่วโมงที่มากกว่า 0");
+      setErr("ใส่จำนวนไฟล์ที่มากกว่า 0");
       return;
     }
     setSaving(true);
     setErr(null);
     try {
-      await upsertMonthlyHoursGoal(startOfMonthIso(), target);
-      onGoalSaved(target);
+      await onSave(target);
       setEditing(false);
     } catch {
       setErr("บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง");
@@ -44,16 +39,15 @@ export default function MonthlyGoalCard({
 
   return (
     <div className="flex h-full flex-col rounded-[20px] bg-linear-to-br from-hero-from via-hero-via to-hero-to p-6">
-      <h2 className="font-display text-xl text-ink">เป้าหมายเดือนนี้</h2>
+      <h2 className="font-display text-xl text-ink">เป้าหมายสัปดาห์นี้</h2>
+      <p className="mt-1 text-sm text-muted">จำนวนไฟล์ N21 Mobile ที่จะฟัง</p>
 
       <div className="mt-6">
         <GoalGauge pct={pct} label="ของเป้าหมาย" />
       </div>
 
       <p className="mt-4 text-center text-sm text-ink">
-        {goalHours
-          ? `เรียนไปแล้ว ${formatHours(monthMinutes)} จาก ${goalHours} ชม.`
-          : "ยังไม่ได้ตั้งเป้าหมายชั่วโมงเรียนรู้"}
+        {goal ? `ฟังแล้ว ${done} จาก ${goal} ไฟล์` : `สัปดาห์นี้ฟังแล้ว ${done} ไฟล์ · ยังไม่ได้ตั้งเป้าหมาย`}
       </p>
 
       <div className="mt-auto pt-5">
@@ -65,7 +59,7 @@ export default function MonthlyGoalCard({
                 min={1}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="จำนวนชั่วโมง"
+                placeholder="จำนวนไฟล์"
                 className="w-full rounded-full border border-border bg-card px-4 py-2 text-sm text-ink outline-none focus:border-primary"
               />
               <button
@@ -94,7 +88,7 @@ export default function MonthlyGoalCard({
             onClick={() => setEditing(true)}
             className="w-full rounded-full bg-linear-to-r from-primary to-accent px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
           >
-            {goalHours ? "แก้ไขเป้าหมาย" : "ตั้งเป้าหมาย"}
+            {goal ? "แก้ไขเป้าหมาย" : "ตั้งเป้าหมาย"}
           </button>
         )}
         {err ? <p className="mt-2 text-center text-xs text-danger">{err}</p> : null}

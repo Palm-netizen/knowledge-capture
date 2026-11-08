@@ -1,5 +1,13 @@
 import { supabase } from "./client";
-import type { LearningSource, LearningNote, ActionItem, Reflection, LearningGoal } from "./types";
+import type {
+  LearningSource,
+  LearningNote,
+  ActionItem,
+  Reflection,
+  LearningGoal,
+  GoalType,
+  WeeklyPlanSlot,
+} from "./types";
 
 export type NoteWithSource = LearningNote & { source: LearningSource | null };
 
@@ -53,20 +61,6 @@ export async function fetchAllSources(limit = 500): Promise<LearningSource[]> {
   return data ?? [];
 }
 
-export async function fetchSourcesByStatus(
-  status: LearningSource["status"],
-  limit = 6
-): Promise<LearningSource[]> {
-  const { data, error } = await supabase
-    .from("learning_sources")
-    .select("*")
-    .eq("status", status)
-    .order("updated_at", { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return data ?? [];
-}
-
 export async function fetchRecentNotes(limit = 6): Promise<NoteWithSource[]> {
   const { data, error } = await supabase
     .from("learning_notes")
@@ -75,12 +69,6 @@ export async function fetchRecentNotes(limit = 6): Promise<NoteWithSource[]> {
     .limit(limit);
   if (error) throw error;
   return (data ?? []) as unknown as NoteWithSource[];
-}
-
-export async function fetchNoteStats(): Promise<Pick<LearningNote, "duration_minutes" | "captured_at">[]> {
-  const { data, error } = await supabase.from("learning_notes").select("duration_minutes, captured_at");
-  if (error) throw error;
-  return data ?? [];
 }
 
 export async function fetchPendingActions(limit = 5): Promise<ActionItem[]> {
@@ -164,13 +152,36 @@ export async function fetchAllActionItems(limit = 100): Promise<ActionItem[]> {
   return data ?? [];
 }
 
-export async function fetchMonthlyHoursGoal(periodMonthIso: string): Promise<LearningGoal | null> {
+export async function fetchGoal(goalType: GoalType, periodIso: string): Promise<LearningGoal | null> {
   const { data, error } = await supabase
     .from("learning_goals")
     .select("*")
-    .eq("goal_type", "hours")
-    .eq("period_month", periodMonthIso)
+    .eq("goal_type", goalType)
+    .eq("period_month", periodIso)
     .maybeSingle();
   if (error) throw error;
   return data ?? null;
+}
+
+export async function fetchWeeklyPlan(weekStartIso: string): Promise<WeeklyPlanSlot[]> {
+  const { data, error } = await supabase
+    .from("weekly_plan")
+    .select("position, source_id")
+    .eq("week_start", weekStartIso);
+  if (error) throw error;
+  return data ?? [];
+}
+
+export type QuoteNote = Pick<LearningNote, "id" | "highlight" | "learned" | "source_id"> & {
+  source: Pick<LearningSource, "title"> | null;
+};
+
+export async function fetchQuoteNotes(limit = 500): Promise<QuoteNote[]> {
+  const { data, error } = await supabase
+    .from("learning_notes")
+    .select("id, highlight, learned, source_id, source:learning_sources(title)")
+    .order("captured_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as unknown as QuoteNote[];
 }

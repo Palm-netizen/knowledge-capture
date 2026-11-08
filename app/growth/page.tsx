@@ -14,7 +14,7 @@ import {
   fetchNotesForGrowth,
   fetchSourceCounts,
   fetchLatestAnyReflection,
-  fetchMonthlyHoursGoal,
+  fetchGoal,
 } from "@/lib/supabase/queries";
 import { formatHours } from "@/lib/format";
 import {
@@ -53,7 +53,7 @@ export default function GrowthPage() {
           fetchNotesForGrowth(),
           fetchSourceCounts(),
           fetchLatestAnyReflection(),
-          fetchMonthlyHoursGoal(startOfMonthIso()),
+          fetchGoal("hours", startOfMonthIso()),
         ]);
 
         if (!active) return;

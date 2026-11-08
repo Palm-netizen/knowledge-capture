@@ -4,84 +4,85 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import SectionHeading from "@/components/ui/SectionHeading";
-import Pill from "@/components/ui/Pill";
-import StatTile from "@/components/ui/StatTile";
 import EmptyState from "@/components/ui/EmptyState";
 import LoadingState from "@/components/ui/LoadingState";
 import ErrorState from "@/components/ui/ErrorState";
 import SourceCard from "@/components/sources/SourceCard";
-import MonthlyGoalCard from "@/components/dashboard/MonthlyGoalCard";
+import QuoteCard from "@/components/dashboard/QuoteCard";
+import FocusCard, { BookIcon, HeadphonesIcon } from "@/components/dashboard/FocusCard";
+import WeeklyGoalCard from "@/components/dashboard/WeeklyGoalCard";
+import WeeklyPlanCard from "@/components/dashboard/WeeklyPlanCard";
 import {
-  fetchSourcesByStatus,
-  fetchRecentNotes,
-  fetchNoteStats,
+  fetchAllSources,
+  fetchSessionStats,
   fetchPendingActions,
   fetchLatestReflection,
-  fetchSourceCounts,
-  fetchMonthlyHoursGoal,
-  type NoteWithSource,
+  fetchGoal,
+  fetchWeeklyPlan,
+  fetchQuoteNotes,
 } from "@/lib/supabase/queries";
-import type { LearningSource, ActionItem, Reflection } from "@/lib/supabase/types";
-import { NOTE_LEVEL_LABEL } from "@/lib/learning-labels";
-import { formatHours, formatThaiDate, greetingForNow, timeAgoThai } from "@/lib/format";
-import { computeStreakDays, minutesInMonth, startOfMonthIso, sumMinutes } from "@/lib/stats";
+import { upsertGoal } from "@/lib/supabase/mutations";
+import type { LearningSource, LearningNote, ActionItem, Reflection, WeeklyPlanSlot } from "@/lib/supabase/types";
+import { N21_CATEGORY } from "@/lib/learning-labels";
+import { formatThaiDate, greetingForNow } from "@/lib/format";
+import { localDateIso, sessionStatsBySource, startOfWeek } from "@/lib/stats";
+import { buildQuotePool, randomIndex, type Quote } from "@/lib/quotes";
+
+type Session = Pick<LearningNote, "source_id" | "captured_at" | "duration_minutes">;
 
 type DashboardData = {
-  currentlyReading: LearningSource[];
-  recentlyCompleted: LearningSource[];
-  recentNotes: NoteWithSource[];
+  sources: LearningSource[];
+  sessions: Session[];
   pendingActions: ActionItem[];
   weeklyReflection: Reflection | null;
-  totalHoursMinutes: number;
-  monthHoursMinutes: number;
-  monthGoalHours: number | null;
-  streakDays: number;
-  sourceCounts: { total: number; completed: number };
+  weekGoal: number | null;
+  plan: WeeklyPlanSlot[] | null; // null = weekly_plan table not available yet
+  quotes: Quote[];
+  quoteIndex: number;
 };
+
+const wrap = "px-5 py-8 md:px-12 md:py-12 max-w-6xl";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const weekStart = startOfWeek();
+  const weekStartIso = localDateIso(weekStart);
+
   useEffect(() => {
     let active = true;
+    const weekIso = localDateIso(startOfWeek());
 
     async function load() {
       try {
-        const monthIso = startOfMonthIso();
-        const [
-          currentlyReading,
-          recentlyCompleted,
-          recentNotes,
-          noteStats,
-          pendingActions,
-          weeklyReflection,
-          sourceCounts,
-          monthGoal,
-        ] = await Promise.all([
-          fetchSourcesByStatus("in_progress", 6),
-          fetchSourcesByStatus("completed", 6),
-          fetchRecentNotes(6),
-          fetchNoteStats(),
+        const [sources, sessions, pendingActions, weeklyReflection, goal, quoteNotes] = await Promise.all([
+          fetchAllSources(),
+          fetchSessionStats(),
           fetchPendingActions(4),
           fetchLatestReflection("weekly"),
-          fetchSourceCounts(),
-          fetchMonthlyHoursGoal(monthIso),
+          fetchGoal("sources", weekIso),
+          fetchQuoteNotes(),
         ]);
-
+        // Separate so the rest of the page still works before the
+        // weekly_plan table has been created.
+        let plan: WeeklyPlanSlot[] | null = null;
+        try {
+          plan = await fetchWeeklyPlan(weekIso);
+        } catch {
+          plan = null;
+        }
         if (!active) return;
-
+        const quotes = buildQuotePool(quoteNotes);
         setData({
-          currentlyReading,
-          recentlyCompleted,
-          recentNotes,
+          sources,
+          sessions,
           pendingActions,
           weeklyReflection,
-          totalHoursMinutes: sumMinutes(noteStats),
-          monthHoursMinutes: minutesInMonth(noteStats, new Date()),
-          monthGoalHours: monthGoal?.target_value ?? null,
-          streakDays: computeStreakDays(noteStats.map((n) => n.captured_at)),
-          sourceCounts,
+          weekGoal: goal?.target_value ?? null,
+          plan,
+          quotes,
+          quoteIndex: randomIndex(quotes.length),
         });
       } catch {
         if (active) setError("โหลดข้อมูลไม่สำเร็จ ตรวจสอบการเชื่อมต่อ Supabase แล้วลองใหม่อีกครั้ง");
@@ -96,7 +97,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="px-5 py-8 md:px-12 md:py-12 max-w-6xl">
+      <div className={wrap}>
         <ErrorState message={error} />
       </div>
     );
@@ -104,20 +105,59 @@ export default function DashboardPage() {
 
   if (!data) {
     return (
-      <div className="px-5 py-8 md:px-12 md:py-12 max-w-6xl">
+      <div className={wrap}>
         <LoadingState />
       </div>
     );
   }
 
-  const today = formatThaiDate(new Date().toISOString());
+  const statsById = sessionStatsBySource(data.sessions);
+  const sessionsThisWeek = data.sessions.filter((s) => new Date(s.captured_at) >= weekStart);
+  const engaged = (s: LearningSource) => (statsById.get(s.id)?.count ?? 0) > 0 || s.status === "completed";
+  const countSessions = (list: LearningSource[]) => list.reduce((n, s) => n + (statsById.get(s.id)?.count ?? 0), 0);
+
+  const n21 = data.sources.filter((s) => s.category === N21_CATEGORY);
+  const n21Ids = new Set(n21.map((s) => s.id));
+  const n21WeekSessions = sessionsThisWeek.filter((s) => s.source_id && n21Ids.has(s.source_id));
+  const listenedThisWeek = new Set(n21WeekSessions.map((s) => s.source_id as string));
+
+  const books = data.sources.filter((s) => s.source_type === "book" && s.category !== N21_CATEGORY);
+  const bookIds = new Set(books.map((s) => s.id));
+  const bookWeekSessions = sessionsThisWeek.filter((s) => s.source_id && bookIds.has(s.source_id)).length;
+
+  const sourceById = new Map(data.sources.map((s) => [s.id, s]));
+  const slots = new Map<number, LearningSource>();
+  (data.plan ?? []).forEach((p) => {
+    const s = sourceById.get(p.source_id);
+    if (s) slots.set(p.position, s);
+  });
+
+  const currentlyReading = data.sources
+    .filter((s) => s.status === "in_progress")
+    .sort((a, b) => (statsById.get(b.id)?.lastAt ?? b.updated_at).localeCompare(statsById.get(a.id)?.lastAt ?? a.updated_at))
+    .slice(0, 8);
+
+  async function saveWeekGoal(target: number) {
+    await upsertGoal("sources", weekStartIso, target);
+    setData((prev) => (prev ? { ...prev, weekGoal: target } : prev));
+  }
+
+  function handlePlanChange(position: number, source: LearningSource | null) {
+    setData((prev) => {
+      if (!prev) return prev;
+      const plan = (prev.plan ?? []).filter((p) => p.position !== position);
+      if (source) plan.push({ position, source_id: source.id });
+      const sources = source && !prev.sources.some((s) => s.id === source.id) ? [source, ...prev.sources] : prev.sources;
+      return { ...prev, plan, sources };
+    });
+  }
 
   return (
-    <div className="px-5 py-8 md:px-12 md:py-12 max-w-6xl space-y-12">
-      {/* Welcome Message */}
+    <div className={`${wrap} space-y-10`}>
+      {/* Welcome */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm text-muted">{today}</p>
+          <p className="text-sm text-muted">{formatThaiDate(new Date().toISOString())}</p>
           <h1 className="font-display text-4xl text-ink mt-1">{greetingForNow()}</h1>
           <p className="mt-2 text-muted">วันนี้มีอะไรให้บันทึกบ้าง?</p>
         </div>
@@ -129,66 +169,50 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Learning Statistics */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatTile label="ชั่วโมงเรียนรู้ทั้งหมด" value={`${formatHours(data.totalHoursMinutes)} ชม.`} />
-        <StatTile
-          label="เรียนจบแล้ว"
-          value={`${data.sourceCounts.completed}/${data.sourceCounts.total}`}
-          sublabel="เล่ม/รายการ"
+      <QuoteCard quotes={data.quotes} initialIndex={data.quoteIndex} />
+
+      {/* Focus: N21 Mobile + Books */}
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <FocusCard
+          title={N21_CATEGORY}
+          icon={<HeadphonesIcon />}
+          href={`/library?category=${encodeURIComponent(N21_CATEGORY)}`}
+          stats={[
+            { label: "ไฟล์ทั้งหมด", value: n21.length },
+            { label: "ครั้งที่ฟัง", value: countSessions(n21) },
+          ]}
+          footnote={`ฟังแล้ว ${n21.filter(engaged).length} ไฟล์ · สัปดาห์นี้ฟัง ${n21WeekSessions.length} ครั้ง`}
         />
-        <StatTile label="ต่อเนื่อง" value={`${data.streakDays} วัน`} sublabel="บันทึกติดต่อกัน" />
+        <FocusCard
+          title="หนังสือ"
+          icon={<BookIcon />}
+          href="/library?type=book"
+          stats={[
+            { label: "เล่มที่อ่าน", value: books.filter(engaged).length },
+            { label: "ครั้งที่อ่าน", value: countSessions(books) },
+          ]}
+          footnote={`อ่านจบ ${books.filter((b) => b.status === "completed").length} เล่ม · สัปดาห์นี้อ่าน ${bookWeekSessions} ครั้ง`}
+        />
       </section>
 
-      {/* Monthly goal + Weekly Reflection */}
+      {/* Weekly goal + weekly N21 plan */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-5">
         <div className="lg:col-span-2">
-          <MonthlyGoalCard
-            goalHours={data.monthGoalHours}
-            monthMinutes={data.monthHoursMinutes}
-            onGoalSaved={(target) => setData((prev) => (prev ? { ...prev, monthGoalHours: target } : prev))}
+          <WeeklyGoalCard goal={data.weekGoal} done={listenedThisWeek.size} onSave={saveWeekGoal} />
+        </div>
+        <div className="lg:col-span-3">
+          <WeeklyPlanCard
+            weekStartIso={weekStartIso}
+            slots={slots}
+            n21Sources={n21}
+            listenedThisWeek={listenedThisWeek}
+            unavailable={data.plan === null}
+            onChange={handlePlanChange}
           />
         </div>
-        <Card className="p-6 lg:col-span-3">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-xl text-ink">ทบทวนประจำสัปดาห์</h2>
-            <Link href="/reflection" className="text-sm font-medium text-primary hover:underline">
-              เขียนรีเฟลกชันใหม่ →
-            </Link>
-          </div>
-          {data.weeklyReflection ? (
-            <div className="space-y-2">
-              <p className="text-xs text-muted">
-                สัปดาห์ของ {formatThaiDate(data.weeklyReflection.period_start, { short: true })}
-              </p>
-              {data.weeklyReflection.reflection_text ? (
-                <p className="text-lg text-ink">&ldquo;{data.weeklyReflection.reflection_text}&rdquo;</p>
-              ) : null}
-              {data.weeklyReflection.key_lessons ? (
-                <p className="text-sm text-muted">{data.weeklyReflection.key_lessons}</p>
-              ) : null}
-            </div>
-          ) : (
-            <EmptyState message="ยังไม่มีรีเฟลกชันประจำสัปดาห์ ลองเขียนสรุปสัปดาห์นี้ดูสิ" />
-          )}
-
-          {data.pendingActions.length > 0 ? (
-            <div className="mt-6 rounded-2xl bg-card p-4">
-              <p className="text-xs font-medium text-muted mb-2">สิ่งที่ยังต้องตามต่อ</p>
-              <ul className="space-y-2">
-                {data.pendingActions.map((action) => (
-                  <li key={action.id} className="text-sm text-ink flex items-start gap-2">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                    {action.action_text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </Card>
       </section>
 
-      {/* Currently Reading */}
+      {/* Currently learning */}
       <section>
         <SectionHeading
           title="กำลังเรียนอยู่"
@@ -198,67 +222,54 @@ export default function DashboardPage() {
             </Link>
           }
         />
-        {data.currentlyReading.length === 0 ? (
+        {currentlyReading.length === 0 ? (
           <EmptyState message="ยังไม่มีสิ่งที่กำลังเรียนอยู่ ไปเพิ่มในคลังความรู้กันเถอะ" />
         ) : (
           <div className="flex gap-4 overflow-x-auto pb-2">
-            {data.currentlyReading.map((source) => (
+            {currentlyReading.map((source) => (
               <SourceCard key={source.id} source={source} />
             ))}
           </div>
         )}
       </section>
 
-      {/* Recently Learned */}
-      <section>
-        <SectionHeading title="เรียนรู้ล่าสุด" />
-        {data.recentlyCompleted.length === 0 ? (
-          <EmptyState message="ยังไม่มีสิ่งที่เรียนจบ เมื่อจบเล่มแรกจะมาโชว์ที่นี่" />
-        ) : (
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {data.recentlyCompleted.map((source) => (
-              <SourceCard key={source.id} source={source} />
-            ))}
+      {/* Weekly reflection */}
+      <Card className="p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-display text-xl text-ink">ทบทวนประจำสัปดาห์</h2>
+          <Link href="/reflection" className="text-sm font-medium text-primary hover:underline">
+            เขียนรีเฟลกชันใหม่ →
+          </Link>
+        </div>
+        {data.weeklyReflection ? (
+          <div className="space-y-2">
+            <p className="text-xs text-muted">
+              สัปดาห์ของ {formatThaiDate(data.weeklyReflection.period_start, { short: true })}
+            </p>
+            {data.weeklyReflection.reflection_text ? (
+              <p className="text-lg text-ink">&ldquo;{data.weeklyReflection.reflection_text}&rdquo;</p>
+            ) : null}
+            {data.weeklyReflection.key_lessons ? (
+              <p className="text-sm text-muted">{data.weeklyReflection.key_lessons}</p>
+            ) : null}
           </div>
-        )}
-      </section>
-
-      {/* Recent Notes */}
-      <section>
-        <SectionHeading
-          title="บันทึกล่าสุด"
-          action={
-            <Link href="/capture" className="text-sm text-primary hover:underline">
-              ดูทั้งหมด
-            </Link>
-          }
-        />
-        {data.recentNotes.length === 0 ? (
-          <EmptyState message="ยังไม่มีบันทึก เริ่มจดสิ่งที่เรียนรู้ได้ที่หน้า Capture" />
         ) : (
-          <div className="space-y-3">
-            {data.recentNotes.map((note) => (
-              <Link key={note.id} href="/capture" className="block">
-                <Card className="p-5 transition-colors hover:bg-secondary">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-ink line-clamp-2">
-                        {note.learned || note.highlight || "(ยังไม่มีรายละเอียด)"}
-                      </p>
-                      <p className="mt-1 text-xs text-muted">
-                        {note.source?.title ?? "ไม่ได้ผูกกับแหล่งข้อมูล"} · {timeAgoThai(note.captured_at)}
-                      </p>
-                    </div>
-                    <Pill tone={note.note_level === "deep" ? "accent" : "neutral"}>
-                      {NOTE_LEVEL_LABEL[note.note_level]}
-                    </Pill>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
+          <EmptyState message="ยังไม่มีรีเฟลกชันประจำสัปดาห์ ลองเขียนสรุปสัปดาห์นี้ดูสิ" />
         )}
-      </section>
+        {data.pendingActions.length > 0 ? (
+          <div className="mt-6 rounded-2xl bg-card p-4">
+            <p className="text-xs font-medium text-muted mb-2">สิ่งที่ยังต้องตามต่อ</p>
+            <ul className="space-y-2">
+              {data.pendingActions.map((action) => (
+                <li key={action.id} className="text-sm text-ink flex items-start gap-2">
+                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                  {action.action_text}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </Card>
     </div>
   );
 }

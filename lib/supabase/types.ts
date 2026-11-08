@@ -63,6 +63,11 @@ export interface Reflection {
   updated_at: string;
 }
 
+export interface WeeklyPlanSlot {
+  position: number;
+  source_id: string;
+}
+
 export interface LearningGoal {
   id: string;
   goal_type: GoalType;

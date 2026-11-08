@@ -165,6 +165,25 @@ alter table learning_goals enable row level security;
 drop policy if exists "allow all" on learning_goals;
 create policy "allow all" on learning_goals for all using (true) with check (true);
 
+-- เป้าหมายรายสัปดาห์ "จำนวนไฟล์ N21 Mobile ที่จะฟัง" ใช้ตาราง learning_goals
+-- เดิม: goal_type = 'sources', period_month = วันจันทร์ของสัปดาห์นั้น
+
+-- ------------------------------------------------------------
+-- 6) weekly_plan — หัวข้อ N21 Mobile ที่ตั้งใจเรียนในสัปดาห์ (3 ช่อง)
+-- ------------------------------------------------------------
+create table if not exists weekly_plan (
+  id          uuid primary key default gen_random_uuid(),
+  week_start  date not null,
+  position    smallint not null check (position between 1 and 3),
+  source_id   uuid not null references learning_sources(id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  unique (week_start, position)
+);
+
+alter table weekly_plan enable row level security;
+drop policy if exists "allow all" on weekly_plan;
+create policy "allow all" on weekly_plan for all using (true) with check (true);
+
 -- ============================================================
 -- Migration — ย้ายข้อมูลเดิมจากตาราง notes เข้าโครงสร้างใหม่
 -- ไม่แก้ไข/ลบตาราง notes หรือ friends เดิม

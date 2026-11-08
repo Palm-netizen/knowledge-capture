@@ -84,6 +84,12 @@ export default function LibraryPage() {
   useEffect(() => {
     load();
     setDismissed(readDismissed());
+    // Deep links from the Overview cards, e.g. ?category=N21%20Mobile or ?type=book
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get("category");
+    if (category) setCategoryFilter(category);
+    const type = params.get("type");
+    if (type && type in SOURCE_TYPE_LABEL) setTypeFilter(type as SourceType);
   }, []);
 
   function dismissGroup(key: string) {
