@@ -116,3 +116,16 @@ alter table daily_logs enable row level security;
 drop policy if exists "allow all daily_logs" on daily_logs;
 create policy "allow all daily_logs" on daily_logs for all to anon, authenticated using (true) with check (true);
 grant select, insert, update, delete on daily_logs to anon, authenticated;
+
+-- ---------- Storage: vision-board photos (Goal page) ----------
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('vision-board', 'vision-board', true, 5242880, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do nothing;
+drop policy if exists "vision-board read" on storage.objects;
+create policy "vision-board read" on storage.objects for select to anon, authenticated using (bucket_id = 'vision-board');
+drop policy if exists "vision-board insert" on storage.objects;
+create policy "vision-board insert" on storage.objects for insert to anon, authenticated with check (bucket_id = 'vision-board');
+drop policy if exists "vision-board update" on storage.objects;
+create policy "vision-board update" on storage.objects for update to anon, authenticated using (bucket_id = 'vision-board') with check (bucket_id = 'vision-board');
+drop policy if exists "vision-board delete" on storage.objects;
+create policy "vision-board delete" on storage.objects for delete to anon, authenticated using (bucket_id = 'vision-board');
