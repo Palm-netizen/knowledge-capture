@@ -5,6 +5,24 @@ import { supabase } from "@/lib/supabase/client";
 import { loginEmail } from "@/lib/auth";
 import ThemeToggle from "@/components/layout/ThemeToggle";
 
+// Supabase answers "invalid_credentials" both for an unknown account and a
+// wrong password, so that message has to cover both.
+function loginErrorMessage(code: string | undefined, status: number | undefined, message: string, email: string) {
+  switch (code) {
+    case "invalid_credentials":
+      return `ไม่พบบัญชี ${email} หรือรหัสผ่านไม่ถูกต้อง`;
+    case "email_not_confirmed":
+      return `บัญชี ${email} ยังไม่ได้ยืนยัน — ต้องยืนยันผู้ใช้ใน Supabase ก่อน`;
+    case "email_provider_disabled":
+    case "provider_disabled":
+      return "การล็อกอินด้วยอีเมลถูกปิดอยู่ใน Supabase";
+    case "over_request_rate_limit":
+      return "ลองบ่อยเกินไป รอสักครู่แล้วลองใหม่";
+  }
+  if (!status) return "เชื่อมต่อไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่";
+  return `เข้าสู่ระบบไม่สำเร็จ: ${message}`;
+}
+
 const inputClass =
   "mt-1 w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-ink outline-none focus:border-primary";
 
@@ -23,13 +41,10 @@ export default function LoginScreen() {
     }
     setBusy(true);
     setErr(null);
-    const { error } = await supabase.auth.signInWithPassword({ email: loginEmail(username), password });
+    const email = loginEmail(username);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      setErr(
-        error.status === 400 || /invalid/i.test(error.message)
-          ? "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"
-          : "เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง"
-      );
+      setErr(loginErrorMessage(error.code, error.status, error.message, email));
       setBusy(false);
     }
     // On success AuthGate swaps to the app via onAuthStateChange.
