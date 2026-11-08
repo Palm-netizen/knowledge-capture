@@ -57,6 +57,7 @@ export const CLOSING: string[] = [
 ];
 
 export const VISION_SLOTS = [
+  { key: "team", title: "ทีมของเรา", caption: "เติบโตไปด้วยกัน สำเร็จไปด้วยกัน" },
   {
     key: "stage",
     title: "ยืนบนเวที ต่อหน้าคนนับพัน",

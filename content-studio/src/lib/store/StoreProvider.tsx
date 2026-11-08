@@ -1,11 +1,13 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import type { AppData, ContentItem, DailyLog, Idea, Platform, Publication } from "../types";
+import type { AppData, AppSetting, ContentItem, DailyLog, Idea, Platform, Publication } from "../types";
 import { nowIso, uid } from "../utils";
 import type { Collection } from "./mappers";
 import {
+  OPTIONAL_COLLECTIONS,
   RemoteSync,
+  type OptionalCollection,
   getSupabase,
   loadRemote,
   readLocal,
@@ -37,12 +39,15 @@ interface StoreValue extends AppData {
   deletePublication: (id: string) => void;
 
   /** Create-or-update the journal row for a day (YYYY-MM-DD). */
-  saveDailyLog: (date: string, patch: Partial<Pick<DailyLog, "todos" | "experience" | "lesson">>) => void;
+  saveDailyLog: (date: string, patch: Partial<Pick<DailyLog, "todos" | "experience" | "lesson" | "gratitude">>) => void;
+  /** Read / write a small JSON setting by key. */
+  getSetting: <T>(id: string, fallback: T) => T;
+  saveSetting: (id: string, value: unknown) => void;
 }
 
 const StoreContext = createContext<StoreValue | null>(null);
 
-const EMPTY: AppData = { ideas: [], contents: [], publications: [], dailyLogs: [] };
+const EMPTY: AppData = { ideas: [], contents: [], publications: [], dailyLogs: [], settings: [] };
 
 export const EMPTY_TODOS = () => Array.from({ length: 5 }, () => ({ text: "", done: false }));
 
@@ -100,8 +105,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const dataRef = useRef<AppData>(EMPTY);
   const remoteRef = useRef<RemoteSync | null>(null);
-  // false while the daily_logs table doesn't exist in Supabase: journal stays local-only
-  const dailyRemoteRef = useRef(true);
+  // optional (newer) tables that are missing in Supabase stay local-only
+  const localOnlyRef = useRef<Set<OptionalCollection>>(new Set());
 
   // ---- initial load -------------------------------------------------
   useEffect(() => {
@@ -122,9 +127,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           setSyncStatus(s);
           setSyncError(s === "error" ? msg ?? "บันทึกไม่สำเร็จ" : null);
         });
-        const { dailyLogsAvailable, ...rest } = remote;
-        dailyRemoteRef.current = dailyLogsAvailable;
-        const merged: AppData = dailyLogsAvailable ? rest : { ...rest, dailyLogs: local.dailyLogs };
+        const merged: AppData = { ...remote.data };
+        localOnlyRef.current = new Set(OPTIONAL_COLLECTIONS.filter((c) => !remote.available[c]));
+        localOnlyRef.current.forEach((c) => {
+          (merged as unknown as Record<string, unknown>)[c] = local[c];
+        });
         dataRef.current = merged;
         setData(merged);
         writeLocal(merged);
@@ -168,17 +175,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       // deletes: children first
-      if (!dailyRemoteRef.current) {
+      if (localOnlyRef.current.size) {
+        const keep = (c: Collection) => !localOnlyRef.current.has(c as OptionalCollection);
         ops = {
-          upsert: ops.upsert?.filter(([c]) => c !== "dailyLogs"),
-          remove: ops.remove?.filter(([c]) => c !== "dailyLogs"),
+          upsert: ops.upsert?.filter(([c]) => keep(c)),
+          remove: ops.remove?.filter(([c]) => keep(c)),
         };
         if (!ops.upsert?.length && !ops.remove?.length) {
           setSyncStatus("saved");
           return;
         }
       }
-      const removeOrder: Collection[] = ["publications", "contents", "ideas", "dailyLogs"];
+      const removeOrder: Collection[] = ["publications", "contents", "ideas", "dailyLogs", "settings"];
       const removes = [...(ops.remove ?? [])].sort(
         (a, b) => removeOrder.indexOf(a[0]) - removeOrder.indexOf(b[0]),
       );
@@ -378,10 +386,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const now = nowIso();
       const row: DailyLog = cur
         ? { ...cur, ...patch, updatedAt: now }
-        : { id: uid(), date, todos: EMPTY_TODOS(), experience: "", lesson: "", ...patch, createdAt: now, updatedAt: now };
+        : { id: uid(), date, todos: EMPTY_TODOS(), experience: "", lesson: "", gratitude: ["", "", ""], ...patch, createdAt: now, updatedAt: now };
       commit(
         { ...d, dailyLogs: cur ? d.dailyLogs.map((l) => (l.id === row.id ? row : l)) : [row, ...d.dailyLogs] },
         { upsert: [["dailyLogs", row]] },
+      );
+    },
+    [commit],
+  );
+
+  const getSetting = useCallback<StoreValue["getSetting"]>(
+    (id, fallback) => {
+      const row = data.settings.find((s) => s.id === id);
+      return row === undefined || row.value === null ? fallback : (row.value as typeof fallback);
+    },
+    [data.settings],
+  );
+
+  const saveSetting = useCallback<StoreValue["saveSetting"]>(
+    (id, value) => {
+      const d = dataRef.current;
+      const cur = d.settings.find((s) => s.id === id);
+      const now = nowIso();
+      const row: AppSetting = cur ? { ...cur, value, updatedAt: now } : { id, value, createdAt: now, updatedAt: now };
+      commit(
+        { ...d, settings: cur ? d.settings.map((s) => (s.id === id ? row : s)) : [...d.settings, row] },
+        { upsert: [["settings", row]] },
       );
     },
     [commit],
@@ -405,8 +435,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       updatePublication,
       deletePublication,
       saveDailyLog,
+      getSetting,
+      saveSetting,
     }),
-    [data, ready, syncMode, syncStatus, syncError, addIdea, updateIdea, deleteIdea, addContent, updateContent, deleteContent, createContentFromIdea, addPublication, updatePublication, deletePublication, saveDailyLog],
+    [data, ready, syncMode, syncStatus, syncError, addIdea, updateIdea, deleteIdea, addContent, updateContent, deleteContent, createContentFromIdea, addPublication, updatePublication, deletePublication, saveDailyLog, getSetting, saveSetting],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -92,6 +92,15 @@ export interface DailyLog {
   todos: TodoItem[]; // always 5 slots
   experience: string;
   lesson: string;
+  gratitude: string[]; // 3 things I'm grateful for today
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Small key → JSON value store (e.g. "advance-gratitude"). */
+export interface AppSetting {
+  id: string;
+  value: unknown;
   createdAt: string;
   updatedAt: string;
 }
@@ -101,4 +110,5 @@ export interface AppData {
   contents: ContentItem[];
   publications: Publication[];
   dailyLogs: DailyLog[];
+  settings: AppSetting[];
 }

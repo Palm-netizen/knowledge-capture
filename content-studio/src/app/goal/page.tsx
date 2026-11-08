@@ -4,6 +4,7 @@ import { Anchor, Camera, Flame, HeartHandshake, Mic, Repeat, Sparkles, UserRound
 import { PageContainer, PageHeader } from "@/components/layout/PageHeader";
 import { VisionBoard } from "@/components/goal/VisionBoard";
 import { Highlight } from "@/components/goal/Highlight";
+import { AdvanceGratitude, GratitudeRecall, GratitudeToday } from "@/components/goal/Gratitude";
 import { CLOSING, GOALS, HERO_REMINDER, METRICS, METRICS_INTRO, MISSION, REMINDERS } from "@/lib/goal-content";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,13 @@ export default function GoalPage() {
       <PageHeader title="Goal" description="Manifest — เห็นภาพให้ชัด แล้วลงมือทุกวัน" />
 
       <VisionBoard />
+
+      {/* gratitude */}
+      <div className="mt-6 space-y-4 md:mt-8">
+        <AdvanceGratitude />
+        <GratitudeToday />
+        <GratitudeRecall />
+      </div>
 
       {/* mission */}
       <section className="relative mt-6 overflow-hidden rounded-3xl bg-ink p-6 text-white md:mt-8 md:p-10">

@@ -8,7 +8,7 @@ import type { AppData } from "../types";
 import { TABLES, fromRow, toRow, type Collection } from "./mappers";
 
 const STORAGE_KEY = "supperpalm-content-studio:v1";
-const EMPTY: AppData = { ideas: [], contents: [], publications: [], dailyLogs: [] };
+const EMPTY: AppData = { ideas: [], contents: [], publications: [], dailyLogs: [], settings: [] };
 
 export type SyncMode = "local" | "supabase";
 export type SyncStatus = "idle" | "saving" | "saved" | "error";
@@ -23,6 +23,7 @@ export function readLocal(): AppData {
       contents: parsed.contents ?? [],
       publications: parsed.publications ?? [],
       dailyLogs: parsed.dailyLogs ?? [],
+      settings: parsed.settings ?? [],
     };
   } catch {
     return EMPTY;
@@ -47,22 +48,31 @@ export function getSupabase(): SupabaseClient | null {
   return client;
 }
 
-export async function loadRemote(sb: SupabaseClient): Promise<AppData & { dailyLogsAvailable: boolean }> {
-  const [ideas, contents, pubs, logs] = await Promise.all([
+/** Newer tables: if one is missing in Supabase, that collection stays local and the rest still syncs. */
+export const OPTIONAL_COLLECTIONS = ["dailyLogs", "settings"] as const;
+export type OptionalCollection = (typeof OPTIONAL_COLLECTIONS)[number];
+
+export async function loadRemote(
+  sb: SupabaseClient,
+): Promise<{ data: AppData; available: Record<OptionalCollection, boolean> }> {
+  const [ideas, contents, pubs, logs, settings] = await Promise.all([
     sb.from(TABLES.ideas).select("*").order("created_at", { ascending: false }),
     sb.from(TABLES.contents).select("*").order("updated_at", { ascending: false }),
     sb.from(TABLES.publications).select("*").order("created_at", { ascending: true }),
     sb.from(TABLES.dailyLogs).select("*").order("date", { ascending: false }),
+    sb.from(TABLES.settings).select("*"),
   ]);
   const err = ideas.error ?? contents.error ?? pubs.error;
   if (err) throw err;
   return {
-    ideas: (ideas.data ?? []).map((r) => fromRow(r)),
-    contents: (contents.data ?? []).map((r) => fromRow(r)),
-    publications: (pubs.data ?? []).map((r) => fromRow(r)),
-    // daily_logs is newer: if the table isn't there yet, keep the core app on Supabase anyway
-    dailyLogs: logs.error ? [] : (logs.data ?? []).map((r) => fromRow(r)),
-    dailyLogsAvailable: !logs.error,
+    data: {
+      ideas: (ideas.data ?? []).map((r) => fromRow(r)),
+      contents: (contents.data ?? []).map((r) => fromRow(r)),
+      publications: (pubs.data ?? []).map((r) => fromRow(r)),
+      dailyLogs: logs.error ? [] : (logs.data ?? []).map((r) => fromRow(r)),
+      settings: settings.error ? [] : (settings.data ?? []).map((r) => fromRow(r)),
+    },
+    available: { dailyLogs: !logs.error, settings: !settings.error },
   };
 }
 
@@ -95,7 +105,7 @@ export class RemoteSync {
     const batch = [...this.pending.values()];
     this.pending.clear();
     // Parents first so foreign keys resolve.
-    const order: Collection[] = ["ideas", "contents", "publications", "dailyLogs"];
+    const order: Collection[] = ["ideas", "contents", "publications", "dailyLogs", "settings"];
     for (const c of order) {
       const rows = batch.filter((b) => b.collection === c).map((b) => toRow(b.row));
       if (rows.length) await this.run(() => this.sb.from(TABLES[c]).upsert(rows));

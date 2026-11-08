@@ -7,15 +7,24 @@ import { getSupabase } from "@/lib/store/persistence";
 import { useFeedback } from "@/components/ui/Feedback";
 import { useStore } from "@/lib/store/StoreProvider";
 import { cn } from "@/lib/utils";
-import { BodyScene, NewZealandScene, StageScene } from "./Illustrations";
+import { BodyScene, NewZealandScene, StageScene, TeamScene } from "./Illustrations";
 
 const BUCKET = "vision-board";
 const LOCAL_KEY = (k: VisionKey) => `supperpalm-vision:${k}`;
 
 const SCENES: Record<VisionKey, (p: { className?: string }) => React.ReactElement> = {
+  team: TeamScene,
   stage: StageScene,
   body: BodyScene,
   nz: NewZealandScene,
+};
+
+/** Grid placement per slot (mobile → desktop). */
+const SLOT_LAYOUT: Record<VisionKey, string> = {
+  team: "col-span-2 aspect-[4/3] md:order-2 md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-1",
+  stage: "col-span-2 aspect-[16/10] md:order-1 md:col-span-1 md:col-start-1 md:row-start-1",
+  body: "aspect-[4/5] md:order-3 md:col-start-1 md:row-start-2",
+  nz: "aspect-[4/5] md:order-4 md:col-start-3 md:row-span-2 md:row-start-1",
 };
 
 /** Resize to max 1600px and encode as JPEG so uploads stay small. */
@@ -149,17 +158,15 @@ export function VisionBoard() {
   return (
     <section aria-label="Vision board">
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onFile(e.target.files?.[0])} />
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] md:gap-4">
-        {VISION_SLOTS.map((slot, i) => {
+      {/* desktop: stage + body on the left, the team photo big in the centre, New Zealand on the right */}
+      <div className="grid grid-cols-2 gap-3 md:h-[34rem] md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] md:grid-rows-2 md:gap-4">
+        {VISION_SLOTS.map((slot) => {
           const Scene = SCENES[slot.key];
           const photo = photos[slot.key];
           return (
             <figure
               key={slot.key}
-              className={cn(
-                "group relative overflow-hidden rounded-3xl bg-ink shadow-card",
-                i === 0 ? "aspect-[16/10] md:aspect-auto md:h-[22rem]" : "aspect-[4/5] md:aspect-auto md:h-[22rem]",
-              )}
+              className={cn("group relative overflow-hidden rounded-3xl bg-ink shadow-card md:aspect-auto", SLOT_LAYOUT[slot.key])}
             >
               {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -167,12 +174,24 @@ export function VisionBoard() {
               ) : (
                 <Scene className="absolute inset-0 h-full w-full" />
               )}
+              {!photo && slot.key === "team" && (
+                <button
+                  onClick={() => pick("team")}
+                  className="absolute inset-0 flex flex-col items-center justify-start gap-2 pt-[9%] text-white"
+                  aria-label="เพิ่มรูปทีม"
+                >
+                  <span className="flex items-center gap-2 rounded-full bg-black/25 px-4 py-2 text-[15px] font-medium backdrop-blur-md">
+                    <ImagePlus size={18} /> กดเพื่อเพิ่มรูปทีม
+                  </span>
+                </button>
+              )}
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/70 to-transparent" />
               <figcaption className="absolute inset-x-0 bottom-0 p-4 text-white md:p-5">
                 <p className="font-display text-lg leading-tight font-semibold md:text-xl">{slot.title}</p>
                 <p className="mt-0.5 text-[13px] text-white/80">{slot.caption}</p>
               </figcaption>
-              <div className="absolute top-3 right-3 flex gap-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100">
+              <div className={cn("absolute top-3 right-3 flex gap-1.5", slot.key === "team" && !photo && "hidden!")}>
+              <div className="flex gap-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100">
                 {photo && (
                   <button
                     onClick={() => reset(slot.key)}
@@ -190,6 +209,7 @@ export function VisionBoard() {
                   {busy === slot.key ? <Loader2 size={15} className="animate-spin" /> : <ImagePlus size={15} />}
                   {photo ? "เปลี่ยนรูป" : "ใช้รูปของฉัน"}
                 </button>
+              </div>
               </div>
             </figure>
           );

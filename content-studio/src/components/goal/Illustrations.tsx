@@ -121,6 +121,41 @@ export function StageScene({ className }: { className?: string }) {
   );
 }
 
+/** Placeholder for the team photo: a group of people, waiting for the real picture. */
+export function TeamScene({ className }: { className?: string }) {
+  const id = useIds("bg", "glow");
+  const people = [
+    { x: 120, s: 0.82, c: "#9DB5FF" },
+    { x: 205, s: 0.92, c: "#B3A4FF" },
+    { x: 300, s: 1.05, c: "#FFFFFF" },
+    { x: 395, s: 0.92, c: "#FFC59A" },
+    { x: 480, s: 0.82, c: "#9DB5FF" },
+  ];
+  return (
+    <svg viewBox="0 0 600 500" preserveAspectRatio="xMidYMid slice" className={className} role="img" aria-label="พื้นที่สำหรับรูปทีม">
+      <defs>
+        <linearGradient id={id.bg} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#2F5BEA" />
+          <stop offset="1" stopColor="#7B61FF" />
+        </linearGradient>
+        <radialGradient id={id.glow} cx=".5" cy=".55" r=".5">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity=".35" />
+          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="600" height="500" fill={`url(#${id.bg})`} />
+      <circle cx="300" cy="290" r="260" fill={`url(#${id.glow})`} />
+      {people.map((p) => (
+        <g key={p.x} transform={`translate(${p.x} ${360 - 40 * p.s}) scale(${p.s})`} fill={p.c} fillOpacity=".9">
+          <circle cx="0" cy="-70" r="34" />
+          <path d="M-62 60 q0 -86 62 -86 q62 0 62 86 z" />
+        </g>
+      ))}
+      <rect x="0" y="380" width="600" height="120" fill="#1A1F55" opacity=".25" />
+    </svg>
+  );
+}
+
 /** Fit, strong body — stylised flex pose. */
 export function BodyScene({ className }: { className?: string }) {
   const id = useIds("bg", "skin", "sun");

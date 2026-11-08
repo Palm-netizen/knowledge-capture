@@ -7,6 +7,7 @@ export const TABLES = {
   contents: "content_items",
   publications: "content_publications",
   dailyLogs: "daily_logs",
+  settings: "app_settings",
 } as const satisfies Record<keyof AppData, string>;
 
 export type Collection = keyof typeof TABLES;
