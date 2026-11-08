@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { loginEmail } from "@/lib/auth";
 import ThemeToggle from "@/components/layout/ThemeToggle";
+import AppLogo from "@/components/ui/AppLogo";
 
 // Supabase answers "invalid_credentials" both for an unknown account and a
 // wrong password, so that message has to cover both.
@@ -57,6 +58,7 @@ export default function LoginScreen() {
       </div>
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
+          <AppLogo className="mx-auto mb-4 h-16 w-16" />
           <p className="font-display text-3xl font-bold text-ink">
             Knowledge Capture<span className="text-primary">.</span>
           </p>
