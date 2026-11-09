@@ -1,3 +1,5 @@
+import type { ReviewKey } from "./types";
+
 // Goal / Manifest page content. Text wrapped in ==…== is rendered as a highlight.
 
 export const MISSION = {
@@ -35,12 +37,12 @@ export const GOALS: { title: string; body: string }[] = [
 export const METRICS_INTRO =
   "อย่าเพิ่งใช้ยอดไลก์หรือยอดวิวเป็นตัววัดความสำเร็จในช่วงเริ่มต้น ==ให้ใช้สิ่งเหล่านี้แทน==";
 
-export const METRICS: { measure: string; question: string }[] = [
-  { measure: "ความกล้า", question: "วันนี้กล้าทำอะไรที่เมื่อก่อนกลัวไหม?" },
-  { measure: "การสื่อสาร", question: "วันนี้พูดได้เป็นธรรมชาติมากขึ้นไหม?" },
-  { measure: "ความสม่ำเสมอ", question: "วันนี้ทำตามที่ตั้งใจไว้หรือเปล่า?" },
-  { measure: "การวางใจ", question: "โพสต์แล้วปล่อยวางได้ไหม?" },
-  { measure: "การพัฒนา", question: "วันนี้เราเรียนรู้อะไรจากการลงมือทำ?" },
+export const METRICS: { key: ReviewKey; measure: string; question: string }[] = [
+  { key: "courage", measure: "ความกล้า", question: "วันนี้กล้าทำอะไรที่เมื่อก่อนกลัวไหม?" },
+  { key: "communication", measure: "การสื่อสาร", question: "วันนี้พูดได้เป็นธรรมชาติมากขึ้นไหม?" },
+  { key: "consistency", measure: "ความสม่ำเสมอ", question: "วันนี้ทำตามที่ตั้งใจไว้หรือเปล่า?" },
+  { key: "letGo", measure: "การวางใจ", question: "โพสต์แล้วปล่อยวางได้ไหม?" },
+  { key: "growth", measure: "การพัฒนา", question: "วันนี้เราเรียนรู้อะไรจากการลงมือทำ?" },
 ];
 
 export const HERO_REMINDER = "วันนี้ไม่ต้องเก่งกว่าใคร ==ขอแค่กล้ากว่าเมื่อวานก็พอ==";

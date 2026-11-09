@@ -22,11 +22,12 @@ const SCENES: Record<VisionKey, (p: { className?: string }) => React.ReactElemen
 
 /** Grid placement per slot (mobile → desktop). */
 const SLOT_LAYOUT: Record<VisionKey, string> = {
-  team: "col-span-2 aspect-[4/3] md:order-2 md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-1",
-  stage: "col-span-2 aspect-[16/10] md:order-1 md:col-span-1 md:col-start-1 md:row-start-1",
-  body: "aspect-[4/5] md:order-3 md:col-start-1 md:row-start-2",
-  nz: "aspect-[4/5] md:order-4 md:col-start-3 md:row-start-1",
-  family: "col-span-2 aspect-[4/3] md:order-5 md:col-span-1 md:col-start-3 md:row-start-2",
+  // team: its own full-width row, made for a landscape photo
+  team: "col-span-2 aspect-[16/9] md:col-span-4 md:aspect-[21/8]",
+  family: "aspect-[4/5]",
+  stage: "aspect-[4/5]",
+  body: "aspect-[4/5]",
+  nz: "aspect-[4/5]",
 };
 
 /** Frames that show a big centred "add photo" button until the photo is uploaded. */
@@ -166,15 +167,15 @@ export function VisionBoard() {
   return (
     <section aria-label="Vision board">
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onFile(e.target.files?.[0])} />
-      {/* desktop: stage + body on the left, the team photo big in the centre, New Zealand + family on the right */}
-      <div className="grid grid-cols-2 gap-3 md:h-[36rem] md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] md:grid-rows-2 md:gap-4">
+      {/* team photo on its own wide row; family, stage, body, New Zealand below */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         {VISION_SLOTS.map((slot) => {
           const Scene = SCENES[slot.key];
           const photo = photos[slot.key];
           return (
             <figure
               key={slot.key}
-              className={cn("group relative overflow-hidden rounded-3xl bg-ink shadow-card md:aspect-auto", SLOT_LAYOUT[slot.key])}
+              className={cn("group relative overflow-hidden rounded-3xl bg-ink shadow-card", SLOT_LAYOUT[slot.key])}
             >
               {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -195,8 +196,8 @@ export function VisionBoard() {
               )}
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/70 to-transparent" />
               <figcaption className="absolute inset-x-0 bottom-0 p-4 text-white md:p-5">
-                <p className="font-display text-lg leading-tight font-semibold md:text-xl">{slot.title}</p>
-                <p className="mt-0.5 text-[13px] text-white/80">{slot.caption}</p>
+                <p className={cn("font-display leading-tight font-semibold", slot.key === "team" ? "text-lg md:text-2xl" : "text-base md:text-[17px]")}>{slot.title}</p>
+                <p className={cn("mt-0.5 text-[13px] text-white/80", slot.key !== "team" && "line-clamp-1")}>{slot.caption}</p>
               </figcaption>
               <div className={cn("absolute top-3 right-3 flex gap-1.5", !!ADD_PROMPT[slot.key] && !photo && "hidden!")}>
               <div className="flex gap-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100">

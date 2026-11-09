@@ -12,6 +12,7 @@ import type { TodoItem } from "@/lib/types";
 import { addDays, fmt, parseDateStr, relativeDayLabel, toDateStr, todayStr } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import { GratitudeToday } from "@/components/goal/Gratitude";
+import { ReviewToday } from "@/components/goal/Review";
 
 const TODO_COUNT = 5;
 
@@ -223,7 +224,8 @@ export default function JournalPage() {
         </section>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <ReviewToday date={date} />
         <GratitudeToday date={date} compact />
       </div>
 
