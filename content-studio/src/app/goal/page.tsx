@@ -1,11 +1,12 @@
 "use client";
 
-import { Anchor, Camera, Flame, HeartHandshake, Mic, Repeat, Sparkles, UserRoundPlus } from "lucide-react";
+import { Anchor, Bell, Camera, Compass, Flame, HeartHandshake, Mic, Repeat, Sparkles, UserRoundPlus } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/layout/PageHeader";
 import { VisionBoard } from "@/components/goal/VisionBoard";
 import { Highlight } from "@/components/goal/Highlight";
 import { AdvanceGratitude, GratitudeRecall, GratitudeToday } from "@/components/goal/Gratitude";
 import { ReviewTrends } from "@/components/goal/Review";
+import { PledgeList } from "@/components/goal/PledgeList";
 import { CLOSING, GOALS, HERO_REMINDER, METRICS, METRICS_INTRO, MISSION, REMINDERS } from "@/lib/goal-content";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,36 @@ export default function GoalPage() {
       <PageHeader title="Goal" description="Manifest — เห็นภาพให้ชัด แล้วลงมือทุกวัน" />
 
       <VisionBoard />
+
+      {/* purpose + mindfulness reminders */}
+      <div className="mt-6 grid grid-cols-1 gap-4 md:mt-8 lg:grid-cols-2">
+        <PledgeList
+          settingKey="purpose"
+          eyebrow="Purpose"
+          title="ปณิธาน"
+          icon={Compass}
+          tone="dark"
+          emptyCta="เขียนปณิธาน 3 ข้อ — เหตุผลที่ฉันทำทั้งหมดนี้"
+          placeholders={[
+            "เช่น ฉันจะเป็นแรงบันดาลใจให้คนรอบตัวกล้าเป็นตัวเอง",
+            "เช่น ฉันจะดูแลครอบครัวให้มีความสุขและมั่นคง",
+            "เช่น ฉันจะแบ่งปันสิ่งที่มีคุณค่าทุกวัน",
+          ]}
+        />
+        <PledgeList
+          settingKey="mindful-reminders"
+          eyebrow="Mindfulness"
+          title="คำเตือนสติ"
+          icon={Bell}
+          tone="light"
+          emptyCta="เขียนคำเตือนสติ 3 ข้อ — ไว้อ่านเมื่อใจไม่นิ่ง"
+          placeholders={[
+            "เช่น หายใจลึก ๆ ก่อนตอบสนองทุกครั้ง",
+            "เช่น ทำวันนี้ให้ดีที่สุด ไม่ต้องรีบไปถึงปลายทาง",
+            "เช่น ไม่เปรียบเทียบตัวเองกับใคร",
+          ]}
+        />
+      </div>
 
       {/* gratitude */}
       <div className="mt-6 space-y-4 md:mt-8">
