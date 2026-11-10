@@ -49,7 +49,7 @@ export function MasterEditor({ item, onOpenVersion }: { item: ContentItem; onOpe
       <EditorSection
         step={3}
         title="เตรียมชิ้นงาน"
-        description="ต้นฉบับ — แต่ละแพลตฟอร์มปรับต่อได้"
+        description="Hook · Caption · Hashtag ใช้ร่วมกันทุกแพลตฟอร์ม"
         done={filled(item.format, item.script, item.onImageText, item.caption, item.hashtags)}
         total={5}
       >

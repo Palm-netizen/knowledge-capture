@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChartColumn, Check, ClipboardCopy, Layers, Plus, RefreshCw, Trash2, Undo2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChartColumn, Check, ClipboardCopy, Layers, Link2, Plus, Trash2, Undo2, Unlink } from "lucide-react";
 import { FORMATS, PLATFORMS, platformMeta } from "@/lib/constants";
 import type { ContentItem, Platform, Publication } from "@/lib/types";
 import { useStore } from "@/lib/store/StoreProvider";
@@ -65,7 +65,7 @@ export function VersionPanel({
       {pubs.length === 0 ? (
         <div className="px-5 py-8 text-center">
           <p className="text-sm font-medium">แตกต้นฉบับเป็นเวอร์ชันของแต่ละช่องทาง</p>
-          <p className="mx-auto mt-1 max-w-xs text-[13px] text-muted">เริ่มจาก Hook, Caption และ Hashtag ของต้นฉบับ แล้วปรับให้เหมาะกับแต่ละแพลตฟอร์ม</p>
+          <p className="mx-auto mt-1 max-w-xs text-[13px] text-muted">ทุกช่องทางใช้ Hook, Caption และ Hashtag ชุดเดียวกัน พิมพ์ครั้งเดียว — อยากให้ช่องไหนต่างค่อยแยกปรับทีหลัง</p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {PLATFORMS.map((p) => (
               <Button key={p.value} size="sm" onClick={() => add(p.value)}>
@@ -115,31 +115,54 @@ export function VersionPanel({
   );
 }
 
+/** A version with no text of its own shares the master's Hook / Caption / Hashtag. */
+export function sharesMasterText(pub: Publication) {
+  return !pub.hook.trim() && !pub.caption.trim() && !pub.hashtags.trim();
+}
+
 function VersionEditor({ pub, master, onDeleted }: { pub: Publication; master: ContentItem; onDeleted: () => void }) {
-  const { updatePublication, deletePublication } = useStore();
+  const { updatePublication, deletePublication, updateContent } = useStore();
   const { confirm, toast } = useFeedback();
   const [metricsOpen, setMetricsOpen] = useState(false);
   const meta = platformMeta(pub.platform);
   const set = <K extends keyof Publication>(key: K) => (v: Publication[K]) => updatePublication(pub.id, { [key]: v } as Partial<Publication>);
+  const shared = sharesMasterText(pub);
 
-  const pullFromMaster = async () => {
-    const dirty = pub.hook || pub.caption || pub.hashtags;
-    if (dirty) {
-      const ok = await confirm({
-        title: "ดึงข้อความจากต้นฉบับ?",
-        description: `Hook, Caption, Hashtag และรูปแบบของเวอร์ชัน ${meta.label} จะถูกแทนที่ด้วยต้นฉบับ`,
-        confirmLabel: "แทนที่",
-      });
-      if (!ok) return;
+  // Older versions were created as a copy of the master: if they're still identical, make them shared.
+  useEffect(() => {
+    const hasText = pub.hook.trim() || pub.caption.trim() || pub.hashtags.trim();
+    if (hasText && pub.hook === master.hook && pub.caption === master.caption && pub.hashtags === master.hashtags) {
+      updatePublication(pub.id, { hook: "", caption: "", hashtags: "" });
     }
-    updatePublication(pub.id, { hook: master.hook, caption: master.caption, hashtags: master.hashtags, format: master.format });
-    toast("ดึงจากต้นฉบับแล้ว");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pub.id]);
+
+  // shared → edit the master (every platform follows); custom → edit this version only
+  const text = shared
+    ? { hook: master.hook, caption: master.caption, hashtags: master.hashtags }
+    : { hook: pub.hook, caption: pub.caption, hashtags: pub.hashtags };
+  const write = (key: "hook" | "caption" | "hashtags") => (v: string) =>
+    shared ? updateContent(master.id, { [key]: v }) : updatePublication(pub.id, { [key]: v });
+
+  const customise = () => {
+    updatePublication(pub.id, { hook: master.hook, caption: master.caption, hashtags: master.hashtags });
+    toast(`แยกข้อความของ ${meta.label} แล้ว — แก้ตรงนี้จะไม่กระทบแพลตฟอร์มอื่น`);
+  };
+
+  const useShared = async () => {
+    const ok = await confirm({
+      title: "กลับไปใช้ข้อความร่วม?",
+      description: `ข้อความเฉพาะของ ${meta.label} จะถูกลบ แล้วใช้ Hook / Caption / Hashtag เดียวกับแพลตฟอร์มอื่น`,
+      confirmLabel: "ใช้ข้อความร่วม",
+    });
+    if (!ok) return;
+    updatePublication(pub.id, { hook: "", caption: "", hashtags: "" });
   };
 
   const copyPost = async () => {
-    const text = [pub.hook, pub.caption, pub.hashtags].filter((x) => x.trim()).join("\n\n");
+    const out = [text.hook, text.caption, text.hashtags].filter((x) => x.trim()).join("\n\n");
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(out);
       toast(`คัดลอกข้อความ ${meta.label} แล้ว`);
     } catch {
       toast("คัดลอกไม่สำเร็จ", { tone: "error" });
@@ -147,7 +170,7 @@ function VersionEditor({ pub, master, onDeleted }: { pub: Publication; master: C
   };
 
   const remove = async () => {
-    const ok = await confirm({ title: `ลบเวอร์ชัน ${meta.label}?`, description: "ข้อความ วันเผยแพร่ และผลลัพธ์ของเวอร์ชันนี้จะถูกลบ", confirmLabel: "ลบ", danger: true });
+    const ok = await confirm({ title: `ลบเวอร์ชัน ${meta.label}?`, description: "วันเผยแพร่ ลิงก์ และผลลัพธ์ของเวอร์ชันนี้จะถูกลบ", confirmLabel: "ลบ", danger: true });
     if (!ok) return;
     deletePublication(pub.id);
     onDeleted();
@@ -155,6 +178,7 @@ function VersionEditor({ pub, master, onDeleted }: { pub: Publication; master: C
   };
 
   const posted = pub.status === "published";
+  const masterEmpty = !master.hook.trim() && !master.caption.trim() && !master.hashtags.trim();
 
   return (
     <div className="space-y-5 p-4 md:p-5">
@@ -167,36 +191,50 @@ function VersionEditor({ pub, master, onDeleted }: { pub: Publication; master: C
           <Button size="sm" variant="ghost" onClick={copyPost} title="คัดลอก Hook + Caption + Hashtag ไปวางในแอป">
             <ClipboardCopy size={14} /> คัดลอก
           </Button>
-          <Menu
-            items={[
-              { label: "ดึงข้อความจากต้นฉบับ", icon: RefreshCw, onSelect: pullFromMaster },
-              { label: "ลบเวอร์ชันนี้", icon: Trash2, danger: true, onSelect: remove },
-            ]}
-          />
+          <Menu items={[{ label: "ลบเวอร์ชันนี้", icon: Trash2, danger: true, onSelect: remove }]} />
         </div>
       </div>
 
-      <div>
-        <p className="mb-1.5 text-xs font-medium tracking-wide text-muted">รูปแบบ</p>
-        <ChipGroup value={pub.format} onChange={set("format")} options={FORMATS} allowClear size="sm" />
-      </div>
+      {/* shared vs platform-specific text */}
+      {shared ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl bg-primary-soft px-3 py-2.5 text-[13px]">
+          <Link2 size={15} className="shrink-0 text-primary" />
+          <span className="min-w-0 flex-1">
+            <span className="font-semibold text-primary">ข้อความเดียวกันทั้ง 3 แพลตฟอร์ม</span>
+            <span className="block text-xs text-muted">พิมพ์ที่ไหนก็เปลี่ยนทุกที่ (รวมถึงต้นฉบับ)</span>
+          </span>
+          <Button size="sm" variant="ghost" onClick={customise} disabled={masterEmpty} title={masterEmpty ? "เขียนข้อความร่วมก่อน แล้วค่อยแยกปรับ" : undefined}>
+            ปรับเฉพาะ {meta.label}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-line-strong px-3 py-2.5 text-[13px]">
+          <Unlink size={15} className="shrink-0 text-muted" />
+          <span className="min-w-0 flex-1">
+            <span className="font-semibold">ข้อความเฉพาะ {meta.label}</span>
+            <span className="block text-xs text-muted">แก้ตรงนี้ไม่กระทบแพลตฟอร์มอื่น</span>
+          </span>
+          <Button size="sm" variant="ghost" onClick={useShared}>
+            ใช้ข้อความร่วม
+          </Button>
+        </div>
+      )}
 
-      <WriteBlock
-        label="Hook"
-        value={pub.hook}
-        onChange={set("hook")}
-        placeholder={master.hook ? `ต้นฉบับ: ${master.hook}` : "ประโยคเปิดสำหรับช่องทางนี้"}
-        large
-      />
+      <WriteBlock label="Hook" value={text.hook} onChange={write("hook")} placeholder="ประโยคเปิดที่หยุดนิ้วคนดู" large />
       <WriteBlock
         label="Caption"
-        value={pub.caption}
-        onChange={set("caption")}
-        placeholder={master.caption ? `ต้นฉบับ: ${master.caption.slice(0, 80)}…` : "Caption สำหรับช่องทางนี้"}
+        value={text.caption}
+        onChange={write("caption")}
+        placeholder="คำบรรยายใต้โพสต์"
         minRows={4}
         counter={CAPTION_LIMIT[pub.platform]}
       />
-      <WriteBlock label="Hashtag" value={pub.hashtags} onChange={set("hashtags")} placeholder={master.hashtags || "#แฮชแท็ก"} />
+      <WriteBlock label="Hashtag" value={text.hashtags} onChange={write("hashtags")} placeholder="#แฮชแท็ก" />
+
+      <div>
+        <p className="mb-1.5 text-xs font-medium tracking-wide text-muted">รูปแบบ ({meta.label})</p>
+        <ChipGroup value={pub.format} onChange={set("format")} options={FORMATS} allowClear size="sm" />
+      </div>
 
       <div className="rounded-lg bg-subtle/70 p-3.5">
         <p className="mb-2 text-xs font-medium tracking-wide text-muted">วันเผยแพร่</p>
