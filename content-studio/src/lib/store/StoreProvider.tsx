@@ -314,10 +314,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         id: uid(),
         contentId,
         platform,
-        // start from the master content — each version is then edited independently
-        hook: master?.hook ?? "",
-        caption: master?.caption ?? "",
-        hashtags: master?.hashtags ?? "",
+        // empty text = share the master's Hook / Caption / Hashtag (type once for every platform)
+        hook: "",
+        caption: "",
+        hashtags: "",
         format: master?.format ?? null,
         scheduledDate: null,
         scheduledTime: null,

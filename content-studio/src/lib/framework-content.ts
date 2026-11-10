@@ -18,8 +18,8 @@ export const WEEK: FrameworkDay[] = [
     dow: 1,
     en: "MONDAY",
     th: "จันทร์",
-    title: "ข้อคิดและหนังสือ",
-    category: "Mindset & Book",
+    title: "Mindset / ข้อคิด",
+    category: "Knowledge & Mindset",
     body: "แนวคิด มุมมอง บทเรียนจากหนังสือและสิ่งที่เรียนรู้",
     format: "photo",
   },
@@ -27,8 +27,8 @@ export const WEEK: FrameworkDay[] = [
     dow: 2,
     en: "TUESDAY",
     th: "อังคาร",
-    title: "ประสบการณ์และเรื่องราวชีวิต",
-    category: "My Experience",
+    title: "เล่าประสบการณ์",
+    category: "Experience & Story",
     body: "เรื่องจริง ความผิดพลาด การทำงาน ธุรกิจ และบทเรียนส่วนตัว",
     format: "video",
   },
@@ -36,9 +36,9 @@ export const WEEK: FrameworkDay[] = [
     dow: 3,
     en: "WEDNESDAY",
     th: "พุธ",
-    title: "ทดลองและลงมือทำ",
-    category: "Practice & Experiment",
-    body: "ทดลองพฤติกรรมใหม่ ฝึกวินัย ทดสอบแนวคิด และแชร์ผลลัพธ์",
+    title: "Funny / ชีวิตจริง",
+    category: "Funny & Entertainment",
+    body: "มุกชีวิตประจำวัน ความเปิ่น ความฮา — เรื่องจริงที่ทำให้คนยิ้มได้",
     format: "video",
   },
   { dow: 4, en: "THURSDAY", th: "พฤหัสบดี", format: "rest" },
@@ -46,7 +46,7 @@ export const WEEK: FrameworkDay[] = [
     dow: 5,
     en: "FRIDAY",
     th: "ศุกร์",
-    title: "สุขภาพและคุณภาพชีวิต",
+    title: "Health / Lifestyle",
     category: "Health & Lifestyle",
     body: "อาหาร การออกกำลังกาย การนอน พลังงาน และการดูแลตัวเอง",
     format: "photo",
@@ -56,9 +56,9 @@ export const WEEK: FrameworkDay[] = [
     dow: 0,
     en: "SUNDAY",
     th: "อาทิตย์",
-    title: "ธุรกิจ สินค้า และโอกาส",
+    title: "Business / Product แบบสนุก",
     category: "Business & Product",
-    body: "ความรู้สินค้า ประสบการณ์ใช้ ระบบธุรกิจ ทักษะและโอกาสเติบโต",
+    body: "ความรู้สินค้า ประสบการณ์ใช้ ระบบธุรกิจ ทักษะและโอกาสเติบโต — เล่าแบบสนุก ไม่ขายแข็ง",
     format: "video",
   },
 ];
@@ -74,14 +74,29 @@ export const REST_NOTE = "พัก หรือแชร์ภาพชีว�
 export const CORE = "การพัฒนาชีวิตอย่างมีระบบ";
 export const PILLARS_NOTE = "ให้คนรู้จักคุณในหลายมิติ แต่ทุกเสามีแกนกลางเดียวกัน คือ ==การพัฒนาชีวิตอย่างมีระบบ==";
 /** 5 content categories + everyday life (Thu / Sat). */
-export const PILLARS = ["Mindset & Book", "My Experience", "Practice & Experiment", "Health & Lifestyle", "Business & Product", "ชีวิตประจำวัน"];
+export const PILLARS = ["Knowledge & Mindset", "Experience & Story", "Funny & Entertainment", "Health & Lifestyle", "Business & Product", "ชีวิตประจำวัน"];
 
 export const PLAN_NOTE = "โพสต์ ==5 วันต่อสัปดาห์== ไม่ต้องโพสต์ทุกวันจนเหนื่อย แต่ต้อง==รักษาความสม่ำเสมอ==";
 
-export const CONTENT_SPLIT = [
-  { pct: 80, label: "ให้ความรู้ ประสบการณ์ และสร้างความสัมพันธ์" },
-  { pct: 20, label: "สินค้า ธุรกิจ และโอกาส" },
+/** Recommended mix across all content (sums to 100). */
+export const CONTENT_MIX: { name: string; pct: number; body: string; funny?: boolean }[] = [
+  { name: "Knowledge & Mindset", pct: 25, body: "ความรู้ ความคิด หนังสือ และมุมมอง" },
+  { name: "Experience & Story", pct: 20, body: "เรื่องจริง ประสบการณ์ และบทเรียน" },
+  { name: "Funny & Entertainment", pct: 20, body: "มุกชีวิตประจำวัน ความเปิ่น ความฮา", funny: true },
+  { name: "Health & Lifestyle", pct: 20, body: "สุขภาพ การออกกำลังกาย และไลฟ์สไตล์" },
+  { name: "Business & Product", pct: 15, body: "ธุรกิจ สินค้า และการต่อยอดรายได้" },
 ];
+
+export const FUNNY_NOTE = {
+  title: "Funny คือเอกลักษณ์ของแบรนด์",
+  lead: "Funny ควรเป็น==หนึ่งในเอกลักษณ์ของแบรนด์คุณเลย== ไม่ใช่แค่คอนเทนต์แทรกเป็นครั้งคราว",
+  why: "เพราะถ้าเราวางภาพตัวเองเป็นคนพัฒนาตัวเอง มีวินัย คิดเป็นระบบ และจริงจังกับชีวิตมากเกินไป คนอาจรู้สึกว่า==เข้าถึงยาก หรือดูเคร่งเครียดตลอดเวลา==",
+};
+
+export const HOLD_ON = {
+  lead: "อย่าให้คนจำคุณได้แค่เพราะมีความรู้ แต่ให้เขารู้สึกว่า",
+  items: ["ได้ความรู้เมื่อเข้ามาติดตาม", "ได้แรงบันดาลใจจากสิ่งที่คุณลงมือทำ", "ยิ้มได้จากเรื่องราวของคุณ", "รู้สึกว่าเป็นคนธรรมดาที่พัฒนาตัวเองไปด้วยกันได้"],
+};
 
 export const FORMAT_SPLIT = [
   { pct: 60, label: "วิดีโอ" },

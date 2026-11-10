@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Camera, Coffee, Video } from "lucide-react";
+import { Camera, Coffee, Smile, Video } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/layout/PageHeader";
 import { Highlight } from "@/components/goal/Highlight";
 import {
   CONNECT_EXAMPLE,
   CONNECT_NOTE,
   CONNECT_TITLE,
-  CONTENT_SPLIT,
+  CONTENT_MIX,
+  FUNNY_NOTE,
+  HOLD_ON,
   CORE,
   FIRST_30,
   FORMAT_LABEL,
@@ -104,6 +106,19 @@ export default function FrameworkPage() {
         <Highlight text={PLAN_NOTE} tone="blue" />
       </p>
 
+      {/* ---------- funny is part of the brand ---------- */}
+      <section className="mt-6 rounded-3xl border border-orange/40 bg-orange-soft/50 p-5 md:p-6">
+        <p className="flex items-center gap-2 text-[16px] font-semibold">
+          <Smile size={18} className="text-orange" /> {FUNNY_NOTE.title}
+        </p>
+        <p className="mt-2 text-[15px] leading-relaxed">
+          <Highlight text={FUNNY_NOTE.lead} />
+        </p>
+        <p className="mt-2 text-[14px] leading-relaxed text-muted">
+          <Highlight text={FUNNY_NOTE.why} />
+        </p>
+      </section>
+
       {/* ---------- pillars ---------- */}
       <section className="mt-10">
         <Head eyebrow="6 เสาหลัก" title="หลายมิติ แกนกลางเดียว" />
@@ -127,10 +142,10 @@ export default function FrameworkPage() {
 
       {/* ---------- ratios ---------- */}
       <section className="mt-10">
-        <Head eyebrow="สัดส่วนที่ให้ยึดเป็นหลัก" title="ความสมดุลของคอนเทนต์" />
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <RatioCard title="เนื้อหา" parts={CONTENT_SPLIT} />
-          <RatioCard title="รูปแบบ (ช่วงเริ่มต้น)" parts={FORMAT_SPLIT} note={FORMAT_WHY} />
+        <Head eyebrow="สัดส่วนที่ให้ยึดเป็นหลัก" title="สัดส่วนคอนเทนต์ที่แนะนำ" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <RatioCard title="รูปแบบ" parts={FORMAT_SPLIT} note={FORMAT_WHY} />
+          <MixCard />
         </div>
         <div className="mt-4 rounded-3xl border border-line bg-card p-5 md:p-6">
           <p className="text-xs font-semibold text-muted">สิ่งที่อยากเน้น · 30 วันแรก</p>
@@ -154,6 +169,20 @@ export default function FrameworkPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ---------- what people should feel ---------- */}
+      <section className="mt-10 rounded-3xl bg-ink p-6 text-white md:p-8">
+        <p className="text-sm font-medium text-white/60">สิ่งที่อยากให้ยึดไว้</p>
+        <p className="mt-2 font-display text-[20px] leading-snug font-semibold md:text-[24px]">{HOLD_ON.lead}</p>
+        <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {HOLD_ON.items.map((t) => (
+            <li key={t} className="flex items-start gap-2.5 rounded-2xl bg-white/5 px-4 py-3 text-[15px]">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange" />
+              {t}
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* ---------- connected content ---------- */}
@@ -244,5 +273,37 @@ function PillarHub() {
         อย่างมีระบบ
       </text>
     </svg>
+  );
+}
+
+/** Mix across all content: 5 categories, quiet bars, Funny accented as a brand trait. */
+function MixCard() {
+  return (
+    <div className="rounded-3xl bg-card p-5 shadow-card md:p-6">
+      <p className="text-xs font-semibold text-muted">ภายในคอนเทนต์ทั้งหมด</p>
+      <div className="mt-3 flex h-3 gap-0.5 overflow-hidden rounded-full" aria-hidden>
+        {CONTENT_MIX.map((m, i) => (
+          <span
+            key={m.name}
+            className={m.funny ? "bg-orange" : ""}
+            style={{ width: `${m.pct}%`, background: m.funny ? undefined : `rgb(21 23 28 / ${0.85 - i * 0.15})` }}
+          />
+        ))}
+      </div>
+      <div className="mt-4 space-y-3">
+        {CONTENT_MIX.map((m) => (
+          <div key={m.name}>
+            <p className="flex items-baseline justify-between gap-3">
+              <span className={cn("text-[15px] font-semibold", m.funny && "text-[#B65A00]")}>{m.name}</span>
+              <span className="font-display text-lg font-semibold tabular-nums">{m.pct}%</span>
+            </p>
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-subtle">
+              <div className={cn("h-full rounded-full", m.funny ? "bg-orange" : "bg-ink")} style={{ width: `${m.pct}%` }} />
+            </div>
+            <p className="mt-1 text-[13px] text-muted">{m.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
