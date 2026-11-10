@@ -1,4 +1,4 @@
-import { CalendarCheck, CalendarDays, ChartColumn, Dna, Inbox, LayoutGrid, NotebookPen, PenLine, Target, type LucideIcon } from "lucide-react";
+import { CalendarCheck, CalendarDays, ChartColumn, Dna, Inbox, LayoutGrid, LayoutTemplate, NotebookPen, PenLine, Target, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -14,6 +14,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", short: "ภาพรวม", icon: LayoutGrid, group: "main", mobile: true },
   { href: "/goal", label: "Goal", short: "เป้าหมาย", icon: Target, group: "main" },
   { href: "/dna", label: "PALM DNA", short: "DNA", icon: Dna, group: "main" },
+  { href: "/framework", label: "Framework", short: "Framework", icon: LayoutTemplate, group: "main" },
   { href: "/journal", label: "Daily Journal", short: "วันนี้", icon: NotebookPen, group: "main", mobile: true },
   { href: "/scorecard", label: "30-Day Scorecard", short: "สกอร์", icon: CalendarCheck, group: "main", mobile: true },
   { href: "/ideas", label: "Idea Inbox", short: "ไอเดีย", icon: Inbox, group: "main" },
