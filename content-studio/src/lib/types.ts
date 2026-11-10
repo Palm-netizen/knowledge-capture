@@ -4,7 +4,7 @@
 export type IdeaKind = "content" | "knowledge" | "business" | "task";
 export type IdeaStatus = "new" | "selected" | "used";
 export type IdeaSource = "experience" | "book" | "person" | "event" | "other";
-export type Category = "health" | "growth" | "business" | "experience" | "product";
+export type Category = "health" | "growth" | "business" | "experience" | "product" | "funny" | "lifestyle";
 
 export interface Idea {
   id: string;

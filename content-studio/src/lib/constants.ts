@@ -33,11 +33,14 @@ export const IDEA_SOURCES: { value: IdeaSource; label: string }[] = [
   { value: "other", label: "อื่น ๆ" },
 ];
 
+// order follows the weekly Framework
 export const CATEGORIES: { value: Category; label: string }[] = [
-  { value: "health", label: "สุขภาพ" },
-  { value: "growth", label: "พัฒนาตัวเอง" },
-  { value: "business", label: "ธุรกิจ" },
+  { value: "growth", label: "Mindset / ข้อคิด" },
   { value: "experience", label: "ประสบการณ์" },
+  { value: "funny", label: "Funny" },
+  { value: "health", label: "สุขภาพ" },
+  { value: "lifestyle", label: "Lifestyle" },
+  { value: "business", label: "ธุรกิจ" },
   { value: "product", label: "สินค้า" },
 ];
 
@@ -48,6 +51,8 @@ export const CATEGORY_STYLE: Record<Category, { tag: string; bar: string }> = {
   business: { tag: "bg-primary-soft text-primary", bar: "bg-primary" },
   experience: { tag: "bg-orange-soft text-[#B65A00]", bar: "bg-orange" },
   product: { tag: "bg-[#FCEBF3] text-[#B23A78]", bar: "bg-[#D2559A]" },
+  funny: { tag: "bg-[#FFF6D6] text-[#8A6A00]", bar: "bg-[#E8B400]" },
+  lifestyle: { tag: "bg-[#E2F5F6] text-[#0B7C86]", bar: "bg-[#14A3B0]" },
 };
 
 export const CONTENT_STATUSES: { value: ContentStatus; label: string; tone: Tone }[] = [
