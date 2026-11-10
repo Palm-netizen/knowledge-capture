@@ -1,4 +1,4 @@
-import { CalendarDays, ChartColumn, Dna, Inbox, LayoutGrid, NotebookPen, PenLine, Target, type LucideIcon } from "lucide-react";
+import { CalendarCheck, CalendarDays, ChartColumn, Dna, Inbox, LayoutGrid, NotebookPen, PenLine, Target, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -6,16 +6,19 @@ export interface NavItem {
   short: string;
   icon: LucideIcon;
   group: "main" | "plan";
+  /** shown as a tab in the mobile bottom bar (others live under "เพิ่มเติม") */
+  mobile?: boolean;
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "Overview", short: "ภาพรวม", icon: LayoutGrid, group: "main" },
+  { href: "/", label: "Overview", short: "ภาพรวม", icon: LayoutGrid, group: "main", mobile: true },
   { href: "/goal", label: "Goal", short: "เป้าหมาย", icon: Target, group: "main" },
   { href: "/dna", label: "PALM DNA", short: "DNA", icon: Dna, group: "main" },
-  { href: "/journal", label: "Daily Journal", short: "วันนี้", icon: NotebookPen, group: "main" },
+  { href: "/journal", label: "Daily Journal", short: "วันนี้", icon: NotebookPen, group: "main", mobile: true },
+  { href: "/scorecard", label: "30-Day Scorecard", short: "สกอร์", icon: CalendarCheck, group: "main", mobile: true },
   { href: "/ideas", label: "Idea Inbox", short: "ไอเดีย", icon: Inbox, group: "main" },
   { href: "/studio", label: "Content Studio", short: "สตูดิโอ", icon: PenLine, group: "main" },
-  { href: "/calendar", label: "Content Calendar", short: "ปฏิทิน", icon: CalendarDays, group: "plan" },
+  { href: "/calendar", label: "Content Calendar", short: "ปฏิทิน", icon: CalendarDays, group: "plan", mobile: true },
   { href: "/performance", label: "Performance", short: "ผลงาน", icon: ChartColumn, group: "plan" },
 ];
 
