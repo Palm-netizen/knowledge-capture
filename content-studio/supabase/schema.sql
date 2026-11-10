@@ -17,7 +17,7 @@ create table if not exists ideas (
               check (kind in ('content', 'knowledge', 'business', 'task')),
   source      text check (source in ('experience', 'book', 'person', 'event', 'other')),
   source_note text not null default '',
-  category    text check (category in ('health', 'growth', 'business', 'experience', 'product')),
+  category    text check (category in ('health', 'growth', 'business', 'experience', 'product', 'funny', 'lifestyle')),
   status      text not null default 'new' check (status in ('new', 'selected', 'used')),
   image_url   text,
   created_at  timestamptz not null default now(),
@@ -31,7 +31,7 @@ create table if not exists content_items (
   id            uuid primary key default gen_random_uuid(),
   idea_id       uuid references ideas (id) on delete set null,
   title         text not null,
-  category      text check (category in ('health', 'growth', 'business', 'experience', 'product')),
+  category      text check (category in ('health', 'growth', 'business', 'experience', 'product', 'funny', 'lifestyle')),
   status        text not null default 'draft'
                 check (status in ('draft', 'producing', 'ready', 'published')),
   -- 1. วางแนวคิด
@@ -150,3 +150,11 @@ alter table content_publications add column if not exists post_url text not null
 
 -- ---------- Daily self-review (5 success metrics, 1–5) ----------
 alter table daily_logs add column if not exists review jsonb not null default '{}'::jsonb;
+
+-- ---------- Categories: add funny + lifestyle (for projects created before) ----------
+alter table ideas drop constraint if exists ideas_category_check;
+alter table ideas add constraint ideas_category_check
+  check (category in ('health', 'growth', 'business', 'experience', 'product', 'funny', 'lifestyle'));
+alter table content_items drop constraint if exists content_items_category_check;
+alter table content_items add constraint content_items_category_check
+  check (category in ('health', 'growth', 'business', 'experience', 'product', 'funny', 'lifestyle'));
