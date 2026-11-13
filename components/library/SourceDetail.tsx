@@ -11,12 +11,14 @@ import LoadingState from "@/components/ui/LoadingState";
 import CoverPicker from "./CoverPicker";
 import TimelineEntry from "./TimelineEntry";
 import MergePicker from "./MergePicker";
+import { FinishForm, SummaryCard } from "./FinishSummary";
 import { fetchAllSources, fetchNotesBySource, fetchSourceById } from "@/lib/supabase/queries";
 import { createLearningNote, deleteLearningSource, updateLearningSource } from "@/lib/supabase/mutations";
 import {
   SOURCE_STATUS_LABEL,
   SOURCE_TYPE_LABEL,
   collectCategories,
+  itemNoun,
   sessionVerb,
 } from "@/lib/learning-labels";
 import { formatHours, formatThaiDate } from "@/lib/format";
@@ -70,6 +72,7 @@ export default function SourceDetail() {
   const [editBusy, setEditBusy] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
   const [statusBusy, setStatusBusy] = useState(false);
+  const [summaryMode, setSummaryMode] = useState<"finish" | "edit" | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -123,6 +126,7 @@ export default function SourceDetail() {
   }
 
   const verb = sessionVerb(source.source_type);
+  const noun = itemNoun(source);
   const categories = collectCategories(allSources);
 
   async function handleMerged(merged: LearningSource, mergedIds: string[]) {
@@ -191,13 +195,15 @@ export default function SourceDetail() {
 
   async function handleToggleFinished() {
     if (!source) return;
-    const finishing = source.status !== "completed";
+    // Finishing first asks for a short summary (FinishForm saves the status).
+    if (source.status !== "completed") {
+      setLogging(false);
+      setSummaryMode("finish");
+      return;
+    }
     setStatusBusy(true);
     try {
-      const updated = await updateLearningSource(source.id, {
-        status: finishing ? "completed" : "in_progress",
-        finished_at: finishing ? todayIso() : null,
-      });
+      const updated = await updateLearningSource(source.id, { status: "in_progress", finished_at: null });
       setSource(updated);
     } catch {
       window.alert("อัปเดตสถานะไม่สำเร็จ ลองใหม่อีกครั้ง");
@@ -378,7 +384,10 @@ export default function SourceDetail() {
         <div className="mt-5 flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
-            onClick={() => setLogging((v) => !v)}
+            onClick={() => {
+              setSummaryMode(null);
+              setLogging((v) => !v);
+            }}
             className="flex-1 rounded-full bg-linear-to-r from-primary to-accent px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
           >
             + บันทึกการ{verb}ครั้งนี้
@@ -387,12 +396,33 @@ export default function SourceDetail() {
             type="button"
             disabled={statusBusy}
             onClick={handleToggleFinished}
-            className="flex-1 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium text-primary disabled:opacity-50"
+            className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-primary disabled:opacity-50"
           >
-            {source.status === "completed" ? "กลับมาเรียนต่อ" : "✓ เรียนจบแล้ว"}
+            {source.status === "completed" ? (
+              "กลับมาเรียนต่อ"
+            ) : (
+              <>
+                ✓ เรียนจบแล้ว
+                <span className="block text-xs font-normal text-muted">หมายถึง เข้าใจ{noun}ทั้งหมด</span>
+              </>
+            )}
           </button>
         </div>
       </Card>
+
+      {summaryMode ? (
+        <FinishForm
+          source={source}
+          finishing={summaryMode === "finish"}
+          onSaved={(updated) => {
+            setSource(updated);
+            setSummaryMode(null);
+          }}
+          onCancel={() => setSummaryMode(null)}
+        />
+      ) : source.status === "completed" || source.summary || source.audience ? (
+        <SummaryCard source={source} onEdit={() => setSummaryMode("edit")} />
+      ) : null}
 
       {logging ? (
         <Card className="space-y-3 p-5">

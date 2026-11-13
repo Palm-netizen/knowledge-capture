@@ -51,6 +51,10 @@ create index if not exists learning_sources_title_idx on learning_sources (title
 -- หมวด (เช่น "N21 Mobile") — แยกจากประเภทสื่อ (source_type)
 alter table learning_sources add column if not exists category text not null default '';
 create index if not exists learning_sources_category_idx on learning_sources (category);
+
+-- สรุปตอนเรียนจบ: เรื่องนี้พูดเรื่องอะไร / เหมาะกับใคร
+alter table learning_sources add column if not exists summary  text not null default '';
+alter table learning_sources add column if not exists audience text not null default '';
 -- No full-text GIN index here: the app's search (Library page, source
 -- picker) filters client-side, so Postgres full-text search is unused.
 
