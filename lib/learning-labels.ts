@@ -37,6 +37,17 @@ export function sessionVerb(type: SourceType): string {
   return "อ่าน";
 }
 
+// "ไฟล์นี้" / "เล่มนี้" ... for wording about a single learning item.
+export function itemNoun(source: { source_type: SourceType; category?: string | null }): string {
+  if (source.category === N21_CATEGORY || source.source_type === "podcast" || source.source_type === "audiobook") {
+    return "ไฟล์นี้";
+  }
+  if (source.source_type === "book") return "เล่มนี้";
+  if (source.source_type === "video") return "คลิปนี้";
+  if (source.source_type === "course") return "คอร์สนี้";
+  return "บทความนี้";
+}
+
 export const ACTION_STATUS_LABEL: Record<ActionStatus, string> = {
   planned: "ยังไม่ทำ",
   in_progress: "กำลังทำ",

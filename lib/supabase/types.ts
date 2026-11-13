@@ -15,6 +15,9 @@ export interface LearningSource {
   status: SourceStatus;
   started_at: string | null;
   finished_at: string | null;
+  // Written when marking the item finished: what it's about, who it suits.
+  summary: string;
+  audience: string;
   tags: string[];
   created_at: string;
   updated_at: string;
