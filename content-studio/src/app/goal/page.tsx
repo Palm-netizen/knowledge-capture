@@ -3,6 +3,7 @@
 import { Anchor, Bell, Camera, Compass, Flame, HeartHandshake, Mic, Repeat, Sparkles, UserRoundPlus } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/layout/PageHeader";
 import { VisionBoard } from "@/components/goal/VisionBoard";
+import { GoalsFive } from "@/components/goal/GoalsFive";
 import { Highlight } from "@/components/goal/Highlight";
 import { AdvanceGratitude, GratitudeRecall, GratitudeToday } from "@/components/goal/Gratitude";
 import { ReviewTrends } from "@/components/goal/Review";
@@ -26,6 +27,10 @@ export default function GoalPage() {
       <PageHeader title="Goal" description="Manifest — เห็นภาพให้ชัด แล้วลงมือทุกวัน" />
 
       <VisionBoard />
+
+      <div className="mt-8">
+        <GoalsFive />
+      </div>
 
       {/* purpose + mindfulness reminders */}
       <div className="mt-6 grid grid-cols-1 gap-4 md:mt-8 lg:grid-cols-2">
