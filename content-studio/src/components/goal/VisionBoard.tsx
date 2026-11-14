@@ -7,6 +7,7 @@ import { getSupabase } from "@/lib/store/persistence";
 import { useFeedback } from "@/components/ui/Feedback";
 import { useStore } from "@/lib/store/StoreProvider";
 import { cn } from "@/lib/utils";
+import { blobToDataUrl, toJpeg } from "@/lib/image";
 import { BodyScene, FamilyScene, NewZealandScene, StageScene, TeamScene } from "./Illustrations";
 
 const BUCKET = "vision-board";
@@ -35,35 +36,6 @@ const ADD_PROMPT: Partial<Record<VisionKey, string>> = {
   team: "กดเพื่อเพิ่มรูปทีม",
   family: "กดเพื่อเพิ่มรูปครอบครัว",
 };
-
-/** Resize to max 1600px and encode as JPEG so uploads stay small. */
-async function toJpeg(file: File, max = 1600): Promise<Blob> {
-  const url = URL.createObjectURL(file);
-  try {
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const i = new Image();
-      i.onload = () => resolve(i);
-      i.onerror = reject;
-      i.src = url;
-    });
-    const scale = Math.min(1, max / Math.max(img.width, img.height));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(img.width * scale);
-    canvas.height = Math.round(img.height * scale);
-    canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
-    return await new Promise<Blob>((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("encode"))), "image/jpeg", 0.85));
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
-const blobToDataUrl = (b: Blob) =>
-  new Promise<string>((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result));
-    r.onerror = reject;
-    r.readAsDataURL(b);
-  });
 
 /**
  * Vision board: 3 frames. Each shows an illustration until the user uploads
