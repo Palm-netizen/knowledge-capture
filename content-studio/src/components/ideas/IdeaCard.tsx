@@ -1,6 +1,8 @@
 "use client";
 
-import { ArrowRight, Check, Pencil, PenLine, Trash2, Undo2, ImageIcon } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Check, Pencil, PenLine, Trash2, Undo2 } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
 import { CATEGORIES, IDEA_KINDS, IDEA_SOURCES, IDEA_STATUSES, labelOf } from "@/lib/constants";
 import type { Idea, IdeaStatus } from "@/lib/types";
 import { useStore } from "@/lib/store/StoreProvider";
@@ -19,6 +21,7 @@ const statusTone: Record<IdeaStatus, string> = {
 export function IdeaCard({ idea, onEdit, compact }: { idea: Idea; onEdit: (i: Idea) => void; compact?: boolean }) {
   const { updateIdea, contents } = useStore();
   const actions = useIdeaActions();
+  const [viewing, setViewing] = useState(false);
   const hasContent = contents.some((c) => c.ideaId === idea.id);
   const kindLabel = labelOf(IDEA_KINDS, idea.kind);
   const sourceLabel = [labelOf(IDEA_SOURCES, idea.source), idea.sourceNote].filter(Boolean).join(" · ");
@@ -52,14 +55,20 @@ export function IdeaCard({ idea, onEdit, compact }: { idea: Idea; onEdit: (i: Id
           {idea.category && <Badge>{labelOf(CATEGORIES, idea.category)}</Badge>}
           {idea.status !== "new" && <Badge tone={IDEA_STATUSES.find((s) => s.value === idea.status)!.tone}>{labelOf(IDEA_STATUSES, idea.status)}</Badge>}
           {sourceLabel && <span className="truncate">จาก {sourceLabel}</span>}
-          {idea.imageUrl && (
-            <a href={idea.imageUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-ink">
-              <ImageIcon size={13} /> รูป
-            </a>
-          )}
           <span className="text-faint">· {fmt.time(new Date(idea.createdAt))} น.</span>
         </div>
       </div>
+
+      {idea.imageUrl && (
+        <button onClick={() => setViewing(true)} aria-label="ดูรูปประกอบ" className="shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={idea.imageUrl} alt="" className={cn("rounded-xl object-cover", compact ? "h-11 w-11" : "h-14 w-14")} />
+        </button>
+      )}
+      <Modal open={viewing} onClose={() => setViewing(false)} title={idea.title} size="lg">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {idea.imageUrl && <img src={idea.imageUrl} alt={idea.title} className="max-h-[70dvh] w-full rounded-xl object-contain" />}
+      </Modal>
 
       <div className="flex shrink-0 items-start gap-0.5">
         {idea.kind === "content" && !compact && (

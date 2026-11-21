@@ -42,6 +42,10 @@ export const CATEGORIES: { value: Category; label: string }[] = [
   { value: "lifestyle", label: "Lifestyle" },
   { value: "business", label: "ธุรกิจ" },
   { value: "product", label: "สินค้า" },
+  { value: "salad", label: "ผักสลัด" },
+  { value: "share_mindset", label: "แชร์โพสต์ Mindset" },
+  { value: "share_health", label: "แชร์โพสต์ สุขภาพ" },
+  { value: "share_product", label: "แชร์โพสต์ สินค้า" },
 ];
 
 /** Colours per category: tag = soft pill, bar = solid swatch (content-mix bar, legend). */
@@ -53,6 +57,11 @@ export const CATEGORY_STYLE: Record<Category, { tag: string; bar: string }> = {
   product: { tag: "bg-[#FCEBF3] text-[#B23A78]", bar: "bg-[#D2559A]" },
   funny: { tag: "bg-[#FFF6D6] text-[#8A6A00]", bar: "bg-[#E8B400]" },
   lifestyle: { tag: "bg-[#E2F5F6] text-[#0B7C86]", bar: "bg-[#14A3B0]" },
+  salad: { tag: "bg-[#EEF7DC] text-[#4F7A0B]", bar: "bg-[#7CB518]" },
+  // shared posts: a lighter shade of their main category
+  share_mindset: { tag: "bg-violet-soft text-violet", bar: "bg-[#B9AAFF]" },
+  share_health: { tag: "bg-success-soft text-success", bar: "bg-[#86D3AE]" },
+  share_product: { tag: "bg-[#FCEBF3] text-[#B23A78]", bar: "bg-[#EFA7CB]" },
 };
 
 export const CONTENT_STATUSES: { value: ContentStatus; label: string; tone: Tone }[] = [

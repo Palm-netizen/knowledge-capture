@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Camera, Loader2, X } from "lucide-react";
+import { savePhoto } from "@/lib/image";
+import { uid } from "@/lib/utils";
 import { CATEGORIES, IDEA_KINDS, IDEA_SOURCES, IDEA_STATUSES } from "@/lib/constants";
 import type { Category, Idea, IdeaKind, IdeaSource, IdeaStatus } from "@/lib/types";
 import { useStore } from "@/lib/store/StoreProvider";
@@ -11,7 +14,7 @@ import { useFeedback } from "@/components/ui/Feedback";
 
 /** Full idea form — used for editing (and creating with all fields). */
 export function IdeaDialog({ open, onClose, idea }: { open: boolean; onClose: () => void; idea?: Idea | null }) {
-  const { addIdea, updateIdea } = useStore();
+  const { addIdea, updateIdea, syncMode } = useStore();
   const { toast } = useFeedback();
 
   const [title, setTitle] = useState("");
@@ -22,6 +25,21 @@ export function IdeaDialog({ open, onClose, idea }: { open: boolean; onClose: ()
   const [category, setCategory] = useState<Category | null>(null);
   const [status, setStatus] = useState<IdeaStatus>("new");
   const [imageUrl, setImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const pickPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { url } = await savePhoto(`ideas/${idea?.id ?? uid()}.jpg`, file, { remote: syncMode === "supabase" });
+      setImageUrl(url);
+    } catch {
+      toast("อัปโหลดรูปไม่สำเร็จ", { tone: "error" });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -103,9 +121,45 @@ export function IdeaDialog({ open, onClose, idea }: { open: boolean; onClose: ()
           <p className="mb-2 text-[13px] font-medium">หมวดหมู่</p>
           <ChipGroup value={category} onChange={setCategory} options={CATEGORIES} allowClear size="sm" />
         </div>
-        <Field label="ลิงก์รูปภาพอ้างอิง" hint="ไม่บังคับ · อัปโหลดรูปจะเพิ่มภายหลัง">
-          <TextInput value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…" inputMode="url" />
-        </Field>
+        <div>
+          <p className="mb-2 text-[13px] font-medium">
+            รูปประกอบ <span className="font-normal text-faint">· ไม่บังคับ</span>
+          </p>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              void pickPhoto(e.target.files?.[0]);
+              e.target.value = "";
+            }}
+          />
+          {imageUrl ? (
+            <div className="relative inline-block">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imageUrl} alt="รูปประกอบไอเดีย" className="h-32 max-w-full rounded-xl object-cover" />
+              <button
+                type="button"
+                onClick={() => setImageUrl("")}
+                aria-label="เอารูปออก"
+                className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-ink text-white shadow-pop"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-2 rounded-xl border border-dashed border-line-strong px-3 py-2 text-[13px] text-muted hover:border-primary hover:text-primary"
+            >
+              {uploading ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
+              {uploading ? "กำลังอัปโหลด…" : "ใส่รูป (ถ่ายหรือเลือกจากเครื่อง)"}
+            </button>
+          )}
+        </div>
         <button type="submit" hidden />
       </form>
     </Modal>
