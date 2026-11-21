@@ -16,11 +16,23 @@ export interface GoalItem {
   reason: string;
   image: string | null;
   done: boolean;
+  /** optional measurable target, e.g. 48,450 BV */
+  target: number | null;
+  current: number | null;
+  unit: string;
 }
 
 const KEY = "goals5";
 const COUNT = 5;
-const EMPTY: GoalItem = { title: "", deadline: "", reason: "", image: null, done: false };
+const EMPTY: GoalItem = { title: "", deadline: "", reason: "", image: null, done: false, target: null, current: null, unit: "" };
+
+const nf = new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 });
+export const fmtNum = (n: number) => nf.format(n);
+/** "48,450" → 48450; empty / invalid → null */
+export const parseNum = (s: string) => {
+  const n = Number(s.replace(/[,\s]/g, ""));
+  return s.trim() && Number.isFinite(n) ? n : null;
+};
 const photoPath = (i: number) => `goals/goal-${i + 1}.jpg`;
 
 const thMonth = new Intl.DateTimeFormat("th-TH", { month: "short" });
@@ -124,6 +136,7 @@ export function GoalsFive() {
             onEdit={() => setEditing(i)}
             onPhoto={() => pickPhoto(i)}
             onRemovePhoto={() => removePhoto(i)}
+            onCurrent={(n) => save(i, { current: n })}
             onToggleDone={() => {
               save(i, { done: !g.done });
               if (!g.done) toast(`พิชิตเป้าหมายข้อ ${i + 1} แล้ว 🎉`);
@@ -146,6 +159,7 @@ function GoalCard({
   onPhoto,
   onRemovePhoto,
   onToggleDone,
+  onCurrent,
 }: {
   index: number;
   goal: GoalItem;
@@ -154,6 +168,7 @@ function GoalCard({
   onPhoto: () => void;
   onRemovePhoto: () => void;
   onToggleDone: () => void;
+  onCurrent: (n: number | null) => void;
 }) {
   if (!goal.title.trim()) {
     return (
@@ -233,6 +248,8 @@ function GoalCard({
             + กำหนดเดือนที่จะพิชิต
           </button>
         )}
+
+        {goal.target !== null && goal.target > 0 && <TargetProgress goal={goal} onCurrent={onCurrent} />}
 
         {goal.reason.trim() && (
           <p className="mt-4 rounded-2xl bg-subtle/70 px-4 py-3 text-[14px] leading-relaxed">
@@ -318,6 +335,9 @@ function GoalDialog({
   const [title, setTitle] = useState("");
   const [deadline, setDeadline] = useState("");
   const [reason, setReason] = useState("");
+  const [target, setTarget] = useState("");
+  const [current, setCurrent] = useState("");
+  const [unit, setUnit] = useState("");
   const [lastIndex, setLastIndex] = useState<number | null>(null);
 
   // load the goal when the dialog opens
@@ -326,6 +346,9 @@ function GoalDialog({
     setTitle(goal?.title ?? "");
     setDeadline(goal?.deadline ?? "");
     setReason(goal?.reason ?? "");
+    setTarget(goal?.target != null ? String(goal.target) : "");
+    setCurrent(goal?.current != null ? String(goal.current) : "");
+    setUnit(goal?.unit ?? "");
   }
 
   if (index === null || !goal) return null;
@@ -334,7 +357,7 @@ function GoalDialog({
 
   const save = () => {
     if (!title.trim()) return;
-    onSave({ title: title.trim(), deadline, reason: reason.trim() });
+    onSave({ title: title.trim(), deadline, reason: reason.trim(), target: parseNum(target), current: parseNum(current), unit: unit.trim() });
     onClose();
   };
 
@@ -350,7 +373,7 @@ function GoalDialog({
               variant="ghost"
               className="mr-auto text-danger hover:bg-danger-soft hover:text-danger"
               onClick={() => {
-                onSave({ title: "", deadline: "", reason: "", done: false });
+                onSave({ title: "", deadline: "", reason: "", done: false, target: null, current: null, unit: "" });
                 onClose();
               }}
             >
@@ -379,11 +402,93 @@ function GoalDialog({
         <Field label="จะพิชิตภายในเดือน" hint="เส้นตาย = สิ้นเดือนนั้น">
           <TextInput type="month" min={minMonth} value={deadline} onChange={(e) => setDeadline(e.target.value)} />
         </Field>
+        <div>
+          <p className="mb-1.5 text-[13px] font-medium">
+            ตัวเลขที่วัดได้ <span className="font-normal text-faint">· ไม่บังคับ</span>
+          </p>
+          <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-2">
+            <TextInput inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="เป้าหมาย เช่น 48,450" aria-label="ตัวเลขเป้าหมาย" />
+            <TextInput value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="BV" aria-label="หน่วย" />
+          </div>
+          <TextInput className="mt-2" inputMode="decimal" value={current} onChange={(e) => setCurrent(e.target.value)} placeholder="ทำได้แล้วตอนนี้ เช่น 30,000" aria-label="ตัวเลขปัจจุบัน" />
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {["BV", "PV", "คน", "บาท"].map((u) => (
+              <button key={u} type="button" onClick={() => setUnit(u)} className={cn("rounded-full border px-2.5 py-0.5 text-xs", unit === u ? "border-primary bg-primary-soft text-primary" : "border-line text-muted")}>
+                {u}
+              </button>
+            ))}
+          </div>
+        </div>
         <Field label="เหตุผล" hint="ทำไมข้อนี้สำคัญกับฉัน">
           <AutoTextarea minRows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="เพราะ…" />
         </Field>
         <button type="submit" hidden />
       </form>
     </Modal>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/** Current vs target: bar, what's left, and the pace needed per day until the deadline. */
+function TargetProgress({ goal, onCurrent }: { goal: GoalItem; onCurrent: (n: number | null) => void }) {
+  const target = goal.target!;
+  const current = goal.current ?? 0;
+  const pct = Math.max(0, Math.min(1, current / target));
+  const left = Math.max(0, target - current);
+  const unit = goal.unit || "";
+  const days = goal.deadline ? daysLeft(goal.deadline) : null;
+  const perDay = days !== null && days > 0 && left > 0 ? left / days : null;
+  const [draft, setDraft] = useState<string | null>(null);
+
+  return (
+    <div className="mt-4 rounded-2xl border border-line p-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-[13px] text-muted">
+          ทำได้แล้ว <span className="font-display text-xl font-semibold text-ink tabular-nums">{fmtNum(current)}</span> / {fmtNum(target)} {unit}
+        </p>
+        <span className={cn("font-display text-sm font-semibold tabular-nums", pct >= 1 ? "text-success" : "text-ink")}>{Math.round(pct * 100)}%</span>
+      </div>
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-subtle">
+        <div className={cn("h-full rounded-full transition-all", pct >= 1 ? "bg-success" : "bg-gradient-to-r from-primary to-violet")} style={{ width: `${pct * 100}%` }} />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[14px]">
+          {left > 0 ? (
+            <>
+              เหลืออีก <span className="font-semibold">{fmtNum(left)} {unit}</span>
+              {perDay !== null && <span className="text-muted"> · เฉลี่ยวันละ {fmtNum(Math.ceil(perDay * 100) / 100)} {unit}</span>}
+            </>
+          ) : (
+            <span className="font-semibold text-success">ถึงเป้าแล้ว 🎉</span>
+          )}
+        </p>
+        {draft === null ? (
+          <button onClick={() => setDraft(goal.current != null ? String(goal.current) : "")} className="rounded-xl border border-line px-2.5 py-1 text-xs text-muted hover:border-primary hover:text-primary">
+            อัปเดตตัวเลข
+          </button>
+        ) : (
+          <form
+            className="flex items-center gap-1.5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              onCurrent(parseNum(draft));
+              setDraft(null);
+            }}
+          >
+            <input
+              autoFocus
+              inputMode="decimal"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              aria-label={`ตัวเลขปัจจุบัน (${unit || "หน่วย"})`}
+              className="h-8 w-28 rounded-lg border border-line bg-card px-2 text-sm tabular-nums focus:border-primary focus:outline-none"
+            />
+            <Button size="sm" variant="primary" type="submit">
+              บันทึก
+            </Button>
+          </form>
+        )}
+      </div>
+    </div>
   );
 }

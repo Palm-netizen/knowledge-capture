@@ -4,6 +4,7 @@ import { Anchor, Bell, Camera, Compass, Flame, HeartHandshake, Mic, Repeat, Spar
 import { PageContainer, PageHeader } from "@/components/layout/PageHeader";
 import { VisionBoard } from "@/components/goal/VisionBoard";
 import { GoalsFive } from "@/components/goal/GoalsFive";
+import { BonusTable } from "@/components/goal/BonusTable";
 import { Highlight } from "@/components/goal/Highlight";
 import { AdvanceGratitude, GratitudeRecall, GratitudeToday } from "@/components/goal/Gratitude";
 import { ReviewTrends } from "@/components/goal/Review";
@@ -30,6 +31,10 @@ export default function GoalPage() {
 
       <div className="mt-8">
         <GoalsFive />
+      </div>
+
+      <div className="mt-6 md:mt-8">
+        <BonusTable />
       </div>
 
       {/* purpose + mindfulness reminders */}
