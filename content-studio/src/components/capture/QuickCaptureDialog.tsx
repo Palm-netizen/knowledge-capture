@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { Camera, ChevronDown, X } from "lucide-react";
 import { CATEGORIES, IDEA_KINDS, IDEA_SOURCES } from "@/lib/constants";
 import type { Category, IdeaKind, IdeaSource } from "@/lib/types";
 import { useStore } from "@/lib/store/StoreProvider";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { AutoTextarea, ChipGroup, Field, TextInput } from "@/components/ui/Form";
 import { useFeedback } from "@/components/ui/Feedback";
 import { cn } from "@/lib/utils";
+import { savePhoto } from "@/lib/image";
 
 /**
  * "Capture Everything" — type, pick a kind, Enter. That's it.
@@ -25,7 +26,7 @@ export function QuickCaptureDialog({
   onClose: () => void;
   defaultKind?: IdeaKind;
 }) {
-  const { addIdea } = useStore();
+  const { addIdea, updateIdea, syncMode } = useStore();
   const { toast } = useFeedback();
   const router = useRouter();
 
@@ -36,6 +37,8 @@ export function QuickCaptureDialog({
   const [source, setSource] = useState<IdeaSource | null>(null);
   const [sourceNote, setSourceNote] = useState("");
   const [category, setCategory] = useState<Category | null>(null);
+  const [photo, setPhoto] = useState<{ file: File; preview: string } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -46,24 +49,37 @@ export function QuickCaptureDialog({
       setSource(null);
       setSourceNote("");
       setCategory(null);
+      setPhoto(null);
     }
   }, [open, defaultKind]);
 
-  const canSave = text.trim().length > 0;
+  // free the preview URL when the photo changes or the dialog closes
+  useEffect(() => () => {
+    if (photo) URL.revokeObjectURL(photo.preview);
+  }, [photo]);
+
+  const canSave = text.trim().length > 0 || !!photo;
 
   const save = () => {
     if (!canSave) return;
     // First line becomes the title; anything after it goes to details.
     const [first, ...rest] = text.trim().split("\n");
     const extra = rest.join("\n").trim();
-    addIdea({
-      title: first,
+    const idea = addIdea({
+      title: first || "ไอเดียจากรูป",
       details: [extra, details.trim()].filter(Boolean).join("\n\n"),
       kind,
       source,
       sourceNote: sourceNote.trim(),
       category,
     });
+    // upload the photo in the background so saving stays instant
+    if (photo) {
+      const file = photo.file;
+      savePhoto(`ideas/${idea.id}.jpg`, file, { remote: syncMode === "supabase" })
+        .then(({ url }) => updateIdea(idea.id, { imageUrl: url }))
+        .catch(() => toast("อัปโหลดรูปไม่สำเร็จ — ไอเดียบันทึกแล้ว", { tone: "error" }));
+    }
     onClose();
     toast("บันทึกไอเดียแล้ว", { action: { label: "ดูใน Inbox", onClick: () => router.push("/ideas") } });
   };
@@ -102,6 +118,41 @@ export function QuickCaptureDialog({
           placeholder="คิดอะไรได้ จดไว้ก่อน… เช่น “คนซื้อซ้ำเพราะเห็นคุณค่า ไม่ใช่เพราะเราตามเก่ง”"
           className="text-[15px]!"
         />
+
+        {/* photo */}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) setPhoto({ file: f, preview: URL.createObjectURL(f) });
+            e.target.value = "";
+          }}
+        />
+        {photo ? (
+          <div className="relative inline-block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo.preview} alt="รูปประกอบไอเดีย" className="h-28 max-w-full rounded-xl object-cover" />
+            <button
+              type="button"
+              onClick={() => setPhoto(null)}
+              aria-label="เอารูปออก"
+              className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-ink text-white shadow-pop"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="flex items-center gap-2 rounded-xl border border-dashed border-line-strong px-3 py-2 text-[13px] text-muted hover:border-primary hover:text-primary"
+          >
+            <Camera size={16} /> ใส่รูป (ถ่ายหรือเลือกจากเครื่อง)
+          </button>
+        )}
 
         <div>
           <p className="mb-2 text-[13px] font-medium">นี่คือ…</p>
